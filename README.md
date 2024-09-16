@@ -1,7 +1,8 @@
-
 # AIPro-Resume
 
 A modern, interactive, and SEO-optimized personal resume website for AI professionals and full-stack developers.
+
+![1726467473818](image/README/1726467473818.png)
 
 ## Overview
 
@@ -51,8 +52,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 Created by Silan Hu - AI Researcher & Full Stack Developer
 
-[Link to your personal website or social media]
-
-## Acknowledgments
-
-[Any acknowledgments or credits you want to include]
+[silan-hu-profile-website](https://silan.tech/)
