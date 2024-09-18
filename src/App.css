@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+
+/* 隐藏 WebKit 浏览器的滚动条 (Chrome, Safari, newer versions of Opera) */
+::-webkit-scrollbar {
+  display: none;
+}
+

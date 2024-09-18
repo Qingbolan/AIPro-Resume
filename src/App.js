@@ -1,5 +1,5 @@
 import React from 'react';
-import ResumeWebsite from './ResumeWebsite';
+import ResumeWebsite from './views/ResumeWebsite';
 
 function App() {
   return (

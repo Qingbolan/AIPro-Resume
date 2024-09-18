@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from './components/Header';
-import Navigation from './components/Navigation';
-import ContentSection from './components/ContentSection';
-import Footer from './components/Footer';
-import { fetchResumeData } from './api/resumeApi';
+import TopNavigation from '../components/TopNavigation';
+import Header from '../components/Header';
+import Navigation from '../components/Navigation';
+import ContentSection from '../components/ContentSection';
+import Footer from '../components/Footer';
+import { fetchResumeData } from '../api/resumeApi';
 
 const StarField = ({ count = 100 }) => {
   const stars = useMemo(() => {
@@ -167,6 +168,7 @@ const ResumeWebsite = () => {
         transition={{ duration: transitionDuration }}
       >
         <div className="container mx-auto px-4 py-12 max-w-6xl">
+          <TopNavigation />
           <Header 
             name={resumeData.name}
             title={resumeData.title}
