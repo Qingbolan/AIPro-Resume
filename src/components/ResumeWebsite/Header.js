@@ -92,7 +92,7 @@ const SocialLinksAndDarkMode = React.memo(({ links, isDarkMode, setIsDarkMode, h
     {links.map((link, index) => (
       <SocialLink key={index} link={link} isDarkMode={isDarkMode} highlightColor={highlightColor} />
     ))}
-    <DarkModeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} highlightColor={highlightColor} />
+    {/* <DarkModeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} highlightColor={highlightColor} /> */}
   </motion.div>
 ));
 
@@ -116,14 +116,14 @@ const SocialLink = React.memo(({ link, isDarkMode, highlightColor }) => {
   );
 });
 
-const DarkModeToggle = React.memo(({ isDarkMode, setIsDarkMode, highlightColor }) => (
-  <button 
-    onClick={() => setIsDarkMode(!isDarkMode)} 
-    className={`${isDarkMode ? 'text-white' : 'text-gray-900'} hover:${highlightColor} transition-colors`}
-    aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-  >
-    {isDarkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
-  </button>
-));
+// const DarkModeToggle = React.memo(({ isDarkMode, setIsDarkMode, highlightColor }) => (
+//   <button 
+//     onClick={() => setIsDarkMode(!isDarkMode)} 
+//     className={`${isDarkMode ? 'text-white' : 'text-gray-900'} hover:${highlightColor} transition-colors`}
+//     aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+//   >
+//     {isDarkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
+//   </button>
+// ));
 
 export default Header;

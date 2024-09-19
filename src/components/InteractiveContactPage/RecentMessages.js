@@ -4,14 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 const RecentMessages = ({ recentMessages, showAllMessages, setShowAllMessages }) => (
-  <div className="bg-white p-6 rounded-lg shadow-lg">
+  <div className="">
     <h2 className="text-2xl font-semibold mb-4 text-purple-700">Recent Messages</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <AnimatePresence>
         {recentMessages.slice(0, showAllMessages ? undefined : 3).map((msg, index) => (
           <motion.div
             key={index}
-            className="bg-purple-50 p-4 rounded-lg"
+            className="bg-purple-50 p-4 rounded-lg shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -36,9 +36,9 @@ const RecentMessages = ({ recentMessages, showAllMessages, setShowAllMessages })
         ))}
       </AnimatePresence>
     </div>
-    {recentMessages.length > 3 && (
+    {recentMessages.length > 3 &&  !showAllMessages &&(
       <button
-        className="mt-4 flex items-center justify-center w-full py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+        className="mt-4 flex items-center justify-center w-full py-2 shadow-lg"
         onClick={() => setShowAllMessages(!showAllMessages)}
       >
         {showAllMessages ? 'Show Less' : 'Show More'}

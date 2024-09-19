@@ -109,7 +109,7 @@ const ContactForm = ({
           className={`px-4 py-2 rounded-r-full ${formType === 'job' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}
           onClick={() => setFormType('job')}
         >
-          Job Opportunity
+          Research/Job Opportunity
         </button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">

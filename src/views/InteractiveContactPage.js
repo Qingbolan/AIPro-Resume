@@ -1,11 +1,12 @@
 // src/pages/InteractiveContactPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Header from '../components/InteractiveContactPage/Header';
 import ContactForm from '../components/InteractiveContactPage/ContactForm';
 import AIChat from '../components/InteractiveContactPage/AIChat';
 import ThoughtsAndOpportunities from '../components/InteractiveContactPage/ThoughtsAndOpportunities';
 import RecentMessages from '../components/InteractiveContactPage/RecentMessages';
+import { getRecentMessagesAPI } from '../api/getRecentMessages.js';
 
 const InteractiveContactPage = () => {
   const [mode, setMode] = useState('ai');
@@ -21,15 +22,22 @@ const InteractiveContactPage = () => {
     fullTime: ''
   });
 
-  useEffect(() => {
-    // 可以从后端获取数据，这里使用模拟数据
-    setRecentMessages([
-      { type: 'general', text: 'Great work on your latest project!', author: 'John Doe', role: 'UX Designer' },
-      { type: 'job', company: 'TechCorp', position: 'Senior AI Developer', text: 'We have an exciting opportunity for an AI expert.', author: 'Jane Smith', role: 'HR Manager' },
-      { type: 'general', text: 'Would love to collaborate on a research paper.', author: 'Dr. Emily Brown', role: 'Research Scientist' },
-      { type: 'job', company: 'InnovateLab', position: 'ML Engineer', text: 'Join our cutting-edge machine learning team!', author: 'Mike Johnson', role: 'Tech Lead' },
-    ]);
+  const pageRef = useRef(null);
 
+  useEffect(() => {
+    const fetchRecentMessages = async () => {
+      try {
+        const messages = await getRecentMessagesAPI();
+        setRecentMessages(messages);
+      } catch (error) {
+        console.error('Failed to fetch recent messages:', error);
+        // 可以在这里设置一个错误状态或显示一个错误消息
+      }
+    };
+
+    fetchRecentMessages();
+
+    // 其他数据的设置（这些可能也来自API，但目前保持不变）
     setRecentThoughts([
       "Exploring the intersection of AI and human creativity",
       "Investigating the ethical implications of large language models",
@@ -47,6 +55,12 @@ const InteractiveContactPage = () => {
       daily: "4-6 hours",
       fullTime: "Available from September 1st, 2024"
     });
+
+    // 强制滚动到顶部
+    if (pageRef.current) {
+      pageRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+    window.scrollTo(0, 0);
   }, []);
 
   const switchMode = () => {
@@ -54,7 +68,7 @@ const InteractiveContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-indigo-100 text-gray-800 p-8">
+    <div ref={pageRef} className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-indigo-100 text-gray-800 p-8">
       <Header />
       <main className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -92,11 +106,13 @@ const InteractiveContactPage = () => {
             availabilityTimes={availabilityTimes}
           />
         </div>
-        <RecentMessages
-          recentMessages={recentMessages}
-          showAllMessages={showAllMessages}
-          setShowAllMessages={setShowAllMessages}
-        />
+        {recentMessages.length > 0 && (
+          <RecentMessages
+            recentMessages={recentMessages}
+            showAllMessages={showAllMessages}
+            setShowAllMessages={setShowAllMessages}
+          />
+        )}
       </main>
     </div>
   );
