@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Briefcase, Lightbulb, BookOpen, Mail, Menu, X, } from 'lucide-react';
-// import{Sun, Moon, Globe } from 'lucide-react';
+import { Home, Briefcase, Lightbulb, BookOpen, Mail, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
-  <motion.a
-    href={`#${link}`}
+  <motion.div
     onClick={onClick}
     className={`relative flex items-center justify-center px-4 py-2 transition-all duration-300 ${colorClass} ${
       isActive ? 'font-semibold' : 'font-medium hover:opacity-80'
@@ -12,8 +12,10 @@ const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
     whileHover={{ y: -2 }}
     whileTap={{ scale: 0.95 }}
   >
-    <span className="mr-2">{icon}</span>
-    <span className="text-sm">{label}</span>
+    <Link to={link} className="flex items-center">
+      <span className="mr-2">{icon}</span>
+      <span className="text-sm">{label}</span>
+    </Link>
     {isActive && (
       <motion.div
         className={`absolute bottom-0 left-0 right-0 h-0.5 ${colorClass}`}
@@ -23,48 +25,8 @@ const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
         exit={{ opacity: 0 }}
       />
     )}
-  </motion.a>
+  </motion.div>
 );
-
-// const LanguageSelector = ({ currentLang, onChangeLang, isDarkMode }) => (
-//   <motion.select
-//     value={currentLang}
-//     onChange={(e) => onChangeLang(e.target.value)}
-//     className={`ml-2 p-1 rounded text-sm ${
-//       isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-//     } border-none focus:ring-2 focus:ring-offset-2 ${
-//       isDarkMode ? 'focus:ring-purple-500' : 'focus:ring-indigo-500'
-//     }`}
-//     whileHover={{ scale: 1.05 }}
-//     whileTap={{ scale: 0.95 }}
-//   >
-//     <option value="en">EN</option>
-//     <option value="zh">中文</option>
-//   </motion.select>
-// );
-
-// const ThemeToggle = ({ isDarkMode, toggleTheme }) => (
-//   <motion.button
-//     onClick={toggleTheme}
-//     className={`ml-4 p-2 rounded-full ${
-//       isDarkMode ? 'bg-purple-600 text-yellow-300' : 'bg-indigo-100 text-indigo-600'
-//     } transition-colors duration-200`}
-//     whileHover={{ scale: 1.1 }}
-//     whileTap={{ scale: 0.9 }}
-//   >
-//     <AnimatePresence mode="wait" initial={false}>
-//       <motion.div
-//         key={isDarkMode ? 'dark' : 'light'}
-//         initial={{ y: -20, opacity: 0 }}
-//         animate={{ y: 0, opacity: 1 }}
-//         exit={{ y: 20, opacity: 0 }}
-//         transition={{ duration: 0.2 }}
-//       >
-//         {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-//       </motion.div>
-//     </AnimatePresence>
-//   </motion.button>
-// );
 
 const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClasses, isDarkMode }) => (
   <AnimatePresence>
@@ -84,7 +46,7 @@ const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClas
               key={index} 
               {...item} 
               isActive={activeSection === item.link}
-              onClick={(e) => handleNavClick(e, item.link)}
+              onClick={() => handleNavClick(item.link)}
               colorClass={colorClasses[index % colorClasses.length]}
             />
           ))}
@@ -97,7 +59,6 @@ const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClas
 const TopNavigation = ({ isDarkMode, toggleTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
-//   const [currentLang, setCurrentLang] = useState('en');
 
   const colorClasses = [
     'text-blue-500',
@@ -108,26 +69,20 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
   ];
 
   const navItems = [
-    { icon: <Home size={18} />, label: "Home", link: "home" },
-    { icon: <Briefcase size={18} />, label: "Projects", link: "projects" },
-    { icon: <Lightbulb size={18} />, label: "Ideas", link: "ideas" },
-    { icon: <BookOpen size={18} />, label: "Blog", link: "blog" },
-    { icon: <Mail size={18} />, label: "Contact", link: "contact" },
+    { icon: <Home size={18} />, label: "Home", link: "/" },
+    { icon: <Briefcase size={18} />, label: "Projects", link: "/projects" },
+    { icon: <Lightbulb size={18} />, label: "Ideas", link: "/ideas" },
+    { icon: <BookOpen size={18} />, label: "Blog", link: "/blog" },
+    { icon: <Mail size={18} />, label: "Contact", link: "/contact" },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = navItems.map(item => document.getElementById(item.link));
-      const currentSection = sections.findIndex(section => {
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom > 100;
-        }
-        return false;
-      });
-
-      if (currentSection !== -1) {
-        setActiveSection(navItems[currentSection].link);
+      // This part might need to be adjusted based on your routing setup
+      const currentPath = window.location.pathname;
+      const currentItem = navItems.find(item => item.link === currentPath);
+      if (currentItem) {
+        setActiveSection(currentItem.link);
       }
     };
 
@@ -135,12 +90,7 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   });
 
-  const handleNavClick = (e, link) => {
-    e.preventDefault();
-    const element = document.getElementById(link);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleNavClick = (link) => {
     setActiveSection(link);
     setIsOpen(false);
   };
@@ -148,8 +98,7 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
   return (
     <>
       <motion.nav 
-        className={`fixed top-0 left-0 right-0 z-50 
-        backdrop-blur-md`}
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 120, damping: 20 }}
@@ -160,7 +109,7 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
               className="flex items-center"
               whileHover={{ scale: 1.05 }}
             >
-              <img className="h-8 w-auto" src="logo.svg" alt="Logo" />
+              <img className="h-8 w-auto" src="/logo.svg" alt="Logo" />
               <span className="ml-2 text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
                 ZIYUN · 2025
               </span>
@@ -173,24 +122,14 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
                   key={index} 
                   {...item} 
                   isActive={activeSection === item.link}
-                  onClick={(e) => handleNavClick(e, item.link)}
+                  onClick={() => handleNavClick(item.link)}
                   colorClass={colorClasses[index % colorClasses.length]}
                 />
               ))}
-              {/* <div className="flex items-center ml-4">
-                <Globe size={18} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
-                <LanguageSelector currentLang={currentLang} onChangeLang={setCurrentLang} isDarkMode={isDarkMode} />
-              </div>
-              <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} /> */}
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
-              {/* <div className="flex items-center mr-2">
-                <Globe size={18} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
-                <LanguageSelector currentLang={currentLang} onChangeLang={setCurrentLang} isDarkMode={isDarkMode} />
-              </div> */}
-              {/* <ThemeToggle isDarkMode={isDarkMode} toggleTheme={toggleTheme} /> */}
               <motion.button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`ml-2 p-2 rounded-md ${
