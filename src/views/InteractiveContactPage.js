@@ -7,6 +7,7 @@ import AIChat from '../components/InteractiveContactPage/AIChat';
 import ThoughtsAndOpportunities from '../components/InteractiveContactPage/ThoughtsAndOpportunities';
 import RecentMessages from '../components/InteractiveContactPage/RecentMessages';
 import { getRecentMessagesAPI } from '../api/getRecentMessages.js';
+import { useTheme } from '../components/ThemeContent'; // 假设您已经创建了这个 context
 
 const InteractiveContactPage = () => {
   const [mode, setMode] = useState('ai');
@@ -23,6 +24,7 @@ const InteractiveContactPage = () => {
   });
 
   const pageRef = useRef(null);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     const fetchRecentMessages = async () => {
@@ -67,19 +69,37 @@ const InteractiveContactPage = () => {
     setMode(prev => prev === 'ai' ? 'form' : 'ai');
   };
 
+  const themeColors = isDarkMode
+    ? {
+        bg: 'bg-gray-900',
+        text: 'text-gray-100',
+        card: 'bg-gray-800',
+        cardText: 'text-white',
+        button: 'bg-purple-600 hover:bg-purple-700',
+        buttonText: 'text-white',
+      }
+    : {
+        bg: 'bg-indigo-100',
+        text: 'text-gray-800',
+        card: 'bg-white',
+        cardText: 'text-gray-800',
+        button: 'bg-purple-600 hover:bg-purple-700',
+        buttonText: 'text-white',
+      };
+
   return (
-    <div ref={pageRef} className="min-h-screen to-indigo-100 text-gray-800 p-8">
-      <Header />
+    <div ref={pageRef} className={`min-h-screen p-8`}>
+      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       <main className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className={`${themeColors.card} p-6 rounded-lg shadow-lg`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-purple-700">
                 {mode === 'ai' ? 'AI Assistant' : 'Contact Form'}
               </h2>
               <button
                 onClick={switchMode}
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+                className={`${themeColors.button} ${themeColors.buttonText} px-4 py-2 rounded transition-colors`}
               >
                 Switch to {mode === 'ai' ? 'Form' : 'AI Assistant'}
               </button>
@@ -104,6 +124,7 @@ const InteractiveContactPage = () => {
             recentThoughts={recentThoughts}
             expectedOpportunities={expectedOpportunities}
             availabilityTimes={availabilityTimes}
+            isDarkMode={isDarkMode}
           />
         </div>
         {recentMessages.length > 0 && (
@@ -111,6 +132,7 @@ const InteractiveContactPage = () => {
             recentMessages={recentMessages}
             showAllMessages={showAllMessages}
             setShowAllMessages={setShowAllMessages}
+            isDarkMode={isDarkMode}
           />
         )}
       </main>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Send } from 'lucide-react';
 import Loader from './Loader';
 import { getAIResponse } from '../../api/getAIResponse';
+import { useTheme } from '../ThemeContent'; // 假设您已经创建了这个 context
 
 const aiVariants = {
   hidden: { opacity: 0, x: 50 },
@@ -15,6 +16,7 @@ const AIChat = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef(null);
+  const { isDarkMode } = useTheme();
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +47,32 @@ const AIChat = () => {
     }
   };
 
+  const themeColors = isDarkMode
+    ? {
+        bg: 'bg-gray-800',
+        text: 'text-white',
+        border: 'border-gray-700',
+        userBg: 'bg-purple-700',
+        aiBg: 'bg-gray-700',
+        inputBg: 'bg-gray-700',
+        inputText: 'text-white',
+        inputBorder: 'border-gray-600',
+        buttonBg: 'bg-purple-600',
+        buttonHoverBg: 'hover:bg-purple-700',
+      }
+    : {
+        bg: 'bg-white',
+        text: 'text-gray-900',
+        border: 'border-gray-200',
+        userBg: 'bg-purple-100',
+        aiBg: 'bg-gray-100',
+        inputBg: 'bg-white',
+        inputText: 'text-gray-900',
+        inputBorder: 'border-gray-300',
+        buttonBg: 'bg-purple-600',
+        buttonHoverBg: 'hover:bg-purple-700',
+      };
+
   return (
     <motion.div
       key="ai"
@@ -53,18 +81,19 @@ const AIChat = () => {
       animate="visible"
       exit="hidden"
       transition={{ duration: 0.3 }}
+      className={`${themeColors.bg} ${themeColors.text}`}
     >
-      <div className="h-64 overflow-y-auto mb-4 border border-gray-200 rounded p-4">
+      <div className={`h-64 overflow-y-auto mb-4 border ${themeColors.border} rounded p-4`}>
         {chatMessages.map((msg, index) => (
           <div key={index} className={`mb-2 ${msg.type === 'user' ? 'text-right' : 'text-left'}`}>
-            <span className={`inline-block p-2 rounded ${msg.type === 'user' ? 'bg-purple-100' : 'bg-gray-100'}`}>
+            <span className={`inline-block p-2 rounded ${msg.type === 'user' ? themeColors.userBg : themeColors.aiBg}`}>
               {msg.text}
             </span>
           </div>
         ))}
         {isLoading && (
           <div className="mb-2 text-left">
-            <span className="inline-block p-2 rounded bg-gray-100">
+            <span className={`inline-block p-2 rounded ${themeColors.aiBg}`}>
               <Loader />
             </span>
           </div>
@@ -77,11 +106,11 @@ const AIChat = () => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Ask the AI assistant..."
-          className="flex-grow p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-purple-600"
+          className={`flex-grow p-2 border ${themeColors.inputBorder} rounded-l focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.inputBg} ${themeColors.inputText}`}
         />
         <button
           type="submit"
-          className="bg-purple-600 text-white px-4 py-2 rounded-r hover:bg-purple-700 transition-colors"
+          className={`${themeColors.buttonBg} text-white px-4 py-2 rounded-r ${themeColors.buttonHoverBg} transition-colors`}
         >
           <Send />
         </button>

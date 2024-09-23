@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { verifyEmailAPI, sendMessageAPI } from '../../api/sendMessage';
 import Loader from './Loader';
+import { useTheme } from '../ThemeContent'; // 假设您已经创建了这个 context
 
 const formVariants = {
   hidden: { opacity: 0, x: -50 },
@@ -27,8 +28,28 @@ const ContactForm = ({
     position: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [errors, setErrors] = useState({});
+  const { isDarkMode } = useTheme();
+
+  const themeColors = isDarkMode
+    ? {
+        bg: 'bg-gray-800',
+        text: 'text-white',
+        border: 'border-gray-700',
+        input: 'bg-gray-700 text-white',
+        buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
+        buttonSecondary: 'bg-gray-700 text-white',
+        buttonInactive: 'bg-gray-600 text-gray-300',
+      }
+    : {
+        bg: 'bg-white',
+        text: 'text-gray-900',
+        border: 'border-gray-300',
+        input: 'bg-white text-gray-900',
+        buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
+        buttonSecondary: 'bg-gray-200 text-gray-700',
+        buttonInactive: 'bg-gray-200 text-gray-500',
+      };
 
   const validateForm = () => {
     const newErrors = {};
@@ -97,16 +118,17 @@ const ContactForm = ({
       animate="visible"
       exit="hidden"
       transition={{ duration: 0.3 }}
+      className={`${themeColors.bg} ${themeColors.text}`}
     >
       <div className="flex justify-center mb-8">
         <button
-          className={`px-4 py-2 rounded-l-full ${formType === 'general' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          className={`px-4 py-2 rounded-l-full ${formType === 'general' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
           onClick={() => setFormType('general')}
         >
           General Message
         </button>
         <button
-          className={`px-4 py-2 rounded-r-full ${formType === 'job' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          className={`px-4 py-2 rounded-r-full ${formType === 'job' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
           onClick={() => setFormType('job')}
         >
           Research/Job Opportunity
@@ -120,7 +142,7 @@ const ContactForm = ({
             placeholder="Your Name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
             required
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -134,7 +156,7 @@ const ContactForm = ({
                 placeholder="Your Company"
                 value={formData.company}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
                 required
               />
               {errors.company && <p className="text-red-500 text-sm mt-1">{errors.company}</p>}
@@ -147,13 +169,13 @@ const ContactForm = ({
                   placeholder="Company Email"
                   value={formData.companyEmail}
                   onChange={handleInputChange}
-                  className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className={`flex-grow p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
                   required
                 />
                 <button
                   type="button"
                   onClick={verifyEmail}
-                  className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                  className={`px-4 py-2 ${isEmailVerified ? themeColors.buttonInactive : themeColors.buttonPrimary} text-white rounded transition-colors`}
                   disabled={isEmailVerified}
                 >
                   {isEmailVerified ? 'Verified' : 'Verify Email'}
@@ -178,7 +200,7 @@ const ContactForm = ({
                 placeholder="Position for Me"
                 value={formData.position}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
                 required
               />
               {errors.position && <p className="text-red-500 text-sm mt-1">{errors.position}</p>}
@@ -203,7 +225,7 @@ const ContactForm = ({
               placeholder="Your Email"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+              className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
               required
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -215,14 +237,14 @@ const ContactForm = ({
             placeholder="Your Message"
             value={formData.message}
             onChange={handleInputChange}
-            className="w-full p-2 border border-gray-300 rounded h-32 resize-none focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className={`w-full p-2 border ${themeColors.border} rounded h-32 resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
             required
           ></textarea>
           {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
         </div>
         <motion.button
           type="submit"
-          className="w-full bg-purple-600 text-white py-2 rounded relative overflow-hidden"
+          className={`w-full ${themeColors.buttonPrimary} text-white py-2 rounded relative overflow-hidden`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           disabled={isSubmitting || (formType === 'job' && !isEmailVerified)}
