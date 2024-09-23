@@ -144,7 +144,7 @@ const ContactForm = ({
                 <input
                   type="email"
                   name="companyEmail"
-                  placeholder="Your Company Email"
+                  placeholder="Company Email"
                   value={formData.companyEmail}
                   onChange={handleInputChange}
                   className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopNavigation from './TopNavigation';
+import { useTheme } from '../components/ThemeContent';
 
 const StarField = ({ count = 100 }) => {
     const stars = useMemo(() => {
@@ -73,14 +74,7 @@ const StarField = ({ count = 100 }) => {
   };
 
 const MainLayout = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    return savedMode ? JSON.parse(savedMode) : false;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
+  const { isDarkMode} = useTheme();
 
   const { bgGradient, textColor } = useMemo(() => ({
     bgGradient: isDarkMode
@@ -116,7 +110,7 @@ const MainLayout = ({ children }) => {
         transition={{ duration: transitionDuration }}
       >
         <div className="container mx-auto px-4 py-12 max-w-6xl">
-          <TopNavigation isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+          <TopNavigation isDarkMode={isDarkMode}/>
           {children}
         </div>
       </motion.div>

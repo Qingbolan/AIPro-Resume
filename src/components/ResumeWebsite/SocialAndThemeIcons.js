@@ -1,7 +1,10 @@
 import React from 'react';
 import { Linkedin, Github, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../ThemeContent';
 
-const SocialAndThemeIcons = ({ socialLinks, isDarkMode, setIsDarkMode, highlightColor }) => {
+const SocialAndThemeIcons = ({ socialLinks, highlightColor }) => {
+  const { isDarkMode, setIsDarkMode } = useTheme();
+
   return (
     <div className="flex justify-center items-center space-x-4">
       {socialLinks.map((link, index) => (

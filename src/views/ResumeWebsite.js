@@ -74,8 +74,9 @@ const ResumeWebsite = () => {
       />
       <Footer 
         name={resumeData.name}
+        contacts={resumeData.contacts}
       />
-    </>
+  </>
   );
 };
 

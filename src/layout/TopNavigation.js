@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Briefcase, Lightbulb, BookOpen, Mail, Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+
 const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
   <motion.div
     onClick={onClick}

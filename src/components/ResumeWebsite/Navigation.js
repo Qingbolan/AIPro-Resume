@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../ThemeContent';
 
-const Navigation = ({ sections, activeSection, setActiveSection, isDarkMode }) => {
+const Navigation = ({ sections, activeSection, setActiveSection}) => {
+  const { isDarkMode} = useTheme();
   return (
     <nav className="mb-12">
       <ul className="flex justify-center space-x-4 flex-wrap">

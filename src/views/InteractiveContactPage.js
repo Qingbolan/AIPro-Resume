@@ -68,7 +68,7 @@ const InteractiveContactPage = () => {
   };
 
   return (
-    <div ref={pageRef} className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-indigo-100 text-gray-800 p-8">
+    <div ref={pageRef} className="min-h-screen to-indigo-100 text-gray-800 p-8">
       <Header />
       <main className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
