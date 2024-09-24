@@ -88,7 +88,7 @@ const InteractiveContactPage = () => {
       };
 
   return (
-    <div ref={pageRef} className={`min-h-screen p-8`}>
+    <div ref={pageRef} className={`min-h-screen p-1`}>
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       <main className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
