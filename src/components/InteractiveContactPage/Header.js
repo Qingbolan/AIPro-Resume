@@ -41,11 +41,9 @@ const Header = () => {
       animate="visible"
     >
       <motion.h1 className={`text-5xl font-bold mb-4 ${themeColors.text}`} variants={itemVariants}>
-        Contact Silan Hu
+        Contact
       </motion.h1>
-      <motion.p className={`text-xl ${themeColors.secondaryText} mb-8`} variants={itemVariants}>
-        AI Researcher &amp; Full Stack Developer
-      </motion.p>
+      
       <motion.div className="flex items-center justify-center" variants={itemVariants}>
         <motion.img
           src="/logo.svg"
@@ -63,8 +61,10 @@ const Header = () => {
             Silan.Hu@u.nus.edu | +65 86986181
           </motion.p>
         </div>
+        
       </motion.div>
-      <motion.button
+      
+      {/* <motion.button
         className={`mt-4 p-2 `}
         onClick={() => setIsDarkMode(!isDarkMode)}
         variants={itemVariants}
@@ -72,8 +72,11 @@ const Header = () => {
         whileTap={{ scale: 0.9 }}
         aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
       >
-        {/* {isDarkMode ? <Sun size={24} color="#FDB813" /> : <Moon size={24} color="#1e3a8a" />} */}
-      </motion.button>
+        {isDarkMode ? <Sun size={24} color="#FDB813" /> : <Moon size={24} color="#1e3a8a" />}
+      </motion.button> */}
+      <motion.p className={`text-xl ${themeColors.secondaryText} mb-8`} variants={itemVariants}>
+        AI Researcher &amp; Full Stack Developer
+      </motion.p>
     </motion.header>
   );
 };

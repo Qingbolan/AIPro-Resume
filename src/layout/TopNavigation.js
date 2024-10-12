@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Briefcase, Lightbulb, BookOpen, Mail, Menu, X } from 'lucide-react';
+import { Home, Briefcase, Lightbulb, BookOpen, Mail, Menu, X, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../components/LanguageContent';
 
 
 const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
@@ -29,7 +30,7 @@ const NavItem = ({ icon, label, link, isActive, onClick, colorClass }) => (
   </motion.div>
 );
 
-const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClasses, isDarkMode }) => (
+const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClasses, isDarkMode, language, toggleLanguage }) => (
   <AnimatePresence>
     {isOpen && (
       <motion.div 
@@ -51,6 +52,12 @@ const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClas
               colorClass={colorClasses[index % colorClasses.length]}
             />
           ))}
+          <NavItem
+            icon={<Globe size={18} />}
+            label={language === 'en' ? 'English' : '中文'}
+            onClick={toggleLanguage}
+            colorClass="text-gray-500"
+          />
         </div>
       </motion.div>
     )}
@@ -60,6 +67,8 @@ const MobileMenu = ({ isOpen, navItems, activeSection, handleNavClick, colorClas
 const TopNavigation = ({ isDarkMode, toggleTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  // const [language, setLanguage] = useState('en');
+  const { language, setLanguage } = useLanguage();
 
   const colorClasses = [
     'text-blue-500',
@@ -69,17 +78,16 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
     'text-pink-500',
   ];
 
-  const navItems = [
-    { icon: <Home size={18} />, label: "Home", link: "/" },
-    { icon: <Briefcase size={18} />, label: "Projects", link: "/projects" },
-    { icon: <Lightbulb size={18} />, label: "Ideas", link: "/ideas" },
-    { icon: <BookOpen size={18} />, label: "Blog", link: "/blog" },
-    { icon: <Mail size={18} />, label: "Contact", link: "/contact" },
-  ];
+  const navItems = useMemo(() => [
+    { icon: <Home size={18} />, label: language === 'en' ? "Home" : "主页", link: "/" },
+    { icon: <Briefcase size={18} />, label: language === 'en' ? "Projects" : "项目", link: "/projects" },
+    { icon: <Lightbulb size={18} />, label: language === 'en' ? "Ideas" : "想法", link: "/ideas" },
+    { icon: <BookOpen size={18} />, label: language === 'en' ? "Blog" : "博客", link: "/blog" },
+    { icon: <Mail size={18} />, label: language === 'en' ? "Contact" : "联系", link: "/contact" },
+  ], [language]);
 
   useEffect(() => {
     const handleScroll = () => {
-      // This part might need to be adjusted based on your routing setup
       const currentPath = window.location.pathname;
       const currentItem = navItems.find(item => item.link === currentPath);
       if (currentItem) {
@@ -89,11 +97,15 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  });
+  }, [navItems]);
 
   const handleNavClick = (link) => {
     setActiveSection(link);
     setIsOpen(false);
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(prevLang => prevLang === 'en' ? 'zh' : 'en');
   };
 
   return (
@@ -127,6 +139,12 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
                   colorClass={colorClasses[index % colorClasses.length]}
                 />
               ))}
+              <NavItem
+                icon={<Globe size={18} />}
+                label={language === 'en' ? 'EN' : '中文'}
+                onClick={toggleLanguage}
+                colorClass="text-gray-500"
+              />
             </div>
 
             {/* Mobile menu button */}
@@ -166,6 +184,8 @@ const TopNavigation = ({ isDarkMode, toggleTheme }) => {
           handleNavClick={handleNavClick}
           colorClasses={colorClasses}
           isDarkMode={isDarkMode}
+          language={language}
+          toggleLanguage={toggleLanguage}
         />
       </motion.nav>
       {/* Spacer to prevent content from being hidden under the fixed navbar */}
