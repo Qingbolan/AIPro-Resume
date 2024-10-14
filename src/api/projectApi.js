@@ -1,6 +1,4 @@
 // src/api/projectApi.js
-import i18n from '../i18n';
-
 // 模拟API延迟
 const simulatedDelay = () => new Promise(resolve => setTimeout(resolve, 100));
 

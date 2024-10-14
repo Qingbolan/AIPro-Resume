@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import ProjectCard from '../components/ProjectGallery/ProjectCard';
 import TimelineView from '../components/ProjectGallery/TimelineView';
 import ProjectDetailModal from '../components/ProjectGallery/ProjectDetailModal';
-import QuickToolsBar from '../components/ProjectGallery/QuickToolsBar';
+// import QuickToolsBar from '../components/ProjectGallery/QuickToolsBar';
 import KnowledgeGraph from '../components/ProjectGallery/KnowledgeGraph';
 import AnnualPlanDetail from '../components/ProjectGallery/ProjectCard/AnnualPlanDetail';
 import AnnualPlanTimeline from '../components/ProjectGallery/AnnualPlanTimeline';
@@ -126,7 +126,7 @@ const ProjectGallery = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            My Project Gallery
+          {t('my_project_gallery')}
           </motion.h1>
           <div className="flex items-center space-x-4">
             <motion.button
@@ -136,7 +136,7 @@ const ProjectGallery = () => {
               whileTap={{ scale: 0.95 }}
             >
               {showAnnualPlans ? <X size={18} className="mr-2" /> : <Calendar size={18} className="mr-2" />}
-              {showAnnualPlans ? "Hide Plans" : "Show Plans"}
+              {showAnnualPlans ? t('hide_plans') : t('show_plans')}
             </motion.button>
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)} 
@@ -153,7 +153,7 @@ const ProjectGallery = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          Explore my journey through innovative projects
+          {t('exploring_the_potential')}
         </motion.p>
   
         <AnimatePresence>
@@ -173,7 +173,7 @@ const ProjectGallery = () => {
             >
               <input
                 type="text"
-                placeholder="Search projects by name, tech stack, or year"
+                placeholder={t('search_placeholder')}
                 className={`w-full p-3 sm:p-4 pr-12 rounded-lg ${isDarkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-purple-500`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -237,7 +237,7 @@ const ProjectGallery = () => {
             }`}
             onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
           >
-            {showKnowledgeGraph ? "Hide Knowledge Graph" : "Show Knowledge Graph"}
+            {showKnowledgeGraph ? t('hide_knowledge_graph') : t('show_knowledge_graph')}
           </button>
         </div>
   
@@ -333,7 +333,7 @@ const ProjectGallery = () => {
         )}
       </AnimatePresence>
   
-      <QuickToolsBar />
+      {/* <QuickToolsBar /> */}
     </div>
   );
 };

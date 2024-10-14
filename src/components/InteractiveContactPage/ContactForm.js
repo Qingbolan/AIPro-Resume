@@ -5,6 +5,8 @@ import { Check } from 'lucide-react';
 import { verifyEmailAPI, sendMessageAPI } from '../../api/sendMessage';
 import Loader from './Loader';
 import { useTheme } from '../ThemeContent'; // 假设您已经创建了这个 context
+import { useTranslation } from 'react-i18next';
+
 
 const formVariants = {
   hidden: { opacity: 0, x: -50 },
@@ -30,6 +32,7 @@ const ContactForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
 
   const themeColors = isDarkMode
     ? {
@@ -125,13 +128,13 @@ const ContactForm = ({
           className={`px-4 py-2 rounded-l-full ${formType === 'general' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
           onClick={() => setFormType('general')}
         >
-          General Message
+          {t('General_message')}
         </button>
         <button
           className={`px-4 py-2 rounded-r-full ${formType === 'job' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
           onClick={() => setFormType('job')}
         >
-          Research/Job Opportunity
+          {t('Research_job_opportunity')}
         </button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -139,7 +142,7 @@ const ContactForm = ({
           <input
             type="text"
             name="name"
-            placeholder="Your Name"
+            placeholder={t("Your Name")}
             value={formData.name}
             onChange={handleInputChange}
             className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -153,7 +156,7 @@ const ContactForm = ({
               <input
                 type="text"
                 name="company"
-                placeholder="Your Company"
+                placeholder={t("Your Company")}
                 value={formData.company}
                 onChange={handleInputChange}
                 className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -166,7 +169,7 @@ const ContactForm = ({
                 <input
                   type="email"
                   name="companyEmail"
-                  placeholder="Company Email"
+                  placeholder={t("Company Email")}
                   value={formData.companyEmail}
                   onChange={handleInputChange}
                   className={`flex-grow p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -178,7 +181,7 @@ const ContactForm = ({
                   className={`px-4 py-2 ${isEmailVerified ? themeColors.buttonInactive : themeColors.buttonPrimary} text-white rounded transition-colors`}
                   disabled={isEmailVerified}
                 >
-                  {isEmailVerified ? 'Verified' : 'Verify Email'}
+                  {isEmailVerified ? t('Verified') : t('Verify Email')}
                 </button>
               </div>
               {errors.companyEmail && <p className="text-red-500 text-sm mt-1">{errors.companyEmail}</p>}
@@ -197,7 +200,7 @@ const ContactForm = ({
               <input
                 type="text"
                 name="position"
-                placeholder="Position for Me"
+                placeholder={t("Position for Me")}
                 value={formData.position}
                 onChange={handleInputChange}
                 className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -213,7 +216,7 @@ const ContactForm = ({
                 onChange={handleInputChange}
                 disabled={!isEmailVerified}
               />
-              <span>Send my resume to this email</span>
+              <span>{t('Send my resume to this email')}</span>
             </label>
           </>
         )}
@@ -222,7 +225,7 @@ const ContactForm = ({
             <input
               type="email"
               name="email"
-              placeholder="Your Email"
+              placeholder={t("Your Email")}
               value={formData.email}
               onChange={handleInputChange}
               className={`w-full p-2 border ${themeColors.border} rounded focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -234,7 +237,7 @@ const ContactForm = ({
         <div>
           <textarea
             name="message"
-            placeholder="Your Message"
+            placeholder={t("Your Message")}
             value={formData.message}
             onChange={handleInputChange}
             className={`w-full p-2 border ${themeColors.border} rounded h-32 resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 ${themeColors.input}`}
@@ -254,7 +257,7 @@ const ContactForm = ({
               Sending...
               <Loader />
             </div>
-          ) : 'Send Message'}
+          ) : t('Send Message')}
         </motion.button>
       </form>
     </motion.div>

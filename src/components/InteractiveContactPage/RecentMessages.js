@@ -2,6 +2,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 
 const RecentMessages = ({ recentMessages, showAllMessages, setShowAllMessages, isDarkMode }) => {
   const themeColors = isDarkMode
@@ -21,10 +23,11 @@ const RecentMessages = ({ recentMessages, showAllMessages, setShowAllMessages, i
         button: 'bg-purple-100 hover:bg-purple-200',
         buttonText: 'text-purple-700',
       };
+  const { t } = useTranslation();
 
   return (
     <div className={`${themeColors.text}`}>
-      <h2 className="text-2xl font-semibold mb-4 text-purple-500">Recent Messages</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-500">{t('Recent Messages')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <AnimatePresence>
           {recentMessages.slice(0, showAllMessages ? undefined : 3).map((msg, index) => (

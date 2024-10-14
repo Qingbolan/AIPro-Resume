@@ -1,6 +1,7 @@
 // src/components/ThoughtsAndOpportunities.js
 import React from 'react';
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ThoughtsAndOpportunities = ({
   formType,
@@ -24,11 +25,12 @@ const ThoughtsAndOpportunities = ({
         secondary: 'text-gray-700',
         listItem: 'bg-purple-50',
       };
+  const { t } = useTranslation();
 
   return (
     <div className={`${themeColors.bg} ${themeColors.text} p-6 rounded-lg shadow-lg`}>
       <h2 className="text-2xl font-semibold mb-4 text-purple-500">
-        {formType === 'general' ? 'Recent Thoughts' : 'Expected Opportunities'}
+        {formType === 'general' ? t('Recent Thoughts') : t('Expected Opportunities')}
       </h2>
       {formType === 'general' ? (
         <ul className="space-y-2">
@@ -45,10 +47,10 @@ const ThoughtsAndOpportunities = ({
           </ul>
           <div className={`${themeColors.highlight} p-4 rounded-lg`}>
             <h3 className="text-lg font-semibold mb-2 flex items-center">
-              <Clock className="mr-2" /> Available Time
+              <Clock className="mr-2" /> {t('Available Time')}
             </h3>
-            <p className={themeColors.secondary}>Daily: {availabilityTimes.daily}</p>
-            <p className={themeColors.secondary}>Full Time: {availabilityTimes.fullTime}</p>
+            <p className={themeColors.secondary}>{t('Daily')}: {availabilityTimes.daily}</p>
+            <p className={themeColors.secondary}>{t('Full Time')}: {availabilityTimes.fullTime}</p>
           </div>
         </>
       )}

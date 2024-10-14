@@ -3,9 +3,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 // import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../ThemeContent'; // 假设您已经创建了这个 context
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
-  const { isDarkMode, setIsDarkMode } = useTheme();
+  // const { isDarkMode, setIsDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
+
   
   const containerVariants = {
     hidden: { opacity: 0, y: -50 },
@@ -41,7 +45,7 @@ const Header = () => {
       animate="visible"
     >
       <motion.h1 className={`text-5xl font-bold mb-4 ${themeColors.text}`} variants={itemVariants}>
-        Contact
+        {t('contact_me')}
       </motion.h1>
       
       <motion.div className="flex items-center justify-center" variants={itemVariants}>
@@ -55,7 +59,7 @@ const Header = () => {
         />
         <div className="text-left">
           <motion.h2 className={`text-2xl font-semibold ${themeColors.text}`} variants={itemVariants}>
-            Silan Hu (ZIYUN · 2025)
+            {t('Silan_Hu_Zi_Yun')}
           </motion.h2>
           <motion.p className={themeColors.secondaryText} variants={itemVariants}>
             Silan.Hu@u.nus.edu | +65 86986181
@@ -75,7 +79,7 @@ const Header = () => {
         {isDarkMode ? <Sun size={24} color="#FDB813" /> : <Moon size={24} color="#1e3a8a" />}
       </motion.button> */}
       <motion.p className={`text-xl ${themeColors.secondaryText} mb-8`} variants={itemVariants}>
-        AI Researcher &amp; Full Stack Developer
+        {t('personal_title')}
       </motion.p>
     </motion.header>
   );

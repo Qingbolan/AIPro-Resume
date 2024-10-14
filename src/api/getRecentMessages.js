@@ -1,6 +1,4 @@
 // src/api/getRecentMessages.js
-// import axios from 'axios';
-// import i18n from '../i18n';
 
 export const getRecentMessagesAPI = (language = 'en') => {
   // 根据语言返回不同的消息列表

@@ -80,7 +80,7 @@ const resumeData = {
           {
             company: "Beijing Stats City Data Technology Co., Ltd.",
             role: "Full Stack Engineer",
-            date: "Jan 2024 – Now",
+            date: "Jan 2024 – Sep 2024",
             details: [
               "Scholar Hero: Led a student startup team to develop an AI-powered educational application. Currently, it has 300 users, received recognition and funding support from the Communication University of China, and attracted attention from top Chinese universities. Published a paper as the first author, with patents and software copyrights pending."
             ]
@@ -206,7 +206,7 @@ const resumeData = {
           {
             company: "北京统计之都数据科技有限公司",
             role: "全栈工程师",
-            date: "2024年1月 – 现在",
+            date: "2024年1月 – 2024年9月",
             details: [
               "Scholar Hero：领导一个学生创业团队开发AI驱动的教育应用。目前拥有300名用户，获得中国传媒大学的认可和资金支持，并吸引了中国顶尖大学的关注。作为第一作者发表论文，正在申请专利和软件版权。"
             ]
