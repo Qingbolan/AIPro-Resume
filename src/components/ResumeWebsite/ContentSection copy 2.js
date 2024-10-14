@@ -6,8 +6,11 @@ import ResearchSection from './sections/ResearchSection';
 import ExperienceSection from './sections/ExperienceSection';
 import AwardsSection from './sections/AwardsSection';
 import SkillsSection from './sections/SkillsSection';
+import { useTheme } from '../ThemeContent';
 
-const ContentSection = ({ sections, activeSection, isDarkMode }) => {
+const ContentSection = ({ sections, activeSection}) => {
+  const { isDarkMode} = useTheme();
+
   const cardBgColor = isDarkMode ? 'bg-gray-800' : 'bg-white';
   const highlightColor = isDarkMode ? 'text-purple-300' : 'text-purple-600';
 

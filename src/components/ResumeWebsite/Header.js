@@ -1,14 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Phone, Linkedin, Github, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../ThemeContent';
 
-const Header = ({ name, title, contacts, socialLinks, isDarkMode, setIsDarkMode }) => {
+const Header = ({ name, title, contacts, socialLinks }) => {
+  const { isDarkMode, setIsDarkMode } = useTheme();
   const highlightColor = isDarkMode ? 'text-purple-300' : 'text-purple-600';
 
   return (
     <header className="text-center mb-12">
       <motion.h1 
-        className={`text-6xl font-bold mb-2 ${highlightColor}`}
+        className="text-6xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
