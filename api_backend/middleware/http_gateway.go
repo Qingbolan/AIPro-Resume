@@ -35,7 +35,7 @@ func (g *HTTPGateway) SetupRouter() *gin.Engine {
 
 	// 设置 CORS 中间件
 	config := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // 根据前端地址调整
+		AllowOrigins:     []string{"*"}, // 根据前端地址调整
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -53,9 +53,6 @@ func (g *HTTPGateway) SetupRouter() *gin.Engine {
 
 	// fetchResumeData API
 	router.GET("/api/fetchResumeData", g.handleFetchResumeData)
-
-	// updateResumeSection API
-	router.PUT("/api/updateResumeSection", g.handleUpdateResumeSection)
 
 	// fetchProjects API
 	router.GET("/api/fetchProjects", g.handleFetchProjects)
@@ -117,21 +114,6 @@ func (g *HTTPGateway) handleFetchResumeData(c *gin.Context) {
 		language = "en"
 	}
 	resp, err := g.Client.FetchResumeData(context.Background(), language)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(200, resp)
-}
-
-// 处理 updateResumeSection API
-func (g *HTTPGateway) handleUpdateResumeSection(c *gin.Context) {
-	var req all_api.UpdateResumeSectionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-	resp, err := g.Client.UpdateResumeSection(context.Background(), &req)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

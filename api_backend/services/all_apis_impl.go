@@ -44,31 +44,6 @@ func (s *AllAPIsServiceImpl) FetchResumeData(ctx context.Context, language strin
 	return &resumeDataEN, nil
 }
 
-// updateResumeSection
-func (s *AllAPIsServiceImpl) UpdateResumeSection(ctx context.Context, req *all_api.UpdateResumeSectionRequest) (*all_api.Response, error) {
-	var dataMap map[string]*all_api.Section
-	if req.Language == "zh" {
-		dataMap = resumeDataZH.Sections
-	} else {
-		dataMap = resumeDataEN.Sections
-	}
-
-	section, exists := dataMap[req.SectionKey]
-	if !exists {
-		return &all_api.Response{
-			Success: false,
-			Message: "Section not found",
-		}, nil
-	}
-
-	section.Content = req.LatestedData
-
-	return &all_api.Response{
-		Success: true,
-		Message: "Section updated successfully",
-	}, nil
-}
-
 // fetchProjects
 func (s *AllAPIsServiceImpl) FetchProjects(ctx context.Context, language string) (*all_api.FetchProjectsResponse, error) {
 	var projectsList []*all_api.Project

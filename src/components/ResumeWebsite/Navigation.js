@@ -30,6 +30,7 @@ const NavItem = React.memo(({ sectionKey, title, isActive, onClick, isDarkMode }
         className={`px-4 py-2 rounded-full transition-colors ${
           isActive
             ? `${isDarkMode ? 'bg-purple-600' : 'bg-purple-500'} text-white`
+            // ? `bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white`
             : `${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} ${isDarkMode ? 'text-white' : 'text-gray-900'}`
         }`}
         onClick={onClick}

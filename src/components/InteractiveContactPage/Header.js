@@ -44,8 +44,17 @@ const Header = () => {
       initial="hidden"
       animate="visible"
     >
-      <motion.h1 className={`text-5xl font-bold mb-4 ${themeColors.text}`} variants={itemVariants}>
-        {t('contact_me')}
+      <motion.h1 
+        className="text-5xl font-bold"
+        variants={itemVariants}
+      >
+        <span 
+          className={`inline-block bg-clip-text text-transparent
+            bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+            py-2 px-1 leading-tight`}
+        >
+          {t('contact_me')}
+        </span>
       </motion.h1>
       
       <motion.div className="flex items-center justify-center" variants={itemVariants}>

@@ -14,7 +14,6 @@ type Client interface {
 	SendMessage(ctx context.Context, request *all_api.SendMessageRequest, callOptions ...callopt.Option) (r *all_api.Response, err error)
 	VerifyEmail(ctx context.Context, request *all_api.VerifyEmailRequest, callOptions ...callopt.Option) (r *all_api.Response, err error)
 	FetchResumeData(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.ResumeData, err error)
-	UpdateResumeSection(ctx context.Context, request *all_api.UpdateResumeSectionRequest, callOptions ...callopt.Option) (r *all_api.Response, err error)
 	FetchProjects(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.FetchProjectsResponse, err error)
 	FetchCategories(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.FetchCategoriesResponse, err error)
 	FetchNews(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.FetchNewsResponse, err error)
@@ -65,11 +64,6 @@ func (p *kAllAPIsServiceClient) VerifyEmail(ctx context.Context, request *all_ap
 func (p *kAllAPIsServiceClient) FetchResumeData(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.ResumeData, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.FetchResumeData(ctx, language)
-}
-
-func (p *kAllAPIsServiceClient) UpdateResumeSection(ctx context.Context, request *all_api.UpdateResumeSectionRequest, callOptions ...callopt.Option) (r *all_api.Response, err error) {
-	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.UpdateResumeSection(ctx, request)
 }
 
 func (p *kAllAPIsServiceClient) FetchProjects(ctx context.Context, language string, callOptions ...callopt.Option) (r *all_api.FetchProjectsResponse, err error) {

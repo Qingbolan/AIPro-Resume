@@ -22,9 +22,54 @@ struct SocialLink {
   2: string url
 }
 
+struct EducationItem {
+  1: string school
+  2: string degree
+  3: string date
+  4: list<string> details
+}
+
+struct ResearchItem {
+  1: string title
+  2: string location
+  3: string date
+  4: list<string> details
+}
+
+struct ExperienceItem {
+  1: string company
+  2: string role
+  3: string date
+  4: list<string> details
+}
+
 struct Section {
   1: string title
   2: list<string> content
+}
+
+struct EducationSection {
+  1: string title
+  2: list<EducationItem> content
+}
+
+struct ResearchSection {
+  1: string title
+  2: list<ResearchItem> content
+}
+
+struct ExperienceSection {
+  1: string title
+  2: list<ExperienceItem> content
+}
+
+struct ResumeSections {
+  1: EducationSection education
+  2: Section publications
+  3: ResearchSection research
+  4: ExperienceSection experience
+  5: Section awards
+  6: Section skills
 }
 
 struct ResumeData {
@@ -33,14 +78,9 @@ struct ResumeData {
   3: string current
   4: list<Contact> contacts
   5: list<SocialLink> socialLinks
-  6: map<string, Section> sections
+  6: ResumeSections sections
 }
 
-struct UpdateResumeSectionRequest {
-  1: string sectionKey
-  2: list<string> LatestedData
-  3: string language
-}
 
 struct Response {
   1: bool success
@@ -111,8 +151,8 @@ struct Message {
   2: string text
   3: string author
   4: string role
-  5: string Company
-  6: string Position
+  5: string company
+  6: string position
 }
 
 struct GetRecentMessagesResponse {
@@ -141,7 +181,7 @@ service AllAPIsService {
 
   // resumeApi.js APIs
   ResumeData fetchResumeData(1: string language)
-  Response updateResumeSection(1: UpdateResumeSectionRequest request)
+  # Response updateResumeSection(1: UpdateResumeSectionRequest request)
 
   // projectApi.js APIs
   FetchProjectsResponse fetchProjects(1: string language)

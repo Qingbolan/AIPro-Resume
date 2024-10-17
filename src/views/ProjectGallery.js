@@ -120,14 +120,18 @@ const ProjectGallery = () => {
     <div className={`min-h-screen p-4 sm:p-8`}>
       <header className="max-w-6xl mx-auto mb-8">
         <div className="flex justify-between items-center mb-6">
-          <motion.h1 
-            className={`text-3xl sm:text-4xl font-bold ${isDarkMode ? 'text-purple-300' : 'text-purple-800'}`}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+        <motion.h1 
+          className={`text-3xl sm:text-4xl font-bold`}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span 
+            className={`inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 py-2 leading-tight`}
           >
-          {t('my_project_gallery')}
-          </motion.h1>
+            {t('my_project_gallery')}
+          </span>
+        </motion.h1>
           <div className="flex items-center space-x-4">
             <motion.button
               className={`${isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'} px-4 py-2 rounded-lg flex items-center`}

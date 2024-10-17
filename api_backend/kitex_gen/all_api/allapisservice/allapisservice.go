@@ -34,13 +34,6 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"updateResumeSection": kitex.NewMethodInfo(
-		updateResumeSectionHandler,
-		newAllAPIsServiceUpdateResumeSectionArgs,
-		newAllAPIsServiceUpdateResumeSectionResult,
-		false,
-		kitex.WithStreamingMode(kitex.StreamingNone),
-	),
 	"fetchProjects": kitex.NewMethodInfo(
 		fetchProjectsHandler,
 		newAllAPIsServiceFetchProjectsArgs,
@@ -203,24 +196,6 @@ func newAllAPIsServiceFetchResumeDataResult() interface{} {
 	return all_api.NewAllAPIsServiceFetchResumeDataResult()
 }
 
-func updateResumeSectionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*all_api.AllAPIsServiceUpdateResumeSectionArgs)
-	realResult := result.(*all_api.AllAPIsServiceUpdateResumeSectionResult)
-	success, err := handler.(all_api.AllAPIsService).UpdateResumeSection(ctx, realArg.Request)
-	if err != nil {
-		return err
-	}
-	realResult.Success = success
-	return nil
-}
-func newAllAPIsServiceUpdateResumeSectionArgs() interface{} {
-	return all_api.NewAllAPIsServiceUpdateResumeSectionArgs()
-}
-
-func newAllAPIsServiceUpdateResumeSectionResult() interface{} {
-	return all_api.NewAllAPIsServiceUpdateResumeSectionResult()
-}
-
 func fetchProjectsHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*all_api.AllAPIsServiceFetchProjectsArgs)
 	realResult := result.(*all_api.AllAPIsServiceFetchProjectsResult)
@@ -364,16 +339,6 @@ func (p *kClient) FetchResumeData(ctx context.Context, language string) (r *all_
 	_args.Language = language
 	var _result all_api.AllAPIsServiceFetchResumeDataResult
 	if err = p.c.Call(ctx, "fetchResumeData", &_args, &_result); err != nil {
-		return
-	}
-	return _result.GetSuccess(), nil
-}
-
-func (p *kClient) UpdateResumeSection(ctx context.Context, request *all_api.UpdateResumeSectionRequest) (r *all_api.Response, err error) {
-	var _args all_api.AllAPIsServiceUpdateResumeSectionArgs
-	_args.Request = request
-	var _result all_api.AllAPIsServiceUpdateResumeSectionResult
-	if err = p.c.Call(ctx, "updateResumeSection", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
