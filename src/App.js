@@ -4,7 +4,8 @@ import MainLayout from './layout/MainLayout';
 import ResumeWebsite from './views/ResumeWebsite';
 import InteractiveContactPage from './views/InteractiveContactPage';
 import ProjectGallery from './views/ProjectGallery';
-import IdeaCollection from './views/IdeaCollection';
+// import IdeaCollection from './views/IdeaCollection';
+import IdeaPage from 'views/IdeaPage';
 import BlogStack from './views/BlogStack';
 import { ThemeProvider } from './components/ThemeContent';
 import { LanguageProvider } from './components/LanguageContent';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/contact" element={<InteractiveContactPage />} />
             <Route path="/projects" element={<ProjectGallery />} />
             {/* <Route path="/ideas" element={<IdeaCollection />} /> */}
+            <Route path="/ideas" element={<IdeaPage />} />
             <Route path="/blog" element={<BlogStack />} />
           </Routes>
         </MainLayout>
