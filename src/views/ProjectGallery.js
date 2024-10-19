@@ -117,8 +117,8 @@ const ProjectGallery = () => {
   }
 
   return (
-    <div className={`min-h-screen p-4 sm:p-8`}>
-      <header className="max-w-6xl mx-auto mb-8">
+    <div className={`min-h-screen`}>
+      <header className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
         <motion.h1 
           className={`text-3xl sm:text-4xl font-bold`}

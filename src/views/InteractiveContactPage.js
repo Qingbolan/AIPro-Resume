@@ -56,31 +56,13 @@ const InteractiveContactPage = () => {
     fetchRecentGoal();
     fetchRecentMessages();
 
-    // // 其他数据的设置（这些可能也来自API，但目前保持不变）
-    // setRecentThoughts([
-    //   "Exploring the intersection of AI and human creativity",
-    //   "Investigating the ethical implications of large language models",
-    //   "Developing more efficient neural network architectures",
-    // ]);
-
-    // setExpectedOpportunities([
-    //   "AI Research Scientist position in a leading tech company",
-    //   "Collaborative projects on natural language processing",
-    //   "Opportunities to contribute to open-source AI projects",
-    //   "Roles involving the development of ethical AI systems",
-    // ]);
-
-    // setAvailabilityTimes({
-    //   daily: "4-6 hours",
-    //   fullTime: "Available from September 1st, 2024"
-    // });
 
     // 强制滚动到顶部
     if (pageRef.current) {
       pageRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
     }
     window.scrollTo(0, 0);
-  }, []);
+  }, [language, t]);
 
   const switchMode = () => {
     setMode(prev => prev === 'ai' ? 'form' : 'ai');

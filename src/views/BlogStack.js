@@ -328,9 +328,9 @@ const BlogStack = () => {
   
     return (
       <div className="container mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-center mb-2 py-1">
+        <header className="flex flex-col md:flex-row justify-between">
             <motion.h1 
-            className={`text-3xl sm:text-4xl font-bold`}
+            className={`text-4xl sm:text-4xl font-bold`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
