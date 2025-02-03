@@ -36,23 +36,23 @@ const ContactForm = ({
 
   const themeColors = isDarkMode
     ? {
-        bg: 'bg-gray-800',
-        text: 'text-white',
-        border: 'border-gray-700',
-        input: 'bg-gray-700 text-white',
-        buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
-        buttonSecondary: 'bg-gray-700 text-white',
-        buttonInactive: 'bg-gray-600 text-gray-300',
-      }
+      bg: 'bg-gray-800',
+      text: 'text-white',
+      border: 'border-gray-700',
+      input: 'bg-gray-700 text-white',
+      buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
+      buttonSecondary: 'bg-gray-700 text-white',
+      buttonInactive: 'bg-gray-600 text-gray-300',
+    }
     : {
-        bg: 'bg-white',
-        text: 'text-gray-900',
-        border: 'border-gray-300',
-        input: 'bg-white text-gray-900',
-        buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
-        buttonSecondary: 'bg-gray-200 text-gray-700',
-        buttonInactive: 'bg-gray-200 text-gray-500',
-      };
+      bg: 'bg-white',
+      text: 'text-gray-900',
+      border: 'border-gray-300',
+      input: 'bg-white text-gray-900',
+      buttonPrimary: 'bg-purple-600 hover:bg-purple-700',
+      buttonSecondary: 'bg-gray-200 text-gray-700',
+      buttonInactive: 'bg-gray-200 text-gray-500',
+    };
 
   const validateForm = () => {
     const newErrors = {};
@@ -125,13 +125,20 @@ const ContactForm = ({
     >
       <div className="flex justify-center mb-8">
         <button
-          className={`px-4 py-2 rounded-l-full ${formType === 'general' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
+          className={`px-4 py-2 rounded-l-full ${formType === 'general'
+            ? `${themeColors.buttonPrimary} text-white`
+            : `${themeColors.buttonSecondary} text-gray-700`
+            }`}
           onClick={() => setFormType('general')}
         >
           {t('General_message')}
         </button>
         <button
-          className={`px-4 py-2 rounded-r-full ${formType === 'job' ? themeColors.buttonPrimary : themeColors.buttonSecondary}`}
+          className={`px-4 py-2 rounded-r-full ${
+            formType === 'job' 
+              ? `${themeColors.buttonPrimary} text-white`
+              : `${themeColors.buttonSecondary} text-gray-700`
+          }`}
           onClick={() => setFormType('job')}
         >
           {t('Research_job_opportunity')}

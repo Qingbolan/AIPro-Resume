@@ -1,41 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Eye, MessageSquare, ThumbsUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const Carousel = ({ items }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [items.length]);
-
-  return (
-    <div className="relative w-full h-96 overflow-hidden rounded-xl mb-8 shadow-lg">
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute top-0 left-0 w-full h-full"
-        >
-          {items[currentIndex]?.image && (
-            <img src={items[currentIndex].image} alt={items[currentIndex].title} className="w-full h-full object-cover" />
-          )}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-900 to-transparent text-white p-6">
-            <h2 className="text-3xl font-bold mb-2">{items[currentIndex]?.title}</h2>
-            <p className="text-lg">{items[currentIndex]?.description}</p>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-};
+import { useTranslation } from 'react-i18next';
+import BlogCalendar from '../components/BlogStack/BlogCalendar';
+import Carousel from 'components/BlogStack/BlogCarousel';
+import BlogPost from 'components/BlogStack/BlogPost';
+import RecentComments from 'components/BlogStack/BlogRecentComments';
+import RecentUpdate from 'components/BlogStack/BlogRecentUpdate';
+import SidebarSection from 'components/BlogStack/BlogSidebarSection';
 
 const CategorySlider = ({ categories }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,176 +46,7 @@ const CategorySlider = ({ categories }) => {
   );
 };
 
-const BlogPost = ({ title, excerpt, date, category, views, comments, likes, image }) => (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden p-1 mb-4 border border-gray-200">
-        <div className="flex flex-col md:flex-row">
-        {image && (
-          <div className="md:w-1/3">
-            <img src={image} alt={title} className="w-full h-48 md:h-full object-cover" />
-          </div>
-        )}
-        <div className={`p-4 flex flex-col justify-between ${image ? 'md:w-2/3' : 'w-full'}`}>
-          <div>
-            <div className="flex justify-between items-start mb-2">
-              <h2 className="text-xl font-semibold text-gray-800 leading-tight">{title}</h2>
-              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">{category}</span>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">{excerpt}</p>
-          </div>
-          <div className="flex justify-between items-center text-xs text-gray-500">
-            <span>{date}</span>
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center"><Eye size={14} className="mr-1" /> {views}</span>
-              <span className="flex items-center"><MessageSquare size={14} className="mr-1" /> {comments}</span>
-              <span className="flex items-center"><ThumbsUp size={14} className="mr-1" /> {likes}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
-const SidebarSection = ({ title, items }) => (
-  <div className="mb-6">
-    <h3 className="text-lg font-bold mb-3 text-gray-800">{title}</h3>
-    <ul className="space-y-2">
-      {items.map((item, index) => (
-        <motion.li
-          key={index}
-          className="text-md text-gray-600 hover:text-purple-600 cursor-pointer transition-colors duration-300"
-          whileHover={{ x: 5 }}
-        >
-          {item}
-        </motion.li>
-      ))}
-    </ul>
-  </div>
-);
-
-const Calendar = ({ events }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-  const getEventsForDay = (day) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate.getDate() === day && 
-             eventDate.getMonth() === currentDate.getMonth() && 
-             eventDate.getFullYear() === currentDate.getFullYear();
-    });
-  };
-
-  const eventTypeColors = {
-    ddl: 'bg-red-500',
-    article: 'bg-blue-500',
-    idea: 'bg-green-500',
-    schedule: 'bg-yellow-500',
-    default: 'bg-purple-500'
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="text-purple-600 hover:text-purple-800"><ChevronLeft /></button>
-        <h3 className="font-bold text-lg text-purple-600">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-        <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="text-purple-600 hover:text-purple-800"><ChevronRight /></button>
-      </div>
-      <div className="grid grid-cols-7 gap-2">
-        {['日', '一', '二', '三', '四', '五', '六'].map(day => (
-          <div key={day} className="text-center text-sm font-semibold text-gray-600">{day}</div>
-        ))}
-        {Array(firstDayOfMonth).fill(null).map((_, index) => (
-          <div key={`empty-${index}`} className="text-center py-2"></div>
-        ))}
-        {days.map(day => {
-          const dayEvents = getEventsForDay(day);
-          return (
-            <motion.div
-              key={day}
-              className={`text-center py-2 text-md cursor-pointer rounded ${
-                dayEvents.length > 0 ? 'bg-purple-100 text-purple-800 font-semibold' : 'hover:bg-gray-100'
-              }`}
-              whileHover={{ scale: 1.1 }}
-              title={dayEvents.map(e => e.title).join(', ')}
-            >
-              {day}
-              <div className="flex justify-center mt-1 space-x-1">
-                {dayEvents.map((event, index) => (
-                  <div 
-                    key={index} 
-                    className={`w-2 h-2 rounded-full ${eventTypeColors[event.type] || eventTypeColors.default}`}
-                    title={event.title}
-                  ></div>
-                ))}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const RecentUpdate = ({ tweets }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-    <h3 className="flex items-center text-xl font-bold mb-4 text-purple-600">
-      最近更新
-    </h3>
-    <ul className="space-y-4">
-      {tweets.map((tweet, index) => (
-        <TweetItem key={index} tweet={tweet} index={index} />
-      ))}
-    </ul>
-  </div>
-);
-
-const TweetItem = React.memo(({ tweet, index }) => (
-  <motion.li
-  // className="border-b border-gray-200 pb-4 last:border-b-0"
-  className="border-l-4 border-purple-500 pl-4 py-2"
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.3, delay: index * 0.1 }}
-  >
-    <p className="text-gray-600">{tweet.content}</p>
-    <div className="text-sm text-gray-500 mt-2 flex justify-between items-center">
-      <span>{tweet.date}</span>
-      <span>{tweet.likes} 赞</span>
-    </div>
-  </motion.li>
-));
-
-const RecentComments = ({ comments }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-    <h3 className="text-xl font-bold mb-4 text-purple-600 flex items-center">
-      最近评论
-    </h3>
-    <ul className="space-y-4">
-      {comments.map((comment, index) => (
-        <CommentItem key={index} comment={comment} index={index} />
-      ))}
-    </ul>
-  </div>
-);
-
-const CommentItem = React.memo(({ comment, index }) => (
-  <motion.li
-    // className="border-b border-gray-200 pb-4 last:border-b-0"
-    className="border-l-4 border-purple-500 pl-4 py-2"
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.3, delay: index * 0.1 }}
-  >
-    <p className="text-gray-600">{comment.content}</p>
-    <div className="text-sm text-gray-500 mt-2 flex justify-between items-center">
-      <span>{comment.author}</span>
-      <span>{comment.date}</span>
-    </div>
-  </motion.li>
-));
 
 const BlogStack = () => {
   const [carouselItems, setCarouselItems] = useState([]);
@@ -257,13 +59,15 @@ const BlogStack = () => {
   const [comments, setComments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+  const { t } = useTranslation();
+
 
   useEffect(() => {
     // Simulating API data fetch
     setCarouselItems([
-      { image: "/api/placeholder/1200/400", title: "AI革新", description: "探索AI如何改变我们的生活" },
-      { image: "/api/placeholder/1200/400", title: "可持续发展", description: "建设更美好的未来" },
-      { image: "/api/placeholder/1200/400", title: "量子计算", description: "下一代计算技术的突破" },
+      { image: "/api/placeholder/1200/400", title: "Easy-AI", description: "探索AI如何改变我们的生活" },
+      { image: "/api/placeholder/1200/400", title: "Deep-AI", description: "建设更美好的未来" },
+      { image: "/api/placeholder/1200/400", title: "super-creater", description: "下一代计算技术的突破" },
     ]);
 
     setCategories([
@@ -338,23 +142,23 @@ const BlogStack = () => {
                 <span 
                     className={`inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 py-2 leading-tight`}
                 >
-                    我的博客堆栈        
+                    {t('My BlogStack')}       
                 </span>
             </motion.h1>
-          <div className="relative w-full md:w-72">
+          {/* <div className="relative w-full md:w-72">
             <input
               type="text"
               placeholder="搜索文章..."
               className="w-full p-3 pl-10 text-md border border-purple-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
-          </div>
+          </div> */}
         </header>
         
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-8">
             <Carousel items={carouselItems} />
-            <CategorySlider categories={categories} />
+            {/* <CategorySlider categories={categories} /> */}
             {currentPosts.map(post => (
               <BlogPost key={post.id} {...post} />
             ))}
@@ -376,18 +180,16 @@ const BlogStack = () => {
           </div>
           
           <div className="col-span-12 lg:col-span-4 space-y-8">
-            <Calendar events={events} updates={updates} />
+            <BlogCalendar events={events} updates={updates} />
             <RecentUpdate tweets={tweets} />
             <RecentComments comments={comments} />
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <SidebarSection title="年度项目" items={projects} />
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <SidebarSection title="年度项目" items={projects} />
+            {/* <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-xl font-bold mb-4 text-gray-800">关于ZIYUN 2025</h3>
               <p className="text-md text-gray-600 leading-relaxed">
                 ZIYUN 2025是一个致力于探索未来科技和可持续发展的项目。通过整合知识库、Idea Cloud和Thought Pool，我们构建了一个动态的思想生态系统，反映创新思维过程和未来展望。
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

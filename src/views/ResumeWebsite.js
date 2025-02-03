@@ -9,6 +9,7 @@ import { useLanguage } from '../components/LanguageContent';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../components/ThemeContent';
 import * as THREE from 'three';
+import IconLoading from 'components/basics/IconLoading';
 
 const Background3D = ({ isDarkMode }) => {
   const canvasRef = useRef(null);
@@ -100,15 +101,7 @@ const ResumeWebsite = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="text-3xl font-bold">Loading...</div>
-        </motion.div>
-      </div>
+      <IconLoading/>
     );
   }
 

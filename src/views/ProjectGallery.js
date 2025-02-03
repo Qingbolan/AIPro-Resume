@@ -13,6 +13,7 @@ import KnowledgeGraph from '../components/ProjectGallery/KnowledgeGraph';
 import AnnualPlanDetail from '../components/ProjectGallery/ProjectCard/AnnualPlanDetail';
 import AnnualPlanTimeline from '../components/ProjectGallery/AnnualPlanTimeline';
 import { fetchProjects, fetchCategories, fetchAnnualPlans, fetchGraphData } from '../api/projectApi';
+import IconLoading from '../components/basics/IconLoading';
 
 const ProjectGallery = () => {
   const [viewMode, setViewMode] = useState('grid');
@@ -72,12 +73,12 @@ const ProjectGallery = () => {
     }
   }, [selectedCategory, language, loading]);
 
-  const filteredProjects = projects.filter(project => 
+  const filteredProjects = projects.filter(project =>
     (selectedCategory === 'All' || project.tags.includes(selectedCategory)) &&
     (project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-     project.year.toString().includes(searchTerm))
+      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      project.year.toString().includes(searchTerm))
   );
 
   const handleProjectClick = (project) => {
@@ -90,15 +91,7 @@ const ProjectGallery = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="text-3xl font-bold">{t('loading')}</div>
-        </motion.div>
-      </div>
+      <IconLoading />
     );
   }
 
@@ -120,18 +113,18 @@ const ProjectGallery = () => {
     <div className={`min-h-screen`}>
       <header className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-        <motion.h1 
-          className={`text-3xl sm:text-4xl font-bold`}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <span 
-            className={`inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 py-2 leading-tight`}
+          <motion.h1
+            className={`text-3xl sm:text-4xl font-bold`}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {t('my_project_gallery')}
-          </span>
-        </motion.h1>
+            <span
+              className={`inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 py-2 leading-tight`}
+            >
+              {t('my_project_gallery')}
+            </span>
+          </motion.h1>
           <div className="flex items-center space-x-4">
             <motion.button
               className={`${isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'} px-4 py-2 rounded-lg flex items-center`}
@@ -142,8 +135,8 @@ const ProjectGallery = () => {
               {showAnnualPlans ? <X size={18} className="mr-2" /> : <Calendar size={18} className="mr-2" />}
               {showAnnualPlans ? t('hide_plans') : t('show_plans')}
             </motion.button>
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)} 
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
               className={`${isDarkMode ? 'text-white' : 'text-gray-900'} hover:${highlightColor} transition-colors`}
               aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
@@ -151,7 +144,7 @@ const ProjectGallery = () => {
             </button>
           </div>
         </div>
-        <motion.p 
+        <motion.p
           className={`text-lg sm:text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,16 +152,16 @@ const ProjectGallery = () => {
         >
           {t('exploring_the_potential')}
         </motion.p>
-  
+
         <AnimatePresence>
           {showAnnualPlans && (
             <AnnualPlanTimeline plans={annualPlans} onPlanClick={handleAnnualPlanClick} />
           )}
         </AnimatePresence>
-  
+
         <AnimatePresence>
           {!showAnnualPlans && (
-            <motion.div 
+            <motion.div
               className="relative mt-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -187,18 +180,17 @@ const ProjectGallery = () => {
           )}
         </AnimatePresence>
       </header>
-  
+
       <main className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
           <div className="flex flex-wrap gap-2">
             {categories.map((category, index) => (
               <motion.button
                 key={category}
-                className={`px-3 py-1 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base ${
-                  selectedCategory === category
-                    ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white')
-                    : (isDarkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-white text-purple-600 hover:bg-purple-100')
-                }`}
+                className={`px-3 py-1 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base ${selectedCategory === category
+                  ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white')
+                  : (isDarkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-white text-purple-600 hover:bg-purple-100')
+                  }`}
                 onClick={() => setSelectedCategory(category)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -219,11 +211,10 @@ const ProjectGallery = () => {
             ].map(({ icon: Icon, mode }) => (
               <button
                 key={mode}
-                className={`p-2 rounded ${
-                  mode === 'ecosystem'
-                    ? (showEcosystem ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white') : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600'))
-                    : (viewMode === mode ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white') : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600'))
-                }`}
+                className={`p-2 rounded ${mode === 'ecosystem'
+                  ? (showEcosystem ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white') : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600'))
+                  : (viewMode === mode ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white') : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600'))
+                  }`}
                 onClick={() => mode === 'ecosystem' ? setShowEcosystem(!showEcosystem) : setViewMode(mode)}
               >
                 <Icon size={20} />
@@ -231,23 +222,22 @@ const ProjectGallery = () => {
             ))}
           </div>
         </div>
-  
+
         <div className="mb-4 flex justify-end">
           <button
-            className={`px-4 py-2 rounded-lg ${
-              showKnowledgeGraph
-                ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white')
-                : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600')
-            }`}
+            className={`px-4 py-2 rounded-lg ${showKnowledgeGraph
+              ? (isDarkMode ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white')
+              : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-purple-600')
+              }`}
             onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
           >
             {showKnowledgeGraph ? t('hide_knowledge_graph') : t('show_knowledge_graph')}
           </button>
         </div>
-  
+
         <AnimatePresence>
           {showEcosystem && (
-            <motion.div 
+            <motion.div
               className={`mb-8 p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg`}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -264,9 +254,8 @@ const ProjectGallery = () => {
                 ].map(({ icon: Icon, label }) => (
                   <button
                     key={label}
-                    className={`flex items-center space-x-2 ${
-                      isDarkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
-                    } transition-colors`}
+                    className={`flex items-center space-x-2 ${isDarkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
+                      } transition-colors`}
                   >
                     <Icon size={20} />
                     <span>{label}</span>
@@ -276,7 +265,7 @@ const ProjectGallery = () => {
             </motion.div>
           )}
         </AnimatePresence>
-  
+
         <AnimatePresence>
           {showKnowledgeGraph && graphData && (
             <motion.div
@@ -289,7 +278,7 @@ const ProjectGallery = () => {
             </motion.div>
           )}
         </AnimatePresence>
-  
+
         <AnimatePresence mode="wait">
           <motion.div
             key={viewMode}
@@ -317,7 +306,7 @@ const ProjectGallery = () => {
           </motion.div>
         </AnimatePresence>
       </main>
-  
+
       <footer className={`max-w-6xl mx-auto mt-12 text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -327,7 +316,7 @@ const ProjectGallery = () => {
           &copy; {new Date().getFullYear()} Silan Hu. All rights reserved.
         </motion.p>
       </footer>
-  
+
       <AnimatePresence>
         {selectedProject && (
           <ProjectDetailModal project={selectedProject} onClose={() => setSelectedProject(null)} />
@@ -336,7 +325,7 @@ const ProjectGallery = () => {
           <AnnualPlanDetail plan={selectedAnnualPlan} onClose={() => setSelectedAnnualPlan(null)} />
         )}
       </AnimatePresence>
-  
+
       {/* <QuickToolsBar /> */}
     </div>
   );

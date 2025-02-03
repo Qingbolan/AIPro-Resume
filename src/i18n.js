@@ -21,7 +21,6 @@ const resources = {
       "show_plans": "Show Plans",
       "hide_plans": "Hide Plans",
       "search_placeholder": "Search projects by name, tech stack, or year",
-      "loading": "Loading...",
       "failed_to_fetch_data": "Failed to fetch data. Please try again.",
       "switch_to_light_mode": "Switch to light mode",
       "switch_to_dark_mode": "Switch to dark mode",
@@ -58,6 +57,47 @@ const resources = {
       "Available Time": "Available Time",
       "Daily": "Daily",
       "Full Time": "Full Time",
+      //IdeaPage
+      "Input your thoughts": "Input your thoughts...",
+      "Anonymous message box": "Anonymous message box",
+      "My Creative Space": "My Creative Space",
+      "ZIYUN 2025": "ZIYUN 2025",
+      "AI for Life && AI for ALL": "AI for Life && AI for ALL",
+
+      //BlogStack
+      "My BlogStack": "My Blog Stack",
+
+
+      "calendar": {
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat",
+        "sunday": "Sun",
+        "previousMonth": "Prev Month",
+        "nextMonth": "Next Month",
+        "dateWithEvents": "{{date}} {{events}}",
+        "noEvents": "No Events"
+      },
+      "events": {
+        "ddl": "DeadLine: {{title}}",
+        "article": "Article: {{title}}",
+        "idea": "Thought: {{title}}",
+        "schedule": "Schedule: {{title}}"
+      },
+      "loading": {
+        "wait": "Please wait...",
+        "connecting": "Connecting to silan.tech backend server...",
+        "retry": {
+          "first": "Making a new attempt (1/3)...",
+          "second": "Making a new attempt (2/3)...",
+          "third": "Making a new attempt (3/3)..."
+        },
+        "thanks": "Silan thanks you for your visit...",
+        "report": "Reporting this situation to silan.hu@u.nus.edu..."
+      }
     }
   },
   zh: {
@@ -77,7 +117,6 @@ const resources = {
       "show_plans": "显示计划",
       "hide_plans": "隐藏计划",
       "search_placeholder": "按名称、技术栈或年份搜索项目",
-      "loading": "加载中...",
       "failed_to_fetch_data": "获取数据失败。请重试。",
       "switch_to_light_mode": "切换到亮色模式",
       "switch_to_dark_mode": "切换到暗色模式",
@@ -114,6 +153,44 @@ const resources = {
       "Available Time": "可支配时间",
       "Daily": "每日",
       "Full Time": "全职",
+      "Input your thoughts": "输入您的想法...",
+      "Anonymous message box": "匿名留言箱",
+      "My Creative Space": "创想空间",
+      "ZIYUN 2025": "紫韵 2025",
+      "AI for Life && AI for ALL": "让AI为每一个人生活服务",
+      //BlogStack
+      "My BlogStack": "我的博客堆栈",
+
+      "calendar": {
+        "monday": "一",
+        "tuesday": "二",
+        "wednesday": "三",
+        "thursday": "四",
+        "friday": "五",
+        "saturday": "六",
+        "sunday": "日",
+        "previousMonth": "上个月",
+        "nextMonth": "下个月",
+        "dateWithEvents": "{{date}} {{events}}",
+        "noEvents": "没有事件"
+      },
+      "events": {
+        "ddl": "截止日期: {{title}}",
+        "article": "文章: {{title}}",
+        "idea": "想法: {{title}}",
+        "schedule": "日程: {{title}}"
+      },
+      "loading": {
+        "wait": "请稍等...",
+        "connecting": "正在连接silan.tech的后端服务器...",
+        "retry": {
+          "first": "正在做新的尝试(1/3)...",
+          "second": "正在做新的尝试(2/3)...",
+          "third": "正在做新的尝试(3/3)..."
+        },
+        "thanks": "silan感谢你的访问...",
+        "report": "正在把这个情况报告给silan.hu@u.nus.edu..."
+      }
     }
   }
 };
