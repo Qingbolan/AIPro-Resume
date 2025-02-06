@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import BlogCalendar from '../components/BlogStack/BlogCalendar';
 import Carousel from 'components/BlogStack/BlogCarousel';
@@ -65,9 +65,9 @@ const BlogStack = () => {
   useEffect(() => {
     // Simulating API data fetch
     setCarouselItems([
-      { image: "/api/placeholder/1200/400", title: "Easy-AI", description: "探索AI如何改变我们的生活" },
-      { image: "/api/placeholder/1200/400", title: "Deep-AI", description: "建设更美好的未来" },
-      { image: "/api/placeholder/1200/400", title: "super-creater", description: "下一代计算技术的突破" },
+      { video: "/easy-ai.mp4", title: "Easy-AI", description: "AI for Life&&Everyone" },
+      { video: "/deep-ai.mp4", title: "Deep-AI", description: "Deep Understand AI" },
+      { video: "/super-creator.mp4", title: "Super-Creator", description: "Use AI Do Awesome Creation" },
     ]);
 
     setCategories([

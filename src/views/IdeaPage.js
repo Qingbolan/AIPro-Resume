@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import MessageBox from 'components/IdeaPage/MessageBox';
 import IdeaHeader from 'components/IdeaPage/IdeaHeader';
 import OpenTopic from 'components/IdeaPage/OpenTopic';
@@ -14,17 +13,17 @@ const IdeaPage = () => {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const formatDate = (date) => {
-    return date.getFullYear() + '-' +
-      String(date.getMonth() + 1).padStart(2, '0') + '-' +
-      String(date.getDate()).padStart(2, '0');
-  };
+  // const formatDate = (date) => {
+  //   return date.getFullYear() + '-' +
+  //     String(date.getMonth() + 1).padStart(2, '0') + '-' +
+  //     String(date.getDate()).padStart(2, '0');
+  // };
 
-  const getDateString = (daysFromToday) => {
-    const date = new Date();
-    date.setDate(date.getDate() + daysFromToday);
-    return formatDate(date);
-  };
+  // const getDateString = (daysFromToday) => {
+  //   const date = new Date();
+  //   date.setDate(date.getDate() + daysFromToday);
+  //   return formatDate(date);
+  // };
 
   // const [tasks, setTasks] = useState([
   //   { id: 1, title: '早间冥想', start: `${formatDate(today)} 06:00:00`, end: `${formatDate(today)} 06:30:00`, percentComplete: 100, resource: '个人' },

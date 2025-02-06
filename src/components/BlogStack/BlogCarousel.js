@@ -20,28 +20,32 @@ const Carousel = ({ items }) => {
                     key={currentIndex}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
+                    exit={{ opacity: 0.5 }}
+                    transition={{ duration: 5 }}
                     className="absolute top-0 left-0 w-full h-full"
                 >
-                    {items[currentIndex]?.image && (
-                        <img
-                            src={items[currentIndex].image}
+                    {items[currentIndex]?.video && (
+                        <video
+                            src={items[currentIndex].video}
                             alt={items[currentIndex].title}
                             className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
                         />
                     )}
                     <div
                         className={`absolute bottom-0 left-0 right-0 p-6 text-white ${isDarkMode
-                                ? 'bg-gradient-to-t from-gray-900 to-transparent'
-                                : 'bg-gradient-to-t from-purple-900 to-transparent'
+                            ? 'bg-gradient-to-t from-gray-900 to-transparent'
+                            : 'bg-gradient-to-t from-purple-900 to-transparent'
                             }`}
                     >
                         <motion.h2
                             key={`carousel-title-${isDarkMode}-${currentIndex}`}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 5, delay: 0 }}
                             className="text-3xl font-bold mb-2"
                         >
                             {items[currentIndex]?.title}
@@ -50,7 +54,7 @@ const Carousel = ({ items }) => {
                             key={`carousel-description-${isDarkMode}-${currentIndex}`}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
+                            transition={{ duration: 5, delay: 0 }}
                             className="text-lg"
                         >
                             {items[currentIndex]?.description}

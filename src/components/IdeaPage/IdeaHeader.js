@@ -21,10 +21,14 @@ const IdeaHeader = () => {
                 </span>
             </motion.h1>
             <div className="relative">
-                <img
-                    src="/api/placeholder/1200/300"
+                <video
+                    src="/header.mp4"
                     alt="Idea Cover"
                     className="w-full h-64 object-cover rounded-xl shadow-lg"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
                 />
                 <div
                     className={`absolute bottom-4 left-4 p-4 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-900 bg-opacity-90' : 'bg-white bg-opacity-90'

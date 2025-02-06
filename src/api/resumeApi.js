@@ -282,14 +282,6 @@ const resumeData = {
         title: "研究",
         content: [
           {
-            company: "潞晨科技",
-            role: "AI工程师", 
-            date: "2025年1月 – 至今",
-            details: [
-              "Open-Sora团队(AIGC 文本生视频)：研究提升文本到视频生成的速度和质量"
-            ]
-          },
-          {
             title: "FOKE：一个个性化且可解释的教育框架",
             location: "中国北京",
             date: "2024年1月 – 2024年3月",
@@ -312,6 +304,14 @@ const resumeData = {
       experience: {
         title: "工作经验",
         content: [
+          {
+            company: "潞晨科技",
+            role: "AI工程师", 
+            date: "2025年1月 – 至今",
+            details: [
+              "Open-Sora团队(AIGC 文本生视频)：研究提升文本到视频生成的速度和质量"
+            ]
+          },
           {
             company: "北京统计之都数据科技有限公司",
             role: "全栈工程师",
