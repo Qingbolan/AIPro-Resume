@@ -2,97 +2,8 @@
 // import i18n from '../i18n';
 
 // const API_BASE_URL = 'https://silan.tech/api';
-
-// // 辅助函数用于处理错误
-// const handleApiError = (error, functionName) => {
-//   console.error(`Error in ${functionName}:`, error);
-//   if (error.response) {
-//     console.error('Error response data:', error.response.data);
-//     console.error('Error response status:', error.response.status);
-//     console.error('Error response headers:', error.response.headers);
-//   } else if (error.request) {
-//     console.error('No response received:', error.request);
-//   } else {
-//     console.error('Error setting up request:', error.message);
-//   }
-//   throw error;
-// };
-
-// export const fetchResumeData = async (language = 'en') => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/fetchResumeData`, { params: { language } });
-//     console.log('API Response:', response.data); // Debug log
-//     // Transform the data structure
-//     // const transformedData = transformResumeData(response.data);
-//     // console.log('Transformed Data:', transformedData); // Debug log
-//     return response.data;
-//   } catch (error) {
-//     handleApiError(error, 'fetchResumeData');
-//   }
-// };
-
-// function transformResumeData(input) {
-//   const output = {
-//     name: input.name,
-//     title: input.title,
-//     current: input.current,
-//     contacts: input.contacts,
-//     socialLinks: input.socialLinks,
-//     sections: {}
-//   };
-
-//   // Helper function to convert array to object for education and experience
-//   const arrayToObject = (arr) => {
-//     return arr.map(item => {
-//       const obj = {};
-//       Object.keys(item).forEach(key => {
-//         if (key === 'details') {
-//           obj[key] = item[key];
-//         } else {
-//           obj[key] = [item[key]];
-//         }
-//       });
-//       return obj;
-//     });
-//   };
-
-//   // Process each section
-//   for (const [key, value] of Object.entries(input.sections)) {
-//     if (['education', 'experience', 'research'].includes(key)) {
-//       output.sections[key] = {
-//         title: value.title,
-//         content: arrayToObject(value.content)
-//       };
-//     } else {
-//       output.sections[key] = value;
-//     }
-//   }
-
-//   return output;
-// }
-
-// export const updateResumeSection = async (sectionKey, newData, language = 'en') => {
-//   try {
-//     const response = await axios.post(`${API_BASE_URL}/updateResumeSection`, {
-//       language,
-//       sectionKey,
-//       latestedData: newData
-//     });
-
-//     if (response.data.Success) {
-//       return { 
-//         success: true, 
-//         message: i18n.t('update_section_success', { section: sectionKey }) 
-//       };
-//     } else {
-//       throw new Error(response.data.Message || i18n.t('update_failed'));
-//     }
-//   } catch (error) {
-//     handleApiError(error, 'updateResumeSection');
-//   }
-// };
 // src/api/resumeApi.js
-import i18n from '../i18n';
+import i18n from '../i18n/index';
 
 // 模拟API延迟
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -229,6 +140,61 @@ const resumeData = {
       skills: {
         title: "Skills",
         content: ['Python', 'C/C++', 'Go', 'PHP', 'Machine Learning', 'MySQL', 'VUE3', 'Android App Development', 'Desktop Software Development', 'Innovation']
+      },
+      recent: {
+        title: "Recent Updates",
+        content: [
+          {
+            id: "1",
+            type: "work",
+            title: "Joined HPC-AI Tech Open-Sora Team",
+            description: "Started working on improving text-to-video generation speed and quality",
+            date: "2025-01-15",
+            tags: ["AI", "Video Generation", "AIGC"],
+            status: "active",
+            priority: "high"
+          },
+          {
+            id: "2", 
+            type: "publication",
+            title: "FOKE Framework Published",
+            description: "Our research on personalized education framework using LLMs was published in Springer",
+            date: "2024-12-10",
+            tags: ["LLM", "Education", "AI"],
+            status: "completed",
+            priority: "high"
+          },
+          {
+            id: "3",
+            type: "education",
+            title: "NUS Master's Program Progress",
+            description: "Currently pursuing Master of Computing with AI specialization at NUS",
+            date: "2024-08-20",
+            tags: ["NUS", "AI", "Master's"],
+            status: "ongoing",
+            priority: "medium"
+          },
+          {
+            id: "4",
+            type: "project",
+            title: "Scholar Hero Platform",
+            description: "Led development of AI-powered educational application with 300+ users",
+            date: "2024-09-15",
+            tags: ["Startup", "AI", "Education"],
+            status: "completed",
+            priority: "high"
+          },
+          {
+            id: "5",
+            type: "research",
+            title: "Point Cloud Recognition Research",
+            description: "Completed research on 3D Lidar using ATSS and big kernel approach",
+            date: "2023-06-30",
+            tags: ["Computer Vision", "Lidar", "ML"],
+            status: "completed", 
+            priority: "medium"
+          }
+        ]
       }
     }
   },
@@ -339,7 +305,7 @@ const resumeData = {
             ]
           },
           {
-            company: "朝阳区‘青年精英’实习计划",
+            company: "朝阳区'青年精英'实习计划",
             role: "暑期实习生",
             date: "2021年7月 – 2021年8月",
             details: [
@@ -356,13 +322,68 @@ const resumeData = {
           '2022年12月 澳门科技大学院长奖学金（前5%）',
           '2022年9月 2022澳门网络安全技术竞赛 – 大学组优秀奖',
           '2022年5月 2022大湾区IT应用系统开发竞赛 - 入围奖（前6支团队）',
-          '2021年10月 澳门科技大学文化及学术优秀奖一等奖',
+          '2022年1月 澳门科技大学文化及学术优秀奖一等奖',
           '2021年4月 全球创业交流 - 2021春季，团队第三名（前5% / 20个国家，81支团队）'
         ]
       },
       skills: {
         title: "技能",
         content: ['Python', 'C/C++', 'Go', 'PHP', '机器学习', 'MySQL', 'VUE3', 'Android应用开发', '桌面软件开发', '创新']
+      },
+      recent: {
+        title: "最近动态",
+        content: [
+          {
+            id: "1",
+            type: "work",
+            title: "加入潞晨科技Open-Sora团队",
+            description: "开始专注于提升文本到视频生成的速度和质量研究",
+            date: "2025-01-15",
+            tags: ["AI", "视频生成", "AIGC"],
+            status: "active",
+            priority: "high"
+          },
+          {
+            id: "2",
+            type: "publication", 
+            title: "FOKE框架论文发表",
+            description: "我们关于使用LLM的个性化教育框架的研究在Springer发表",
+            date: "2024-12-10",
+            tags: ["LLM", "教育", "AI"],
+            status: "completed",
+            priority: "high"
+          },
+          {
+            id: "3",
+            type: "education",
+            title: "NUS硕士项目进展",
+            description: "目前在新加坡国立大学攻读人工智能专业计算机硕士学位",
+            date: "2024-08-20",
+            tags: ["NUS", "AI", "硕士"],
+            status: "ongoing",
+            priority: "medium"
+          },
+          {
+            id: "4",
+            type: "project",
+            title: "Scholar Hero平台",
+            description: "领导开发AI驱动的教育应用平台，用户数超过300",
+            date: "2024-09-15",
+            tags: ["创业", "AI", "教育"],
+            status: "completed",
+            priority: "high"
+          },
+          {
+            id: "5",
+            type: "research",
+            title: "点云识别研究",
+            description: "完成了使用ATSS和大内核方法的3D激光雷达研究",
+            date: "2023-06-30",
+            tags: ["计算机视觉", "激光雷达", "机器学习"],
+            status: "completed",
+            priority: "medium"
+          }
+        ]
       }
     }
   }
@@ -393,6 +414,35 @@ export const updateResumeSection = async (sectionKey, newData, language = 'en') 
     }
   } catch (error) {
     console.error(`Error updating ${sectionKey} section:`, error);
+    throw error;
+  }
+};
+
+// Extract personal information from resume data
+export const fetchPersonalInfo = async (language = 'en') => {
+  try {
+    const data = await fetchResumeData(language);
+    
+    // Extract personal info from resume data
+    const personalInfo = {
+      name: data.name,
+      title: data.title,
+      current: data.current,
+      contacts: data.contacts.map(contact => ({
+        icon: null, // Icon will be set in the component
+        value: contact.value,
+        type: contact.type
+      })),
+      socialLinks: data.socialLinks.map(link => ({
+        icon: null, // Icon will be set in the component
+        url: link.url,
+        type: link.type
+      }))
+    };
+    
+    return personalInfo;
+  } catch (error) {
+    console.error('Error fetching personal info:', error);
     throw error;
   }
 };

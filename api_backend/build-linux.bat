@@ -1,1 +1,0 @@
-$env:GOOS = "linux"; $env:GOARCH = "amd64"; $env:CGO_ENABLED = "0"; go build -ldflags="-w -s" -v -o ver1014; $env:GOOS = ""; $env:GOARCH = ""; $env:CGO_ENABLED = ""
