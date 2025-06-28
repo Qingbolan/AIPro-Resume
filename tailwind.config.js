@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
@@ -216,25 +216,14 @@ module.exports = {
 
       // Theme-aware shadows using CSS custom properties
       boxShadow: {
-        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'sm': 'var(--shadow-sm)',
-        'md': 'var(--shadow-md)',
-        'lg': 'var(--shadow-lg)',
-        'xl': 'var(--shadow-xl)',
-        '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-        'theme-sm': 'var(--color-shadowSm)',
-        'theme-md': 'var(--color-shadowMd)',
-        'theme-lg': 'var(--color-shadowLg)',
-        'theme-xl': 'var(--color-shadowXl)',
+        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+        'large': '0 10px 40px -10px rgba(0, 0, 0, 0.1), 0 2px 10px -5px rgba(0, 0, 0, 0.04)',
+        'theme': 'var(--shadow-elevation)',
       },
 
       // Clean border radius
       borderRadius: {
-        'xs': '0.125rem',
-        'sm': '0.25rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
         'xl': '0.75rem',
         '2xl': '1rem',
         '3xl': '1.5rem',
@@ -242,13 +231,7 @@ module.exports = {
 
       // Professional backdrop blur
       backdropBlur: {
-        'xs': '2px',
-        'sm': '4px',
-        'md': '8px',
-        'lg': '12px',
-        'xl': '16px',
-        '2xl': '24px',
-        '3xl': '40px',
+        xs: '2px',
       },
 
       // Gradients using CSS custom properties
@@ -257,9 +240,15 @@ module.exports = {
         'gradient-secondary': 'var(--color-gradientSecondary)',
         'gradient-accent': 'var(--color-gradientAccent)',
       },
+
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
+      },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
+  plugins: [],
 }

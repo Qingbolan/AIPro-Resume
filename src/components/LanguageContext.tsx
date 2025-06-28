@@ -1,10 +1,11 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import i18n from '../i18n/index';
+import type { Language } from '../types/api';
 
 interface LanguageContextType {
-  language: string;
-  setLanguage: (language: string) => void;
-  changeLanguage: (lang: string) => void;
+  language: Language;
+  setLanguage: (language: Language) => void;
+  changeLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
@@ -15,16 +16,16 @@ interface LanguageProviderProps {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<string>(() => {
+  const [language, setLanguage] = useState<Language>(() => {
     const savedLanguage = localStorage.getItem('language');
-    if (savedLanguage) {
-      return savedLanguage;
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'zh')) {
+      return savedLanguage as Language;
     }
     // Set default language based on browser language
     return navigator.language.startsWith('zh') ? 'zh' : 'en';
   });
 
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = (lang: Language) => {
     setLanguage(lang);
   };
 

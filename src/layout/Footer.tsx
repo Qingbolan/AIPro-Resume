@@ -1,5 +1,4 @@
-import React from 'react';
-import { useTheme } from '../components/ThemeContent';
+import { useTheme } from '../components/ThemeContext';
 
 const Footer = () => {
   const { isDarkMode} = useTheme();

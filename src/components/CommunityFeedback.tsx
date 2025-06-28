@@ -5,20 +5,12 @@ import {
   Plus, 
   Heart, 
   Reply, 
-  Filter, 
-  Send, 
-  User,
+  Send,
   Lightbulb,
   Bug,
-  HelpCircle,
-  CheckCircle,
-  Clock,
-  Trash2,
-  Edit3,
-  MoreHorizontal
+  HelpCircle
 } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
-import { useTheme } from './ThemeContext';
 import { Comment, Reply as ReplyType, CommunityStats } from '../types/community';
 
 interface CommunityFeedbackProps {
@@ -26,8 +18,7 @@ interface CommunityFeedbackProps {
 }
 
 const CommunityFeedback: React.FC<CommunityFeedbackProps> = ({ projectId = 'default' }) => {
-  const { language, t } = useLanguage();
-  const { colors } = useTheme();
+  const { language } = useLanguage();
   
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');

@@ -102,7 +102,7 @@ const InteractiveContactPage: React.FC = () => {
     }
   ], []);
 
-  const handleSocialClick = useCallback((href: string, label: string) => {
+  const handleSocialClick = useCallback((href: string) => {
     window.open(href, '_blank', 'noopener,noreferrer');
   }, []);
 
@@ -363,7 +363,7 @@ const InteractiveContactPage: React.FC = () => {
                 {socialLinks.map((social, index) => (
                   <motion.button
                     key={index}
-                    onClick={() => handleSocialClick(social.href, social.label)}
+                    onClick={() => handleSocialClick(social.href)}
                     className={`p-3 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-theme-primary ring-offset-theme-background social-icon ${social.hoverColor}`}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}

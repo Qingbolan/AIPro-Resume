@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Github, Linkedin, Mail, MapPin, Phone, Globe, Download, AlertCircle,
+  Github, Linkedin, Mail, MapPin, Phone, Globe, AlertCircle,
   Calendar, Clock, Filter, Eye, ChevronRight, Star, Zap, BookOpen, 
   Briefcase, GraduationCap, FileText, Target
 } from 'lucide-react';
@@ -87,8 +87,7 @@ interface ProjectSectionProps {
   onDownloadResume?: () => void;
 }
 
-const ProjectSection: React.FC<ProjectSectionProps> = ({ data, onDownloadResume }) => {
-  const { t } = useTranslation();
+const ProjectSection: React.FC<ProjectSectionProps> = ({ data }) => {
 
   const socialLinks = useMemo(() => {
     return data.socialLinks.map(link => ({
@@ -110,14 +109,14 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ data, onDownloadResume 
     }));
   }, [data.contacts]);
 
-  const handleSocialClick = useCallback((url: string, label: string) => {
+  const handleSocialClick = useCallback((url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, url: string, label: string) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, url: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      handleSocialClick(url, label);
+      handleSocialClick(url);
     }
   }, [handleSocialClick]);
   
@@ -213,8 +212,8 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ data, onDownloadResume 
           {socialLinks.map((social, index) => (
             <motion.button
               key={index}
-              onClick={() => handleSocialClick(social.url, social.label)}
-              onKeyDown={(e) => handleKeyDown(e, social.url, social.label)}
+              onClick={() => handleSocialClick(social.url)}
+              onKeyDown={(e) => handleKeyDown(e, social.url)}
               className="p-2.5 xs:p-3 rounded-lg xs:rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-theme-primary ring-offset-theme-background social-icon btn-touch"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -226,7 +225,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ data, onDownloadResume 
         </motion.div>
 
         {/* Download Resume Button */}
-        {onDownloadResume && (
+        {/* {onDownloadResume && (
           <motion.button
             onClick={onDownloadResume}
             className="mb-6 xs:mb-8 px-4 xs:px-6 py-2.5 xs:py-3 rounded-lg xs:rounded-xl font-semibold text-white flex items-center space-x-2 mx-auto transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-theme-primary ring-offset-theme-background btn-primary btn-touch-large text-sm xs:text-base"
@@ -239,7 +238,7 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({ data, onDownloadResume 
             <Download size={18} className="w-4 h-4 xs:w-5 xs:h-5" />
             <span>{t('resume.download_resume')}</span>
           </motion.button>
-        )}
+        )} */}
       </div>
     </motion.section>
   );

@@ -6,7 +6,6 @@ import {
   Lightbulb,
   Calendar,
   Clock,
-  Users,
   ExternalLink,
   CheckCircle,
   Circle,
@@ -16,10 +15,7 @@ import {
   Share2,
   Heart,
   MessageSquare,
-  Flag,
   BarChart3,
-  Github,
-  Target,
   Beaker
 } from 'lucide-react';
 import { useTheme } from '../ThemeContext';
@@ -232,15 +228,6 @@ const IdeaDetail: React.FC = () => {
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'expert': return { color: '#DC2626', backgroundColor: '#FEE2E2' };
-      case 'advanced': return { color: '#EA580C', backgroundColor: '#FED7AA' };
-      case 'intermediate': return { color: '#D97706', backgroundColor: '#FEF3C7' };
-      default: return { color: '#059669', backgroundColor: '#DCFCE7' };
-    }
-  };
-
   const getExperimentIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle size={16} style={{ color: '#059669' }} />;
@@ -410,7 +397,7 @@ const IdeaDetail: React.FC = () => {
         <div>
           <h3 className="text-xl font-semibold mb-4" style={{ color: colors.textPrimary }}>{language === 'en' ? 'Recent Experiments' : '最近实验'}</h3>
           <div className="space-y-4">
-            {idea.experiments.map((experiment, index) => (
+            {idea.experiments.map((experiment) => (
               <div key={experiment.id} className="p-6 rounded-xl" style={{ 
                 backgroundColor: colors.cardBackground, 
                 boxShadow: colors.shadowSm 
@@ -508,7 +495,7 @@ const IdeaDetail: React.FC = () => {
   const renderReferences = () => (
     <div className="space-y-4">
       {idea.relatedWorks && idea.relatedWorks.length > 0 ? (
-        idea.relatedWorks.map((ref, index) => (
+        idea.relatedWorks.map((ref) => (
           <div key={ref.id} className="p-6 rounded-xl" style={{ backgroundColor: colors.cardBackground, boxShadow: colors.shadowSm }}>
             <div className="flex items-start gap-4">
               <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface }}>

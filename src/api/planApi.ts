@@ -1,7 +1,9 @@
+import type { Plan, ProjectWithPlan, Language } from '../types/api';
+
 // Plan API - handles plan/phase data management
 
 // Mock plan data - in real app this would come from backend
-const mockPlansData = {
+const mockPlansData: { en: Plan[] } = {
   en: [
     {
       id: 'undergraduate',
@@ -89,7 +91,7 @@ const mockPlansData = {
 };
 
 // Enhanced project data with plan association
-const mockProjectsData = {
+const mockProjectsData: { en: ProjectWithPlan[] } = {
   en: [
     {
       id: '1',
@@ -160,10 +162,8 @@ const mockProjectsData = {
 
 /**
  * Fetch all plans
- * @param {string} language - Language preference ('en' or 'zh')
- * @returns {Promise<Plan[]>}
  */
-export const fetchPlans = async (language = 'en') => {
+export const fetchPlans = async (_language: Language = 'en'): Promise<Plan[]> => {
   try {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -177,10 +177,8 @@ export const fetchPlans = async (language = 'en') => {
 
 /**
  * Get current active plan
- * @param {string} language - Language preference ('en' or 'zh')
- * @returns {Promise<Plan|null>}
  */
-export const fetchCurrentPlan = async (language = 'en') => {
+export const fetchCurrentPlan = async (language: Language = 'en'): Promise<Plan | null> => {
   try {
     const plans = await fetchPlans(language);
     return plans.find(plan => plan.status === 'active') || plans[0];
@@ -192,11 +190,8 @@ export const fetchCurrentPlan = async (language = 'en') => {
 
 /**
  * Get plan by ID
- * @param {string} planId - Plan identifier
- * @param {string} language - Language preference ('en' or 'zh')
- * @returns {Promise<Plan|null>}
  */
-export const fetchPlanById = async (planId, language = 'en') => {
+export const fetchPlanById = async (planId: string, language: Language = 'en'): Promise<Plan | null> => {
   try {
     const plans = await fetchPlans(language);
     return plans.find(plan => plan.id === planId) || null;
@@ -208,10 +203,8 @@ export const fetchPlanById = async (planId, language = 'en') => {
 
 /**
  * Fetch projects with plan association
- * @param {string} language - Language preference ('en' or 'zh')
- * @returns {Promise<ProjectWithPlan[]>}
  */
-export const fetchProjectsWithPlans = async (language = 'en') => {
+export const fetchProjectsWithPlans = async (_language: Language = 'en'): Promise<ProjectWithPlan[]> => {
   try {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -225,11 +218,8 @@ export const fetchProjectsWithPlans = async (language = 'en') => {
 
 /**
  * Get projects by plan ID
- * @param {string} planId - Plan identifier
- * @param {string} language - Language preference ('en' or 'zh')
- * @returns {Promise<ProjectWithPlan[]>}
  */
-export const fetchProjectsByPlan = async (planId, language = 'en') => {
+export const fetchProjectsByPlan = async (planId: string, language: Language = 'en'): Promise<ProjectWithPlan[]> => {
   try {
     const projects = await fetchProjectsWithPlans(language);
     return projects.filter(project => project.planId === planId);

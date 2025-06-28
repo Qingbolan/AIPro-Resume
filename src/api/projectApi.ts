@@ -1,31 +1,102 @@
-// src/api/projectApi.js
-// 模拟API延迟
-const simulatedDelay = () => new Promise(resolve => setTimeout(resolve, 100));
+import type { Project, AnnualPlan, GraphData, Language } from '../types/api';
 
-// 模拟项目数据，支持多语言
-const projects = {
+// Simulate API delay
+const simulatedDelay = (): Promise<void> => new Promise(resolve => setTimeout(resolve, 100));
+
+// Mock project data with multi-language support
+const projects: Record<Language, Project[]> = {
   en: [
-    { id: 1, name: "AI Chatbot", description: "An intelligent chatbot using natural language processing techniques to provide human-like interactions.", tags: ["AI", "NLP", "Python"], year: 2023, annualPlan: "ZIYUN2024" },
-    { id: 2, name: "E-commerce Platform", description: "A full-stack online shopping platform with user authentication, product catalog, and secure payment integration.", tags: ["Web", "React", "Node.js"], year: 2022, annualPlan: "WENXIN2022" },
-    { id: 3, name: "Data Visualization Tool", description: "Interactive data visualizations using D3.js to represent complex datasets in an intuitive and engaging manner.", tags: ["D3.js", "Data Science"], year: 2024, annualPlan: "ZIYUN2024" },
-    { id: 4, name: "Mobile Fitness App", description: "A cross-platform mobile application for tracking workouts, nutrition, and personal fitness goals.", tags: ["Mobile", "React Native", "Firebase"], year: 2021, annualPlan: "WANXIANG2021" },
-    { id: 5, name: "Blockchain Voting System", description: "A decentralized voting system using blockchain technology to ensure transparency and security in elections.", tags: ["Blockchain", "Solidity", "Web3"], year: 2023, annualPlan: "YANGFAN2023" },
+    { 
+      id: 1, 
+      name: "AI Chatbot", 
+      description: "An intelligent chatbot using natural language processing techniques to provide human-like interactions.", 
+      tags: ["AI", "NLP", "Python"], 
+      year: 2023, 
+      annualPlan: "ZIYUN2024" 
+    },
+    { 
+      id: 2, 
+      name: "E-commerce Platform", 
+      description: "A full-stack online shopping platform with user authentication, product catalog, and secure payment integration.", 
+      tags: ["Web", "React", "Node.js"], 
+      year: 2022, 
+      annualPlan: "WENXIN2022" 
+    },
+    { 
+      id: 3, 
+      name: "Data Visualization Tool", 
+      description: "Interactive data visualizations using D3.js to represent complex datasets in an intuitive and engaging manner.", 
+      tags: ["D3.js", "Data Science"], 
+      year: 2024, 
+      annualPlan: "ZIYUN2024" 
+    },
+    { 
+      id: 4, 
+      name: "Mobile Fitness App", 
+      description: "A cross-platform mobile application for tracking workouts, nutrition, and personal fitness goals.", 
+      tags: ["Mobile", "React Native", "Firebase"], 
+      year: 2021, 
+      annualPlan: "WANXIANG2021" 
+    },
+    { 
+      id: 5, 
+      name: "Blockchain Voting System", 
+      description: "A decentralized voting system using blockchain technology to ensure transparency and security in elections.", 
+      tags: ["Blockchain", "Solidity", "Web3"], 
+      year: 2023, 
+      annualPlan: "YANGFAN2023" 
+    },
   ],
   zh: [
-    { id: 1, name: "AI 聊天机器人", description: "使用自然语言处理技术提供类人交互的智能聊天机器人。", tags: ["AI", "NLP", "Python"], year: 2023, annualPlan: "ZIYUN2024" },
-    { id: 2, name: "电子商务平台", description: "一个具有用户认证、产品目录和安全支付集成的全栈在线购物平台。", tags: ["Web", "React", "Node.js"], year: 2022, annualPlan: "WENXIN2022" },
-    { id: 3, name: "数据可视化工具", description: "使用D3.js进行交互式数据可视化，以直观和引人入胜的方式展示复杂数据集。", tags: ["D3.js", "数据科学"], year: 2024, annualPlan: "ZIYUN2024" },
-    { id: 4, name: "移动健身应用", description: "用于跟踪锻炼、营养和个人健身目标的跨平台移动应用。", tags: ["移动", "React Native", "Firebase"], year: 2021, annualPlan: "WANXIANG2021" },
-    { id: 5, name: "区块链投票系统", description: "使用区块链技术确保选举透明性和安全性的去中心化投票系统。", tags: ["区块链", "Solidity", "Web3"], year: 2023, annualPlan: "YANGFAN2023" },
+    { 
+      id: 1, 
+      name: "AI 聊天机器人", 
+      description: "使用自然语言处理技术提供类人交互的智能聊天机器人。", 
+      tags: ["AI", "NLP", "Python"], 
+      year: 2023, 
+      annualPlan: "ZIYUN2024" 
+    },
+    { 
+      id: 2, 
+      name: "电子商务平台", 
+      description: "一个具有用户认证、产品目录和安全支付集成的全栈在线购物平台。", 
+      tags: ["Web", "React", "Node.js"], 
+      year: 2022, 
+      annualPlan: "WENXIN2022" 
+    },
+    { 
+      id: 3, 
+      name: "数据可视化工具", 
+      description: "使用D3.js进行交互式数据可视化，以直观和引人入胜的方式展示复杂数据集。", 
+      tags: ["D3.js", "数据科学"], 
+      year: 2024, 
+      annualPlan: "ZIYUN2024" 
+    },
+    { 
+      id: 4, 
+      name: "移动健身应用", 
+      description: "用于跟踪锻炼、营养和个人健身目标的跨平台移动应用。", 
+      tags: ["移动", "React Native", "Firebase"], 
+      year: 2021, 
+      annualPlan: "WANXIANG2021" 
+    },
+    { 
+      id: 5, 
+      name: "区块链投票系统", 
+      description: "使用区块链技术确保选举透明性和安全性的去中心化投票系统。", 
+      tags: ["区块链", "Solidity", "Web3"], 
+      year: 2023, 
+      annualPlan: "YANGFAN2023" 
+    },
   ]
 };
 
-const categories = {
+const categories: Record<Language, string[]> = {
   en: ["All", "Research", "Web Apps", "Mobile Apps", "AI Projects", "Tools"],
   zh: ["所有", "研究", "网页应用", "移动应用", "AI 项目", "工具"]
 };
 
-const annualPlans = {
+const annualPlans: Record<Language, AnnualPlan[]> = {
   en: [
     {
       year: 2024,
@@ -142,7 +213,7 @@ const annualPlans = {
   ]
 };
 
-const graphData = {
+const graphData: Record<Language, Record<string, GraphData>> = {
   en: {
     all: {
       nodes: [
@@ -181,7 +252,6 @@ const graphData = {
         { source: "Backend", target: "Database", value: 1 },
       ]
     },
-    // 添加更多类别的图表数据...
   },
   zh: {
     all: {
@@ -221,36 +291,35 @@ const graphData = {
         { source: "后端", target: "数据库", value: 1 },
       ]
     },
-    // 添加更多类别的图表数据...
   }
 };
 
-export const fetchProjects = async (language = 'en') => {
+export const fetchProjects = async (language: Language = 'en'): Promise<Project[]> => {
   await simulatedDelay();
   return projects[language];
 };
 
-export const fetchCategories = async (language = 'en') => {
+export const fetchCategories = async (language: Language = 'en'): Promise<string[]> => {
   await simulatedDelay();
   return categories[language];
 };
 
-export const fetchAnnualPlans = async (language = 'en') => {
+export const fetchAnnualPlans = async (language: Language = 'en'): Promise<AnnualPlan[]> => {
   await simulatedDelay();
   return annualPlans[language];
 };
 
-export const fetchProjectById = async (id, language = 'en') => {
+export const fetchProjectById = async (id: number, language: Language = 'en'): Promise<Project | undefined> => {
   await simulatedDelay();
   return projects[language].find(project => project.id === id);
 };
 
-export const fetchAnnualPlanByName = async (name, language = 'en') => {
+export const fetchAnnualPlanByName = async (name: string, language: Language = 'en'): Promise<AnnualPlan | undefined> => {
   await simulatedDelay();
   return annualPlans[language].find(plan => plan.name === name);
 };
 
-export const fetchGraphData = async (category = 'all', language = 'en') => {
+export const fetchGraphData = async (category: string = 'all', language: Language = 'en'): Promise<GraphData> => {
   await simulatedDelay();
   return graphData[language][category] || graphData[language].all;
-};
+}; 

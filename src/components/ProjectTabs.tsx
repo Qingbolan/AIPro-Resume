@@ -3,10 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   BookOpen, 
   Download, 
-  MessageSquare, 
   Users, 
-  Shield, 
-  GitBranch,
   Play,
   Settings,
   BarChart3,

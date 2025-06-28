@@ -1,15 +1,20 @@
-// import axios from 'axios';
-// import i18n from '../i18n';
-
-// const API_BASE_URL = 'https://silan.tech/api';
-// src/api/resumeApi.js
 import i18n from '../i18n/index';
+import type { 
+  ResumeData, 
+  PersonalInfo, 
+  Language, 
+  EducationItem,
+  ResearchItem,
+  ExperienceItem,
+  RecentUpdate,
+  ResumeSection
+} from '../types/api';
 
-// 模拟API延迟
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Simulate API delay
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
-// 模拟简历数据，支持多语言
-const resumeData = {
+// Mock resume data with multi-language support
+const resumeData: Record<Language, ResumeData> = {
   en: {
     name: "Silan Hu",
     title: "AI Researcher & Full Stack Developer",
@@ -45,7 +50,7 @@ const resumeData = {
               "Core Courses: Graduation Project (A+), Machine Learning (A+), Computer Programming (A+), Data Structures (A), Digital Logic (A+), Database Systems (A+), etc."
             ]
           }
-        ]
+        ] as EducationItem[]
       },
       publications: {
         title: "Publications",
@@ -53,7 +58,7 @@ const resumeData = {
           'Hu, S., & Wang, X. (2024). FOKE: A Personalized and Explainable Education Framework Integrating Foundation Models, Knowledge Graphs, and Prompt Engineering. Communications in Computer and Information Science, vol 2161. Springer.',
           'Qiu, Y., Liu, H., Lin, Y., Hu, S., Wei, W., & Wang, X. (2023, December). Knowledge-graph relation extraction for Chinese business datasets. In AHPCAI 2023 (Vol. 12941, pp. 678-687). SPIE.',
           'Shen, M., Chen, D., Hu, S., & Xu, G. (2023). Class incremental learning of remote sensing images based on class similarity distillation. PeerJ Computer Science, 9, e1583.'
-        ]
+        ] as string[]
       },
       research: {
         title: "Research",
@@ -76,7 +81,7 @@ const resumeData = {
             date: "Feb 2023 – Jun 2023",
             details: ["Validated on GAC Research Institute's cloud computing platform, our method excelled in real traffic scenarios such as high-speed driving and low-speed parking."]
           }
-        ]
+        ] as ResearchItem[]
       },
       experience: {
         title: "Experience",
@@ -124,7 +129,7 @@ const resumeData = {
               "Gained comprehensive understanding of operations and culture in renowned companies, expanded skills in finance, management, auditing, and artificial intelligence, and improved practical abilities in case analysis and business plan development."
             ]
           }
-        ]
+        ] as ExperienceItem[]
       },
       awards: {
         title: "Awards",
@@ -135,11 +140,11 @@ const resumeData = {
           'May 2022 2022 Greater Bay Area IT Application System Development Competition - Finalist Award (TOP 6 Teams)',
           'Oct 2021 First Prize of the Macao University of Science and Technology\'s Cultural and Academic Excellence Award',
           'Apr 2021 Global Entrepreneurship Exchange - Spring 2021，Third place team (Top 5%/20 Countries, 81 Teams)'
-        ]
+        ] as string[]
       },
       skills: {
         title: "Skills",
-        content: ['Python', 'C/C++', 'Go', 'PHP', 'Machine Learning', 'MySQL', 'VUE3', 'Android App Development', 'Desktop Software Development', 'Innovation']
+        content: ['Python', 'C/C++', 'Go', 'PHP', 'Machine Learning', 'MySQL', 'VUE3', 'Android App Development', 'Desktop Software Development', 'Innovation'] as string[]
       },
       recent: {
         title: "Recent Updates",
@@ -194,14 +199,13 @@ const resumeData = {
             status: "completed", 
             priority: "medium"
           }
-        ]
+        ] as RecentUpdate[]
       }
     }
   },
   zh: {
     name: "胡思蓝",
     title: "AI研究员 & 全栈开发工程师",
-    // current: "looking for PhD opportunities, internships, and research collaborations",
     current: "正在寻找博士机会、实习和研究合作",
     contacts: [
       { type: "email", value: "Silan.Hu@u.nus.edu" },
@@ -234,7 +238,7 @@ const resumeData = {
               "核心课程：毕业项目（A+）、机器学习（A+）、计算机编程（A+）、数据结构（A）、数字逻辑（A+）、数据库系统（A+）等"
             ]
           }
-        ]
+        ] as EducationItem[]
       },
       publications: {
         title: "发表论文",
@@ -242,7 +246,7 @@ const resumeData = {
           'Hu, S., & Wang, X. (2024). FOKE: A Personalized and Explainable Education Framework Integrating Foundation Models, Knowledge Graphs, and Prompt Engineering. Communications in Computer and Information Science, vol 2161. Springer.',
           'Qiu, Y., Liu, H., Lin, Y., Hu, S., Wei, W., & Wang, X. (2023, December). Knowledge-graph relation extraction for Chinese business datasets. In AHPCAI 2023 (Vol. 12941, pp. 678-687). SPIE.',
           'Shen, M., Chen, D., Hu, S., & Xu, G. (2023). Class incremental learning of remote sensing images based on class similarity distillation. PeerJ Computer Science, 9, e1583.'
-        ]
+        ] as string[]
       },
       research: {
         title: "研究",
@@ -265,7 +269,7 @@ const resumeData = {
             date: "2023年2月 – 2023年6月",
             details: ["在广汽研究院的云计算平台上验证，我们的方法在高速驾驶和低速停车等真实交通场景中表现出色。"]
           }
-        ]
+        ] as ResearchItem[]
       },
       experience: {
         title: "工作经验",
@@ -313,7 +317,7 @@ const resumeData = {
               "全面了解知名公司的运营和文化，扩展了在金融、管理、审计和人工智能方面的技能，并提升了案例分析和商业计划开发的实战能力。"
             ]
           }
-        ]
+        ] as ExperienceItem[]
       },
       awards: {
         title: "奖项",
@@ -324,11 +328,11 @@ const resumeData = {
           '2022年5月 2022大湾区IT应用系统开发竞赛 - 入围奖（前6支团队）',
           '2022年1月 澳门科技大学文化及学术优秀奖一等奖',
           '2021年4月 全球创业交流 - 2021春季，团队第三名（前5% / 20个国家，81支团队）'
-        ]
+        ] as string[]
       },
       skills: {
         title: "技能",
-        content: ['Python', 'C/C++', 'Go', 'PHP', '机器学习', 'MySQL', 'VUE3', 'Android应用开发', '桌面软件开发', '创新']
+        content: ['Python', 'C/C++', 'Go', 'PHP', '机器学习', 'MySQL', 'VUE3', 'Android应用开发', '桌面软件开发', '创新'] as string[]
       },
       recent: {
         title: "最近动态",
@@ -383,14 +387,14 @@ const resumeData = {
             status: "completed",
             priority: "medium"
           }
-        ]
+        ] as RecentUpdate[]
       }
     }
   }
 };
 
-// 模拟API调用函数
-export const fetchResumeData = async (language = 'en') => {
+// Mock API call functions
+export const fetchResumeData = async (language: Language = 'en'): Promise<ResumeData> => {
   try {
     return resumeData[language];
   } catch (error) {
@@ -399,18 +403,25 @@ export const fetchResumeData = async (language = 'en') => {
   }
 };
 
-// 可选: 添加更多API函数
-export const updateResumeSection = async (sectionKey, newData, language = 'en') => {
+// Update resume section
+export const updateResumeSection = async (
+  sectionKey: string, 
+  newData: any, 
+  language: Language = 'en'
+): Promise<{ success: boolean; message: string }> => {
   try {
-    // 模拟网络延迟
+    // Simulate network delay
     await delay(500);
 
-    // 模拟更新操作
-    if (resumeData[language].sections[sectionKey]) {
-      resumeData[language].sections[sectionKey].content = newData;
-      return { success: true, message: i18n.t('update_section_success', { section: sectionKey }) };
+    // Simulate update operation
+    if (resumeData[language].sections[sectionKey as keyof typeof resumeData[Language]['sections']]) {
+      (resumeData[language].sections[sectionKey as keyof typeof resumeData[Language]['sections']] as ResumeSection).content = newData;
+      return { 
+        success: true, 
+        message: i18n.t('update_section_success', { section: sectionKey }) || `Successfully updated ${sectionKey} section` 
+      };
     } else {
-      throw new Error(i18n.t('section_not_found', { section: sectionKey }));
+      throw new Error(i18n.t('section_not_found', { section: sectionKey }) || `Section ${sectionKey} not found`);
     }
   } catch (error) {
     console.error(`Error updating ${sectionKey} section:`, error);
@@ -419,12 +430,12 @@ export const updateResumeSection = async (sectionKey, newData, language = 'en') 
 };
 
 // Extract personal information from resume data
-export const fetchPersonalInfo = async (language = 'en') => {
+export const fetchPersonalInfo = async (language: Language = 'en'): Promise<PersonalInfo> => {
   try {
     const data = await fetchResumeData(language);
     
     // Extract personal info from resume data
-    const personalInfo = {
+    const personalInfo: PersonalInfo = {
       name: data.name,
       title: data.title,
       current: data.current,
@@ -445,4 +456,4 @@ export const fetchPersonalInfo = async (language = 'en') => {
     console.error('Error fetching personal info:', error);
     throw error;
   }
-};
+}; 
