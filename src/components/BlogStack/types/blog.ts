@@ -21,6 +21,20 @@ export interface BlogData {
   views: number;
   summary: string;
   summaryZh?: string;
+  type?: 'article' | 'vlog' | 'series';
+  // Vlog specific fields
+  videoUrl?: string;
+  videoDuration?: string;
+  videoThumbnail?: string;
+  // Series specific fields
+  seriesId?: string;
+  seriesTitle?: string;
+  seriesTitleZh?: string;
+  seriesDescription?: string;
+  seriesDescriptionZh?: string;
+  episodeNumber?: number;
+  totalEpisodes?: number;
+  seriesImage?: string;
 }
 
 export interface Comment {

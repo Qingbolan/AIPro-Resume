@@ -130,6 +130,113 @@ const processUserData = (users) =>
           id: 'content-2'
         }
       ]
+    },
+    '4': {
+      id: '4',
+      title: 'Building Scalable AI Systems: A Developer\'s Journey',
+      titleZh: '构建可扩展AI系统：开发者之旅',
+      author: 'AI Researcher',
+      publishDate: '2024-01-18',
+      readTime: '25 min video',
+      category: 'Engineering',
+      tags: ['AI Systems', 'Scalability', 'Development', 'Vlog'],
+      type: 'vlog',
+      videoUrl: 'https://example.com/video/ai-systems-journey.mp4',
+      videoDuration: '25:30',
+      videoThumbnail: '/api/placeholder/800/450',
+      summary: 'Follow my journey as I build and scale AI systems in production. This vlog covers real challenges, solutions, and lessons learned.',
+      summaryZh: '跟随我构建和扩展生产环境AI系统的旅程。这个视频博客涵盖了真实的挑战、解决方案和经验教训。',
+      content: [
+        {
+          id: 'intro-1',
+          type: 'text',
+          content: 'In this video, I share my experience building scalable AI systems from the ground up. We\'ll explore architecture decisions, performance optimizations, and deployment strategies.'
+        },
+        {
+          id: 'video-1',
+          type: 'video',
+          content: 'https://example.com/video/ai-systems-journey.mp4',
+          caption: 'Full development journey and system architecture walkthrough'
+        },
+        {
+          id: 'timeline-1',
+          type: 'text',
+          content: 'Video Timeline:\n00:00 - Introduction\n03:15 - System Architecture Overview\n08:30 - Database Design Decisions\n15:45 - Scaling Challenges\n20:10 - Deployment Pipeline\n23:00 - Lessons Learned'
+        }
+      ],
+      likes: 89,
+      views: 1250
+    },
+    '5': {
+      id: '5',
+      title: 'Modern Web Development Series: React Deep Dive',
+      titleZh: '现代Web开发系列：React深度解析',
+      author: 'Frontend Expert',
+      publishDate: '2024-01-15',
+      readTime: '45 min read',
+      category: 'Frontend',
+      tags: ['React', 'JavaScript', 'Web Development', 'Series'],
+      type: 'series',
+      seriesId: 'modern-web-dev',
+      seriesTitle: 'Modern Web Development Mastery',
+      seriesTitleZh: '现代Web开发精通',
+      seriesDescription: 'A comprehensive series covering modern web development practices, from React fundamentals to advanced patterns.',
+      seriesDescriptionZh: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      episodeNumber: 1,
+      totalEpisodes: 8,
+      seriesImage: '/api/placeholder/1200/400',
+      summary: 'Episode 1 of our comprehensive web development series. We start with React fundamentals and build up to advanced concepts.',
+      summaryZh: '我们全面的Web开发系列第1集。我们从React基础开始，逐步构建到高级概念。',
+      content: [
+        {
+          id: 'series-intro-1',
+          type: 'text',
+          content: 'Welcome to the Modern Web Development Mastery series! In this first episode, we\'ll dive deep into React fundamentals and set the foundation for advanced topics in upcoming episodes.'
+        },
+        {
+          id: 'series-overview-1',
+          type: 'text',
+          content: 'This series will cover:\n\n• React Fundamentals (Episode 1)\n• State Management Patterns (Episode 2)\n• Performance Optimization (Episode 3)\n• Testing Strategies (Episode 4)\n• Advanced Hooks (Episode 5)\n• Server-Side Rendering (Episode 6)\n• Micro-frontends (Episode 7)\n• Production Deployment (Episode 8)'
+        },
+        {
+          id: 'react-basics-1',
+          type: 'text',
+          content: 'Let\'s start with the core concepts that make React so powerful for building user interfaces...'
+        }
+      ],
+      likes: 156,
+      views: 2340
+    },
+    '6': {
+      id: '6',
+      title: 'AI in Daily Life: Smart Home Automation',
+      titleZh: 'AI日常生活：智能家居自动化',
+      author: 'Tech Enthusiast',
+      publishDate: '2024-01-10',
+      readTime: '18 min video',
+      category: 'Lifestyle Tech',
+      tags: ['AI', 'Smart Home', 'Automation', 'Vlog'],
+      type: 'vlog',
+      videoUrl: 'https://example.com/video/smart-home-ai.mp4',
+      videoDuration: '18:45',
+      videoThumbnail: '/api/placeholder/800/450',
+      summary: 'A practical look at how I use AI to automate my smart home. From voice assistants to predictive automation.',
+      summaryZh: '实际展示我如何使用AI自动化智能家居。从语音助手到预测性自动化。',
+      content: [
+        {
+          id: 'vlog-intro-1',
+          type: 'text',
+          content: 'Join me for a tour of my AI-powered smart home setup. I\'ll show you practical automations that actually make life easier.'
+        },
+        {
+          id: 'video-2',
+          type: 'video',
+          content: 'https://example.com/video/smart-home-ai.mp4',
+          caption: 'Complete smart home tour and automation demonstrations'
+        }
+      ],
+      likes: 234,
+      views: 3450
     }
   },
   zh: {
@@ -263,6 +370,113 @@ const processUserData = (users) =>
           id: 'content-2'
         }
       ]
+    },
+    '4': {
+      id: '4',
+      title: '构建可扩展AI系统：开发者之旅',
+      titleZh: '构建可扩展AI系统：开发者之旅',
+      author: 'AI研究员',
+      publishDate: '2024-01-18',
+      readTime: '25分钟视频',
+      category: '工程',
+      tags: ['AI系统', '可扩展性', '开发', 'Vlog'],
+      type: 'vlog',
+      videoUrl: 'https://example.com/video/ai-systems-journey.mp4',
+      videoDuration: '25:30',
+      videoThumbnail: '/api/placeholder/800/450',
+      summary: '跟随我构建和扩展生产环境AI系统的旅程。这个视频博客涵盖了真实的挑战、解决方案和经验教训。',
+      summaryZh: '跟随我构建和扩展生产环境AI系统的旅程。这个视频博客涵盖了真实的挑战、解决方案和经验教训。',
+      content: [
+        {
+          id: 'intro-1',
+          type: 'text',
+          content: '在这个视频中，我分享构建可扩展AI系统的经验。我们将探索架构决策、性能优化和部署策略。'
+        },
+        {
+          id: 'video-1',
+          type: 'video',
+          content: 'https://example.com/video/ai-systems-journey.mp4',
+          caption: '完整开发旅程和系统架构演示'
+        },
+        {
+          id: 'timeline-1',
+          type: 'text',
+          content: '视频时间轴：\n00:00 - 介绍\n03:15 - 系统架构概览\n08:30 - 数据库设计决策\n15:45 - 扩展挑战\n20:10 - 部署流水线\n23:00 - 经验教训'
+        }
+      ],
+      likes: 89,
+      views: 1250
+    },
+    '5': {
+      id: '5',
+      title: '现代Web开发系列：React深度解析',
+      titleZh: '现代Web开发系列：React深度解析',
+      author: '前端专家',
+      publishDate: '2024-01-15',
+      readTime: '45分钟阅读',
+      category: '前端',
+      tags: ['React', 'JavaScript', 'Web开发', '系列'],
+      type: 'series',
+      seriesId: 'modern-web-dev',
+      seriesTitle: '现代Web开发精通',
+      seriesTitleZh: '现代Web开发精通',
+      seriesDescription: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      seriesDescriptionZh: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      episodeNumber: 1,
+      totalEpisodes: 8,
+      seriesImage: '/api/placeholder/1200/400',
+      summary: '我们全面的Web开发系列第1集。我们从React基础开始，逐步构建到高级概念。',
+      summaryZh: '我们全面的Web开发系列第1集。我们从React基础开始，逐步构建到高级概念。',
+      content: [
+        {
+          id: 'series-intro-1',
+          type: 'text',
+          content: '欢迎来到现代Web开发精通系列！在第一集中，我们将深入React基础知识，为后续章节的高级主题奠定基础。'
+        },
+        {
+          id: 'series-overview-1',
+          type: 'text',
+          content: '本系列将涵盖：\n\n• React基础（第1集）\n• 状态管理模式（第2集）\n• 性能优化（第3集）\n• 测试策略（第4集）\n• 高级Hooks（第5集）\n• 服务端渲染（第6集）\n• 微前端（第7集）\n• 生产部署（第8集）'
+        },
+        {
+          id: 'react-basics-1',
+          type: 'text',
+          content: '让我们从使React在构建用户界面方面如此强大的核心概念开始...'
+        }
+      ],
+      likes: 156,
+      views: 2340
+    },
+    '6': {
+      id: '6',
+      title: 'AI日常生活：智能家居自动化',
+      titleZh: 'AI日常生活：智能家居自动化',
+      author: '科技爱好者',
+      publishDate: '2024-01-10',
+      readTime: '18分钟视频',
+      category: '生活科技',
+      tags: ['AI', '智能家居', '自动化', 'Vlog'],
+      type: 'vlog',
+      videoUrl: 'https://example.com/video/smart-home-ai.mp4',
+      videoDuration: '18:45',
+      videoThumbnail: '/api/placeholder/800/450',
+      summary: '实际展示我如何使用AI自动化智能家居。从语音助手到预测性自动化。',
+      summaryZh: '实际展示我如何使用AI自动化智能家居。从语音助手到预测性自动化。',
+      content: [
+        {
+          id: 'vlog-intro-1',
+          type: 'text',
+          content: '加入我参观AI驱动的智能家居设置。我将向您展示真正让生活更轻松的实用自动化。'
+        },
+        {
+          id: 'video-2',
+          type: 'video',
+          content: 'https://example.com/video/smart-home-ai.mp4',
+          caption: '完整智能家居参观和自动化演示'
+        }
+      ],
+      likes: 234,
+      views: 3450
     }
   }
 };
