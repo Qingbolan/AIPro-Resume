@@ -138,6 +138,207 @@ export interface Project {
   annualPlan: string;
 }
 
+// Detailed project information for project detail pages
+export interface ProjectDetail {
+  id: string;
+  title: string;
+  titleZh?: string;
+  description: string;
+  fullDescription: string;
+  fullDescriptionZh?: string;
+  image?: string;
+  tags: string[];
+  
+  // Related blogs and articles
+  relatedBlogs?: ProjectBlogReference[];
+  
+  // Version management
+  versions: {
+    latest: string;
+    releases: ProjectRelease[];
+  };
+  
+  // Project status
+  status: {
+    buildStatus: 'passing' | 'failing' | 'unknown';
+    coverage: number;
+    vulnerabilities: number;
+    lastUpdated: string;
+    license: string;
+    language: string;
+    size: string;
+  };
+  
+  // License information
+  licenseInfo?: {
+    name: string;
+    spdxId: string;
+    fullText: string;
+    fullTextZh?: string;
+    url: string;
+    permissions: string[];
+    permissionsZh?: string[];
+    conditions: string[];
+    conditionsZh?: string[];
+    limitations: string[];
+    limitationsZh?: string[];
+    description: string;
+    descriptionZh?: string;
+  };
+  
+  // Quick start guide
+  quickStart: {
+    installation: string[];
+    installationZh?: string[];
+    basicUsage: string;
+    basicUsageZh?: string;
+    requirements: string[];
+    requirementsZh?: string[];
+  };
+  
+  // API documentation
+  api?: {
+    baseUrl: string;
+    endpoints: ApiEndpoint[];
+  };
+  
+  // Community data
+  community: {
+    contributors: number;
+    forks: number;
+    watchers: number;
+    issues: {
+      open: number;
+      closed: number;
+      recent: ProjectIssue[];
+    };
+    discussions: ProjectDiscussion[];
+  };
+  
+  // Dependencies
+  dependencies: {
+    production: ProjectDependency[];
+    development: ProjectDependency[];
+  };
+  
+  // Performance metrics
+  performance: {
+    benchmarks: ProjectBenchmark[];
+    analytics: {
+      downloads: AnalyticsData[];
+      usage: UsageData[];
+    };
+  };
+  
+  // Basic information
+  features: string[];
+  featuresZh?: string[];
+  timeline: {
+    start: string;
+    end: string;
+    duration: string;
+  };
+  teamSize: number;
+  myRole: string;
+  myRoleZh?: string;
+  metrics: {
+    linesOfCode: number;
+    commits: number;
+    stars: number;
+    downloads: number;
+  };
+  github?: string;
+  demo?: string;
+  planId?: string;
+  year: number;
+}
+
+export interface ProjectRelease {
+  version: string;
+  date: string;
+  description: string;
+  downloadCount: number;
+  assets: ProjectAsset[];
+}
+
+export interface ProjectAsset {
+  name: string;
+  size: string;
+  downloadUrl: string;
+}
+
+export interface ApiEndpoint {
+  method: string;
+  path: string;
+  description: string;
+  parameters?: ApiParameter[];
+}
+
+export interface ApiParameter {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+}
+
+export interface ProjectIssue {
+  id: number;
+  title: string;
+  author: string;
+  created: string;
+  labels: string[];
+  status: 'open' | 'closed';
+}
+
+export interface ProjectDiscussion {
+  id: number;
+  title: string;
+  author: string;
+  replies: number;
+  created: string;
+  category: string;
+}
+
+export interface ProjectDependency {
+  name: string;
+  version: string;
+  license: string;
+  vulnerabilities?: number;
+}
+
+export interface ProjectBenchmark {
+  name: string;
+  value: number;
+  unit: string;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface AnalyticsData {
+  date: string;
+  count: number;
+}
+
+export interface UsageData {
+  feature: string;
+  percentage: number;
+}
+
+export interface ProjectBlogReference {
+  id: string;
+  title: string;
+  titleZh?: string;
+  summary: string;
+  summaryZh?: string;
+  publishDate: string;
+  category: string;
+  tags: string[];
+  readTime: string;
+  url: string;
+  relevance: 'high' | 'medium' | 'low';
+  description?: string;
+  descriptionZh?: string;
+}
+
 export interface AnnualPlan {
   year: number;
   name: string;

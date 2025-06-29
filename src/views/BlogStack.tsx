@@ -3,66 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, User, Tag, ArrowRight, Search, AlertCircle } from 'lucide-react';
 import { useTheme } from '../components/ThemeContext';
 import { useLanguage } from '../components/LanguageContext';
-import { BlogPost } from '../types';
-
-const mockBlogPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'The Future of AI in Software Development',
-    excerpt: 'Exploring how AI is transforming software development practices.',
-    content: 'Full blog content here...',
-    date: '2024-01-20',
-    author: 'Silan Hu',
-    tags: ['AI', 'Software Development'],
-    image: '/api/placeholder/600/300'
-  },
-  {
-    id: '2',
-    title: 'Building Scalable ML Pipelines',
-    excerpt: 'A guide to designing enterprise-scale ML pipelines.',
-    content: 'Full blog content here...',
-    date: '2024-01-15',
-    author: 'Silan Hu',
-    tags: ['Machine Learning', 'Data Engineering'],
-    image: '/api/placeholder/600/300'
-  },
-  {
-    id: '3',
-    title: 'TypeScript Best Practices for Large Applications',
-    excerpt: 'Essential patterns and practices for maintaining type safety and code quality in enterprise TypeScript projects.',
-    content: 'Full blog content here...',
-    date: '2024-01-10',
-    author: 'Silan Hu',
-    tags: ['TypeScript', 'Best Practices', 'Enterprise'],
-    image: '/api/placeholder/600/300'
-  },
-  {
-    id: '4',
-    title: 'Deep Dive into Neural Architecture Search',
-    excerpt: 'Understanding automated neural network design and its implications for the future of deep learning.',
-    content: 'Full blog content here...',
-    date: '2024-01-05',
-    author: 'Silan Hu',
-    tags: ['Deep Learning', 'Neural Networks', 'AutoML'],
-    image: '/api/placeholder/600/300'
-  },
-  {
-    id: '5',
-    title: 'The Rise of Edge Computing in AI',
-    excerpt: 'How edge computing is enabling real-time AI applications and changing the deployment landscape.',
-    content: 'Full blog content here...',
-    date: '2023-12-28',
-    author: 'Silan Hu',
-    tags: ['Edge Computing', 'AI', 'Real-time Systems'],
-    image: '/api/placeholder/600/300'
-  }
-];
+import { useNavigate } from 'react-router-dom';
+import { BlogData } from '../components/BlogStack/types/blog';
+import { fetchBlogPosts } from '../api';
 
 interface BlogCardProps {
-  post: BlogPost;
+  post: BlogData;
   index: number;
   featured?: boolean;
-  onClick?: (post: BlogPost) => void;
+  onClick?: (post: BlogData) => void;
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({ 
@@ -123,7 +72,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         <div className="flex items-center space-x-4 mb-4 text-sm">
           <div className="flex items-center space-x-1 text-theme-tertiary">
             <Calendar size={14} />
-            <span>{new Date(post.date).toLocaleDateString()}</span>
+            <span>{new Date(post.publishDate).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center space-x-1 text-theme-tertiary">
             <User size={14} />
@@ -135,12 +84,12 @@ const BlogCard: React.FC<BlogCardProps> = ({
         <h2 className={`font-bold mb-3 group-hover:text-theme-primary transition-colors duration-300 text-theme-primary ${
           featured ? 'text-2xl md:text-3xl' : 'text-xl'
         }`}>
-          {post.title}
+          {language === 'zh' && post.titleZh ? post.titleZh : post.title}
         </h2>
 
         {/* Excerpt */}
         <p className={`leading-relaxed mb-4 text-theme-secondary ${featured ? 'text-base' : 'text-sm'}`}>
-          {post.excerpt}
+          {language === 'zh' && post.summaryZh ? post.summaryZh : post.summary}
         </p>
 
         {/* Tags */}
@@ -193,8 +142,8 @@ const TagFilter: React.FC<TagFilterProps> = ({ tag, active, onClick }) => {
 };
 
 const BlogStack: React.FC = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<BlogData[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogData[]>([]);
   const [selectedTag, setSelectedTag] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -202,6 +151,7 @@ const BlogStack: React.FC = () => {
 
   const { colors } = useTheme();
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
   // Set CSS variables based on current theme
   useEffect(() => {
@@ -220,12 +170,12 @@ const BlogStack: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Fetch blog posts from API with language support
+        const fetchedPosts = await fetchBlogPosts(language as 'en' | 'zh');
         
         if (isMounted) {
-          setPosts(mockBlogPosts);
-          setFilteredPosts(mockBlogPosts);
+          setPosts(fetchedPosts);
+          setFilteredPosts(fetchedPosts);
           setLoading(false);
         }
       } catch (err) {
@@ -255,13 +205,15 @@ const BlogStack: React.FC = () => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(post => 
         post.title.toLowerCase().includes(searchLower) ||
-        post.excerpt.toLowerCase().includes(searchLower) ||
+        (post.titleZh && post.titleZh.toLowerCase().includes(searchLower)) ||
+        post.summary.toLowerCase().includes(searchLower) ||
+        (post.summaryZh && post.summaryZh.toLowerCase().includes(searchLower)) ||
         post.tags.some(tag => tag.toLowerCase().includes(searchLower))
       );
     }
 
     return filtered;
-  }, [posts, selectedTag, searchTerm]);
+  }, [posts, selectedTag, searchTerm, language]);
 
   useEffect(() => {
     setFilteredPosts(filteredPostsMemo);
@@ -273,10 +225,10 @@ const BlogStack: React.FC = () => {
     return [language === 'en' ? 'All' : '全部', ...allTags];
   }, [posts, language]);
 
-  const handlePostClick = useCallback((post: BlogPost) => {
-    // Handle blog post navigation
-    console.log('Navigate to post:', post.id);
-  }, []);
+  const handlePostClick = useCallback((post: BlogData) => {
+    // Navigate to blog detail page
+    navigate(`/blog/${post.id}`);
+  }, [navigate]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

@@ -22,5 +22,4 @@ export { BlogLoadingState } from './components/BlogLoadingState';
 // Content Components
 export * from './components/BlogContent';
 
-// Data
-export { mockBlogData } from './data/mockBlogData'; 
+// Data - moved to API layer 

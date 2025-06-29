@@ -6,7 +6,7 @@ import ResumeWebsite from './views/ResumeWebsite';
 import RecentUpdates from './views/RecentUpdates';
 import InteractiveContactPage from './views/InteractiveContactPage';
 import ProjectGallery from './views/ProjectGallery';
-import ProjectDetail from './views/ProjectDetail';
+import ProjectDetail from './components/ProjectGallery/ProjectDetail';
 import IdeaPage from './views/IdeaPage';
 import IdeaDetail from './components/IdeaPage/IdeaDetail';
 import BlogStack from './views/BlogStack';

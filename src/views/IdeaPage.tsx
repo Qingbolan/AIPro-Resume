@@ -5,54 +5,7 @@ import { Lightbulb, Clock, Plus, Search, AlertCircle } from 'lucide-react';
 import { useTheme } from '../components/ThemeContext';
 import { useLanguage } from '../components/LanguageContext';
 import { IdeaData } from '../types';
-
-const mockIdeas: IdeaData[] = [
-  {
-    id: '1',
-    title: 'AI-Powered Code Refactoring Tool',
-    description: 'A tool that uses machine learning to automatically suggest code improvements',
-    category: 'Development Tools',
-    tags: ['AI', 'Code Quality', 'Automation'],
-    status: 'experimenting',
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    title: 'Quantum Machine Learning Framework',
-    description: 'Framework combining quantum computing with traditional ML algorithms',
-    category: 'Research',
-    tags: ['Quantum Computing', 'Machine Learning'],
-    status: 'validating',
-    createdAt: '2024-01-10'
-  },
-  {
-    id: '3',
-    title: 'Decentralized Knowledge Base',
-    description: 'A blockchain-based platform for sharing and verifying technical knowledge',
-    category: 'Blockchain',
-    tags: ['Blockchain', 'Knowledge Sharing', 'Decentralization'],
-    status: 'hypothesis',
-    createdAt: '2024-01-05'
-  },
-  {
-    id: '4',
-    title: 'Real-time Collaborative IDE',
-    description: 'An IDE that allows multiple developers to code together in real-time with AI assistance',
-    category: 'Development Tools',
-    tags: ['Collaboration', 'IDE', 'Real-time', 'AI'],
-    status: 'published',
-    createdAt: '2023-12-20'
-  },
-  {
-    id: '5',
-    title: 'Neural Network Visualization Engine',
-    description: 'A 3D visualization tool for understanding and debugging neural network architectures',
-    category: 'Visualization',
-    tags: ['Neural Networks', '3D Visualization', 'Debugging'],
-    status: 'experimenting',
-    createdAt: '2023-12-15'
-  }
-];
+import { fetchIdeas } from '../api';
 
 interface IdeaCardProps {
   idea: IdeaData;
@@ -263,12 +216,12 @@ const IdeaPage: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Fetch ideas from API with language support
+        const fetchedIdeas = await fetchIdeas(language as 'en' | 'zh');
         
         if (isMounted) {
-          setIdeas(mockIdeas);
-          setFilteredIdeas(mockIdeas);
+          setIdeas(fetchedIdeas);
+          setFilteredIdeas(fetchedIdeas);
           setLoading(false);
         }
       } catch (err) {

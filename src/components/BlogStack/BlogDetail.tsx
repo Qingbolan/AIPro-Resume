@@ -28,7 +28,7 @@ const BlogDetail: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Custom hooks
-  const { blog, loading } = useBlogData(id);
+  const { blog, loading, error } = useBlogData(id);
   const readingProgress = useReadingProgress();
   const {
     userAnnotations,
@@ -79,8 +79,8 @@ const BlogDetail: React.FC = () => {
   };
 
   // Loading and error states
-  if (loading || !blog) {
-    return <BlogLoadingState loading={loading} error={!loading && !blog} />;
+  if (loading || !blog || error) {
+    return <BlogLoadingState loading={loading} error={!!error || (!loading && !blog)} />;
   }
 
   const userAnnotationsCount = Object.keys(userAnnotations).length;

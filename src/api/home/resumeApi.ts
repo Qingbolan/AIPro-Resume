@@ -1,4 +1,4 @@
-import i18n from '../i18n/index';
+import i18n from '../../i18n/index';
 import type { 
   ResumeData, 
   PersonalInfo, 
@@ -8,7 +8,7 @@ import type {
   ExperienceItem,
   RecentUpdate,
   ResumeSection
-} from '../types/api';
+} from '../../types/api';
 
 // Simulate API delay
 const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));

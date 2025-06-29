@@ -1,24 +1,45 @@
 import { useState, useEffect } from 'react';
 import { BlogData } from '../types/blog';
-import { mockBlogData } from '../data/mockBlogData';
+import { fetchBlogById, updateBlogViews } from '../../../api';
+import { useLanguage } from '../../LanguageContext';
 
 export const useBlogData = (id: string | undefined) => {
   const [blog, setBlog] = useState<BlogData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
     const loadBlog = async () => {
-      setLoading(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const blogData = mockBlogData[id || '1'];
-      if (blogData) {
-        setBlog(blogData);
+      if (!id) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    };
-    loadBlog();
-  }, [id]);
 
-  return { blog, loading };
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch blog data with language support
+        const blogData = await fetchBlogById(id, language as 'en' | 'zh');
+        
+        if (blogData) {
+          setBlog(blogData);
+          // Update view count
+          await updateBlogViews(id, language as 'en' | 'zh');
+        } else {
+          setError(language === 'en' ? 'Blog post not found' : '博客文章未找到');
+        }
+      } catch (err) {
+        console.error('Error loading blog:', err);
+        setError(language === 'en' ? 'Failed to load blog post' : '加载博客文章失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBlog();
+  }, [id, language]);
+
+  return { blog, loading, error };
 }; 

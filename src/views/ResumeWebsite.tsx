@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';
 import { LoadingSpinner } from '../components/ui';
-import { fetchResumeData } from '../api/resumeApi';
+import { fetchResumeData } from '../api/home/resumeApi';
 
 interface RecentItem {
   id: string;

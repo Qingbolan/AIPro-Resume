@@ -1,0 +1,403 @@
+import type { BlogData } from '../../components/BlogStack/types/blog';
+
+// Simulate API delay
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mock blog data with multi-language support
+const mockBlogData: Record<'en' | 'zh', Record<string, BlogData>> = {
+  en: {
+    '1': {
+      id: '1',
+      title: 'Leveraging Large Language Models for Code Refactoring: A Deep Dive',
+      author: 'Hu Silan',
+      publishDate: '2024-01-25',
+      readTime: '15 min read',
+      category: 'Research',
+      tags: ['LLM', 'Code Refactoring', 'AI', 'Software Engineering'],
+      summary: 'Exploring the revolutionary potential of large language models in automated code refactoring, this article delves into our latest research findings and practical implementations.',
+      likes: 234,
+      views: 1547,
+      content: [
+        {
+          type: 'text',
+          content: 'Large Language Models (LLMs) have revolutionized many aspects of software development, but their application in code refactoring represents a particularly exciting frontier. Our recent research has uncovered several breakthrough approaches that could fundamentally change how developers approach code quality improvement.',
+          id: 'content-1'
+        },
+        {
+          type: 'quote',
+          content: 'The future of code refactoring lies not in replacing human intuition, but in augmenting it with AI-powered insights that can see patterns across millions of codebases.',
+          id: 'content-2'
+        },
+        {
+          type: 'image',
+          content: '/api/placeholder/800/400',
+          caption: 'Figure 1: LLM-based refactoring pipeline architecture',
+          id: 'content-3'
+        },
+        {
+          type: 'text',
+          content: 'Traditional refactoring tools rely heavily on syntactic analysis and predefined patterns. While effective for simple transformations, they often miss semantic improvements that require deeper understanding of code intent and context.',
+          annotation: 'This limitation has been a major pain point for developers working with legacy codebases.',
+          id: 'content-4'
+        },
+        {
+          type: 'code',
+          content: `// Before: Traditional approach
+function processUserData(users) {
+  let result = [];
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].isActive && users[i].age > 18) {
+      result.push({
+        name: users[i].name,
+        email: users[i].email
+      });
+    }
+  }
+  return result;
+}
+
+// After: LLM-suggested refactoring
+const processUserData = (users) => 
+  users
+    .filter(user => user.isActive && user.age > 18)
+    .map(({ name, email }) => ({ name, email }));`,
+          language: 'javascript',
+          caption: 'Example of LLM-suggested functional refactoring',
+          id: 'content-5'
+        },
+        {
+          type: 'text',
+          content: 'Our experiments show that LLM-based refactoring tools can identify and suggest improvements that go beyond surface-level changes. They understand semantic patterns, suggest performance optimizations, and can even propose architectural improvements.',
+          id: 'content-6'
+        },
+        {
+          type: 'video',
+          content: '/api/placeholder/video/demo.mp4',
+          caption: 'Live demonstration of our LLM refactoring tool',
+          id: 'content-7'
+        }
+      ]
+    },
+    '2': {
+      id: '2',
+      title: 'Building Scalable AI Systems: Lessons from Production',
+      author: 'Hu Silan',
+      publishDate: '2024-01-20',
+      readTime: '12 min read',
+      category: 'Engineering',
+      tags: ['AI Systems', 'Scalability', 'Production', 'MLOps'],
+      summary: 'Practical insights and lessons learned from deploying AI systems at scale, covering architecture decisions, monitoring strategies, and performance optimization.',
+      likes: 189,
+      views: 1203,
+      content: [
+        {
+          type: 'text',
+          content: 'Deploying AI systems in production environments presents unique challenges that go far beyond training accurate models. This article shares practical insights from our experience building and maintaining large-scale AI systems.',
+          id: 'content-1'
+        },
+        {
+          type: 'quote',
+          content: 'The difference between a research prototype and a production AI system is like the difference between a paper airplane and a commercial aircraft.',
+          id: 'content-2'
+        },
+        {
+          type: 'text',
+          content: 'One of the most critical aspects of production AI systems is monitoring and observability. Unlike traditional software, AI systems can fail silently, producing plausible but incorrect results.',
+          id: 'content-3'
+        }
+      ]
+    },
+    '3': {
+      id: '3',
+      title: 'The Evolution of Neural Network Architectures',
+      author: 'Hu Silan',
+      publishDate: '2024-01-15',
+      readTime: '18 min read',
+      category: 'Deep Learning',
+      tags: ['Neural Networks', 'Architecture', 'Deep Learning', 'History'],
+      summary: 'A comprehensive overview of how neural network architectures have evolved from simple perceptrons to modern transformer models.',
+      likes: 312,
+      views: 2156,
+      content: [
+        {
+          type: 'text',
+          content: 'The journey of neural network architectures from simple perceptrons to sophisticated transformer models represents one of the most remarkable progressions in computer science history.',
+          id: 'content-1'
+        },
+        {
+          type: 'text',
+          content: 'Understanding this evolution helps us appreciate not just where we are today, but also provides insights into where the field might be heading.',
+          id: 'content-2'
+        }
+      ]
+    }
+  },
+  zh: {
+    '1': {
+      id: '1',
+      title: '利用大型语言模型进行代码重构：深度探讨',
+      titleZh: '利用大型语言模型进行代码重构：深度探讨',
+      author: '胡思蓝',
+      publishDate: '2024-01-25',
+      readTime: '15分钟阅读',
+      category: '研究',
+      tags: ['大语言模型', '代码重构', '人工智能', '软件工程'],
+      summary: '探索大型语言模型在自动化代码重构中的革命性潜力，本文深入研究我们的最新研究发现和实际实现。',
+      summaryZh: '探索大型语言模型在自动化代码重构中的革命性潜力，本文深入研究我们的最新研究发现和实际实现。',
+      likes: 234,
+      views: 1547,
+      content: [
+        {
+          type: 'text',
+          content: '大型语言模型（LLM）已经彻底改变了软件开发的许多方面，但它们在代码重构中的应用代表了一个特别令人兴奋的前沿领域。我们最近的研究发现了几种突破性方法，这些方法可能从根本上改变开发人员处理代码质量改进的方式。',
+          id: 'content-1'
+        },
+        {
+          type: 'quote',
+          content: '代码重构的未来不在于取代人类直觉，而在于用能够在数百万代码库中看到模式的AI驱动洞察来增强它。',
+          id: 'content-2'
+        },
+        {
+          type: 'image',
+          content: '/api/placeholder/800/400',
+          caption: '图1：基于LLM的重构管道架构',
+          id: 'content-3'
+        },
+        {
+          type: 'text',
+          content: '传统的重构工具严重依赖语法分析和预定义模式。虽然对简单转换有效，但它们经常错过需要更深入理解代码意图和上下文的语义改进。',
+          annotation: '这种限制一直是处理遗留代码库的开发人员的主要痛点。',
+          id: 'content-4'
+        },
+        {
+          type: 'code',
+          content: `// 之前：传统方法
+function processUserData(users) {
+  let result = [];
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].isActive && users[i].age > 18) {
+      result.push({
+        name: users[i].name,
+        email: users[i].email
+      });
+    }
+  }
+  return result;
+}
+
+// 之后：LLM建议的重构
+const processUserData = (users) => 
+  users
+    .filter(user => user.isActive && user.age > 18)
+    .map(({ name, email }) => ({ name, email }));`,
+          language: 'javascript',
+          caption: 'LLM建议的函数式重构示例',
+          id: 'content-5'
+        },
+        {
+          type: 'text',
+          content: '我们的实验表明，基于LLM的重构工具可以识别并建议超越表面层次变化的改进。它们理解语义模式，建议性能优化，甚至可以提出架构改进。',
+          id: 'content-6'
+        },
+        {
+          type: 'video',
+          content: '/api/placeholder/video/demo.mp4',
+          caption: '我们的LLM重构工具实时演示',
+          id: 'content-7'
+        }
+      ]
+    },
+    '2': {
+      id: '2',
+      title: '构建可扩展的AI系统：生产环境的经验教训',
+      titleZh: '构建可扩展的AI系统：生产环境的经验教训',
+      author: '胡思蓝',
+      publishDate: '2024-01-20',
+      readTime: '12分钟阅读',
+      category: '工程',
+      tags: ['AI系统', '可扩展性', '生产环境', 'MLOps'],
+      summary: '从大规模部署AI系统中获得的实用见解和经验教训，涵盖架构决策、监控策略和性能优化。',
+      summaryZh: '从大规模部署AI系统中获得的实用见解和经验教训，涵盖架构决策、监控策略和性能优化。',
+      likes: 189,
+      views: 1203,
+      content: [
+        {
+          type: 'text',
+          content: '在生产环境中部署AI系统带来了远超训练准确模型的独特挑战。本文分享了我们构建和维护大规模AI系统的实践经验。',
+          id: 'content-1'
+        },
+        {
+          type: 'quote',
+          content: '研究原型和生产AI系统之间的差异，就像纸飞机和商用飞机之间的差异一样。',
+          id: 'content-2'
+        },
+        {
+          type: 'text',
+          content: '生产AI系统最关键的方面之一是监控和可观察性。与传统软件不同，AI系统可能会静默失败，产生看似合理但不正确的结果。',
+          id: 'content-3'
+        }
+      ]
+    },
+    '3': {
+      id: '3',
+      title: '神经网络架构的演进',
+      titleZh: '神经网络架构的演进',
+      author: '胡思蓝',
+      publishDate: '2024-01-15',
+      readTime: '18分钟阅读',
+      category: '深度学习',
+      tags: ['神经网络', '架构', '深度学习', '历史'],
+      summary: '神经网络架构如何从简单感知器演变为现代变换器模型的全面概述。',
+      summaryZh: '神经网络架构如何从简单感知器演变为现代变换器模型的全面概述。',
+      likes: 312,
+      views: 2156,
+      content: [
+        {
+          type: 'text',
+          content: '神经网络架构从简单感知器到复杂变换器模型的演进历程，代表了计算机科学史上最显著的进步之一。',
+          id: 'content-1'
+        },
+        {
+          type: 'text',
+          content: '理解这种演进不仅帮助我们欣赏今天的成就，还为该领域的未来发展方向提供了洞察。',
+          id: 'content-2'
+        }
+      ]
+    }
+  }
+};
+
+// API functions
+export const fetchBlogPosts = async (language: 'en' | 'zh' = 'en'): Promise<BlogData[]> => {
+  try {
+    // Simulate API delay
+    await delay(800);
+    
+    const blogData = mockBlogData[language];
+    return Object.values(blogData);
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    throw new Error(language === 'en' ? 'Failed to load blog posts' : '加载博客文章失败');
+  }
+};
+
+export const fetchBlogById = async (id: string, language: 'en' | 'zh' = 'en'): Promise<BlogData | null> => {
+  try {
+    // Simulate API delay
+    await delay(500);
+    
+    const blogData = mockBlogData[language];
+    return blogData[id] || null;
+  } catch (error) {
+    console.error('Error fetching blog by ID:', error);
+    throw new Error(language === 'en' ? 'Failed to load blog post' : '加载博客文章失败');
+  }
+};
+
+export const searchBlogPosts = async (
+  query: string,
+  filters: {
+    category?: string;
+    tags?: string[];
+    author?: string;
+  } = {},
+  language: 'en' | 'zh' = 'en'
+): Promise<BlogData[]> => {
+  try {
+    // Simulate API delay
+    await delay(400);
+    
+    let posts = Object.values(mockBlogData[language]);
+    
+    // Apply search query
+    if (query) {
+      const searchLower = query.toLowerCase();
+      posts = posts.filter(post => 
+        post.title.toLowerCase().includes(searchLower) ||
+        post.summary.toLowerCase().includes(searchLower) ||
+        (post.summaryZh && post.summaryZh.toLowerCase().includes(searchLower)) ||
+        post.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+        post.content.some(content => 
+          content.content.toLowerCase().includes(searchLower)
+        )
+      );
+    }
+    
+    // Apply category filter
+    if (filters.category && filters.category !== 'All' && filters.category !== '全部') {
+      posts = posts.filter(post => post.category === filters.category);
+    }
+    
+    // Apply tags filter
+    if (filters.tags && filters.tags.length > 0) {
+      posts = posts.filter(post => 
+        filters.tags!.some(tag => post.tags.includes(tag))
+      );
+    }
+    
+    // Apply author filter
+    if (filters.author) {
+      posts = posts.filter(post => post.author === filters.author);
+    }
+    
+    return posts;
+  } catch (error) {
+    console.error('Error searching blog posts:', error);
+    throw new Error(language === 'en' ? 'Failed to search blog posts' : '搜索博客文章失败');
+  }
+};
+
+export const getBlogCategories = async (language: 'en' | 'zh' = 'en'): Promise<string[]> => {
+  try {
+    const posts = Object.values(mockBlogData[language]);
+    const categories = Array.from(new Set(posts.map(post => post.category)));
+    return [language === 'en' ? 'All' : '全部', ...categories];
+  } catch (error) {
+    console.error('Error fetching blog categories:', error);
+    return [language === 'en' ? 'All' : '全部'];
+  }
+};
+
+export const getBlogTags = async (language: 'en' | 'zh' = 'en'): Promise<string[]> => {
+  try {
+    const posts = Object.values(mockBlogData[language]);
+    const allTags = posts.flatMap(post => post.tags);
+    return Array.from(new Set(allTags));
+  } catch (error) {
+    console.error('Error fetching blog tags:', error);
+    return [];
+  }
+};
+
+export const updateBlogViews = async (id: string, language: 'en' | 'zh' = 'en'): Promise<void> => {
+  try {
+    // Simulate API delay
+    await delay(200);
+    
+    const blogData = mockBlogData[language];
+    if (blogData[id]) {
+      blogData[id].views += 1;
+    }
+  } catch (error) {
+    console.error('Error updating blog views:', error);
+    // Don't throw error for view updates as it's not critical
+  }
+};
+
+export const updateBlogLikes = async (id: string, increment: boolean = true, language: 'en' | 'zh' = 'en'): Promise<number> => {
+  try {
+    // Simulate API delay
+    await delay(300);
+    
+    const blogData = mockBlogData[language];
+    if (blogData[id]) {
+      blogData[id].likes += increment ? 1 : -1;
+      return blogData[id].likes;
+    }
+    
+    throw new Error(language === 'en' ? 'Blog post not found' : '博客文章未找到');
+  } catch (error) {
+    console.error('Error updating blog likes:', error);
+    throw new Error(language === 'en' ? 'Failed to update likes' : '更新点赞失败');
+  }
+}; 

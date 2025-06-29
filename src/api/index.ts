@@ -1,11 +1,13 @@
 // Central API exports
-export * from './resumeApi';
+export * from './home/resumeApi';
 export * from './getRecentMessages';
-export * from './newsApi';
+// export * from './newsApi';
 export * from './planApi';
 export * from './getAIResponse';
 export * from './getRecentGoal';
-export * from './projectApi';
+export * from './projects/projectApi';
+export * from './ideas/ideaApi';
+export * from './blog/blogApi';
 export * from './sendMessage';
 
 // Re-export types for convenience
@@ -25,6 +27,7 @@ export type {
   Plan,
   ProjectWithPlan,
   Project,
+  ProjectDetail,
   AnnualPlan,
   GraphData,
   RecentGoalData,
