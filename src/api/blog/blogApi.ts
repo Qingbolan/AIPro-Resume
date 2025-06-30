@@ -614,4 +614,135 @@ export const updateBlogLikes = async (id: string, increment: boolean = true, lan
     console.error('Error updating blog likes:', error);
     throw new Error(language === 'en' ? 'Failed to update likes' : '更新点赞失败');
   }
+};
+
+// Series-specific API functions
+export interface SeriesEpisode {
+  id: string;
+  title: string;
+  titleZh?: string;
+  duration?: string;
+  completed?: boolean;
+  current?: boolean;
+  order: number;
+}
+
+export interface SeriesData {
+  id: string;
+  title: string;
+  titleZh?: string;
+  description: string;
+  descriptionZh?: string;
+  episodes: SeriesEpisode[];
+  totalDuration: string;
+  completedCount: number;
+}
+
+// Mock series data
+const mockSeriesData: Record<'en' | 'zh', Record<string, SeriesData>> = {
+  en: {
+    'modern-web-dev': {
+      id: 'modern-web-dev',
+      title: 'Modern Web Development Mastery',
+      titleZh: '现代Web开发精通',
+      description: 'A comprehensive series covering modern web development practices, from React fundamentals to advanced patterns.',
+      descriptionZh: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      totalDuration: '6h 20m',
+      completedCount: 1,
+      episodes: [
+        { id: '5', title: 'React Fundamentals', titleZh: 'React基础', duration: '45 min', current: true, completed: false, order: 1 },
+        { id: '5-2', title: 'State Management Patterns', titleZh: '状态管理模式', duration: '38 min', completed: false, order: 2 },
+        { id: '5-3', title: 'Performance Optimization', titleZh: '性能优化', duration: '42 min', completed: false, order: 3 },
+        { id: '5-4', title: 'Testing Strategies', titleZh: '测试策略', duration: '35 min', completed: false, order: 4 },
+        { id: '5-5', title: 'Advanced Hooks', titleZh: '高级Hooks', duration: '40 min', completed: false, order: 5 },
+        { id: '5-6', title: 'Server-Side Rendering', titleZh: '服务端渲染', duration: '48 min', completed: false, order: 6 },
+        { id: '5-7', title: 'Micro-frontends', titleZh: '微前端', duration: '52 min', completed: false, order: 7 },
+        { id: '5-8', title: 'Production Deployment', titleZh: '生产部署', duration: '44 min', completed: false, order: 8 },
+      ]
+    }
+  },
+  zh: {
+    'modern-web-dev': {
+      id: 'modern-web-dev',
+      title: '现代Web开发精通',
+      titleZh: '现代Web开发精通',
+      description: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      descriptionZh: '一个全面的系列，涵盖现代Web开发实践，从React基础到高级模式。',
+      totalDuration: '6小时20分钟',
+      completedCount: 1,
+      episodes: [
+        { id: '5', title: 'React基础', titleZh: 'React基础', duration: '45分钟', current: true, completed: false, order: 1 },
+        { id: '5-2', title: '状态管理模式', titleZh: '状态管理模式', duration: '38分钟', completed: false, order: 2 },
+        { id: '5-3', title: '性能优化', titleZh: '性能优化', duration: '42分钟', completed: false, order: 3 },
+        { id: '5-4', title: '测试策略', titleZh: '测试策略', duration: '35分钟', completed: false, order: 4 },
+        { id: '5-5', title: '高级Hooks', titleZh: '高级Hooks', duration: '40分钟', completed: false, order: 5 },
+        { id: '5-6', title: '服务端渲染', titleZh: '服务端渲染', duration: '48分钟', completed: false, order: 6 },
+        { id: '5-7', title: '微前端', titleZh: '微前端', duration: '52分钟', completed: false, order: 7 },
+        { id: '5-8', title: '生产部署', titleZh: '生产部署', duration: '44分钟', completed: false, order: 8 },
+      ]
+    }
+  }
+};
+
+export const fetchSeriesData = async (seriesId: string, language: 'en' | 'zh' = 'en'): Promise<SeriesData | null> => {
+  try {
+    await delay(500);
+    return mockSeriesData[language][seriesId] || null;
+  } catch (error) {
+    console.error('Error fetching series data:', error);
+    throw new Error(language === 'en' ? 'Failed to load series data' : '加载系列数据失败');
+  }
+};
+
+export const updateSeriesProgress = async (
+  seriesId: string, 
+  episodeId: string, 
+  completed: boolean, 
+  language: 'en' | 'zh' = 'en'
+): Promise<SeriesData> => {
+  try {
+    await delay(300);
+    
+    const seriesData = mockSeriesData[language][seriesId];
+    if (!seriesData) {
+      throw new Error(language === 'en' ? 'Series not found' : '系列未找到');
+    }
+    
+    const episode = seriesData.episodes.find(ep => ep.id === episodeId);
+    if (episode) {
+      episode.completed = completed;
+      // Update completed count
+      seriesData.completedCount = seriesData.episodes.filter(ep => ep.completed).length;
+    }
+    
+    return seriesData;
+  } catch (error) {
+    console.error('Error updating series progress:', error);
+    throw new Error(language === 'en' ? 'Failed to update progress' : '更新进度失败');
+  }
+};
+
+export const setCurrentEpisode = async (
+  seriesId: string, 
+  episodeId: string, 
+  language: 'en' | 'zh' = 'en'
+): Promise<SeriesData> => {
+  try {
+    await delay(200);
+    
+    const seriesData = mockSeriesData[language][seriesId];
+    if (!seriesData) {
+      throw new Error(language === 'en' ? 'Series not found' : '系列未找到');
+    }
+    
+    // Update current episode
+    seriesData.episodes.forEach(ep => {
+      ep.current = ep.id === episodeId;
+    });
+    
+    return seriesData;
+  } catch (error) {
+    console.error('Error setting current episode:', error);
+    throw new Error(language === 'en' ? 'Failed to set current episode' : '设置当前集数失败');
+  }
 }; 

@@ -142,9 +142,19 @@ export const TextContent: React.FC<TextContentProps> = ({
           {(hoveredAnnotation === annotationId || clickedAnnotation === annotationId) && (
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-20 annotation-popup">
               <div className="bg-theme-background-secondary border border-theme-card-border 
-                              rounded-lg p-4 shadow-xl w-80 max-w-sm relative">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-theme-text-secondary leading-relaxed flex-1"
+                              rounded-lg p-3 shadow-xl w-72 max-w-sm relative">
+                {/* Original quoted text */}
+                <p className="text-xs text-theme-text-primary leading-relaxed italic text-left mb-2 px-2 py-1 
+                             bg-theme-accent/8 rounded border-l-2 border-theme-accent/30"
+                   style={{ 
+                     fontFamily: 'Georgia, "Times New Roman", Charter, serif'
+                   }}>
+                  "{selectedText}"
+                </p>
+                
+                {/* Annotation content */}
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xs text-theme-text-secondary leading-relaxed flex-1 text-left"
                      style={{ 
                        fontFamily: 'Georgia, "Times New Roman", Charter, serif'
                      }}>
@@ -162,7 +172,7 @@ export const TextContent: React.FC<TextContentProps> = ({
                                  flex-shrink-0"
                       title={language === 'en' ? 'Remove annotation' : '删除批注'}
                     >
-                      <X size={12} className="stroke-2" />
+                      <X size={10} className="stroke-2" />
                     </button>
                   )}
                 </div>

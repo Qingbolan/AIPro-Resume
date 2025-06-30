@@ -257,10 +257,9 @@ const Logo: React.FC = () => {
           transition={{ duration: 0.2 }}
         />
       </motion.div>
-      
       <div className="hidden xs:block">
         <motion.div 
-          className="text-lg xs:text-xl sm:text-xl font-bold tracking-tight"
+          className="text-lg text-nowrap font-bold tracking-tight leading-tight"
           style={{ color: colors.textPrimary }}
           whileHover={{ scale: 1.02 }}
           transition={{ duration: 0.2 }}
@@ -268,7 +267,7 @@ const Logo: React.FC = () => {
           Silan Hu
         </motion.div>
         <div 
-          className="text-xs tracking-wider uppercase opacity-60" 
+          className="text-[10px] text-nowrap tracking-wider uppercase opacity-60 leading-tight -mt-0.5" 
         >
           ZIYUN·2025
         </div>
@@ -279,6 +278,7 @@ const Logo: React.FC = () => {
 
 const TopNavigation: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
+  // const [scrolled, setScrolled] = useState<boolean>(false);
   const { pathname } = useLocation();
   const { language } = useLanguage();
   const { colors } = useTheme();
@@ -286,11 +286,33 @@ const TopNavigation: React.FC = () => {
   // Close mobile menu on route change
   useEffect(() => setOpen(false), [pathname]);
 
+  // Handle scroll effects
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const scrollPosition = window.scrollY;
+  //     setScrolled(scrollPosition > 20);
+  //   };
+
+  //   window.addEventListener('scroll', handleScroll);
+  //   return () => window.removeEventListener('scroll', handleScroll);
+  // }, []);
+
   const items = useMemo(() => NAV_ITEMS(language), [language]);
 
   return (
     <motion.nav
-      className="sticky top-0 z-50 backdrop-blur-xl"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      // style={{
+      //   backgroundColor: scrolled 
+      //     ? `${colors.background}98` // More opaque when scrolled
+      //     : `${colors.background}90`, // Less opaque at top
+      //   borderBottomColor: scrolled 
+      //     ? `${colors.cardBorder}80` 
+      //     : `${colors.cardBorder}30`,
+      //   boxShadow: scrolled 
+      //     ? `0 4px 20px ${colors.shadowMd}` 
+      //     : 'none'
+      // }}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}

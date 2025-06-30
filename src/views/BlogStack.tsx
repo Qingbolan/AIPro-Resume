@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, User, Tag, ArrowRight, Search, AlertCircle, Play, Video, List, Grid } from 'lucide-react';
 import { useTheme } from '../components/ThemeContext';
 import { useLanguage } from '../components/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BlogData } from '../components/BlogStack/types/blog';
 import { fetchBlogPosts } from '../api';
 
@@ -313,6 +313,7 @@ const BlogStack: React.FC = () => {
   const { colors } = useTheme();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Set CSS variables based on current theme
   useEffect(() => {
@@ -321,6 +322,24 @@ const BlogStack: React.FC = () => {
       root.style.setProperty(`--color-${key}`, value);
     });
   }, [colors]);
+
+  // Handle URL parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const typeParam = searchParams.get('type');
+    
+    if (typeParam) {
+      // Map category filter keys to display names
+      const typeMap: Record<string, string> = {
+        'article': language === 'en' ? 'Articles' : '文章',
+        'vlog': language === 'en' ? 'Videos' : '视频',
+        'series': language === 'en' ? 'Series' : '系列'
+      };
+      
+      const displayType = typeMap[typeParam] || (language === 'en' ? 'All' : '全部');
+      setSelectedType(displayType);
+    }
+  }, [location.search, language]);
 
   // Load posts
   useEffect(() => {
