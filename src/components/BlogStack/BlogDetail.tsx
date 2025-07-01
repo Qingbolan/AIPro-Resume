@@ -32,7 +32,7 @@ const BlogDetail: React.FC = () => {
     removeUserAnnotation,
     highlightAnnotation,
     cancelAnnotation
-  } = useAnnotations();
+  } = useAnnotations(id);
 
   // Handle annotation toggle
   const toggleAnnotation = (contentId: string) => {

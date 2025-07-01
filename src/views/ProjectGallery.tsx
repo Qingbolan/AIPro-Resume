@@ -9,6 +9,7 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../components/ThemeContext";
 import { useLanguage } from "../components/LanguageContext";
 import { Plan, ProjectWithPlan } from "../types";
@@ -16,7 +17,7 @@ import {
   fetchCurrentPlan,
   fetchProjectsWithPlans,
   fetchPlans,
-} from "../api/planApi";
+} from "../api";
 import { getPlanDisplay } from "../utils/iconMap";
 import { useNavigate } from "react-router-dom";
 
@@ -30,6 +31,7 @@ const CurrentPlanSubtitle: React.FC<CurrentPlanProps> = ({
   plan,
   language,
 }) => {
+  const { t } = useTranslation();
   const planDisplay = getPlanDisplay(plan, { size: 20 });
   
   return (
@@ -43,19 +45,19 @@ const CurrentPlanSubtitle: React.FC<CurrentPlanProps> = ({
           <span className="text-lg font-semibold text-theme-primary">
             {language === "en" ? plan.name : plan.nameZh}
           </span>
-          <span className="text-sm text-theme-secondary ml-2">
-            {plan.startYear} - {plan.endYear || (language === "en" ? "Ongoing" : "进行中")} • {" "}
-            <span className={`font-medium ${
-              plan.status === "active" ? "text-green-600" :
-              plan.status === "completed" ? "text-blue-600" :
-              "text-yellow-600"
-            }`}>
-              {language === "en" ? 
-                (plan.status === "active" ? "Active" : plan.status === "completed" ? "Completed" : "Planned") :
-                (plan.status === "active" ? "进行中" : plan.status === "completed" ? "已完成" : "计划中")
-              }
+                      <span className="text-sm text-theme-secondary ml-2">
+              {plan.startYear} - {plan.endYear || t('projects.ongoing')} • {" "}
+              <span className={`font-medium ${
+                plan.status === "active" ? "text-green-600" :
+                plan.status === "completed" ? "text-blue-600" :
+                "text-yellow-600"
+              }`}>
+                {plan.status === "active" ? t('projects.active') :
+                 plan.status === "completed" ? t('projects.completed') :
+                 t('projects.planned')
+                }
+              </span>
             </span>
-          </span>
           <span className="text-base font-medium text-theme-primary italic">
             "{language === "en" ? plan.slogan : plan.sloganZh}"
           </span>
@@ -78,7 +80,7 @@ const CurrentPlanSubtitle: React.FC<CurrentPlanProps> = ({
           {(language === "en" ? plan.goals : plan.goalsZh).length > 3 && (
             <span className="px-3 py-1 text-xs rounded-full bg-theme-accent text-white">
               +{(language === "en" ? plan.goals : plan.goalsZh).length - 3}{" "}
-              {language === "en" ? "more" : "更多"}
+              {t('projects.more')}
             </span>
           )}
         </div>
@@ -101,6 +103,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onView,
 }) => {
   const { language } = useLanguage();
+  const { t } = useTranslation();
 
   const handleView = useCallback(() => {
     onView?.(project);
@@ -119,6 +122,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const plan = plans.find((p) => p.id === project.planId);
   const planIcon = plan ? getPlanDisplay(plan, { size: 16 }) : null;
 
+  const generateProjectNumber = () => {
+    // Use project year instead of createdAt since createdAt doesn't exist in ProjectWithPlan type
+    const year = project.year;
+    
+    // Create a simple hash from title to ensure consistency
+    const titleHash = project.title.split('').reduce((hash, char) => {
+      return hash * 31 + char.charCodeAt(0);
+    }, 0);
+    
+    // Use project ID as additional uniqueness factor
+    const idHash = project.id.split('').reduce((hash, char) => {
+      return hash * 31 + char.charCodeAt(0);
+    }, 0);
+    
+    const paperNum = String(Math.abs(titleHash + idHash) % 10000).padStart(4, '0');
+    const prefix = 'proj';
+
+    return `${prefix}.${year}.${paperNum}`;
+  };
+
   return (
     <motion.article
       className="group relative overflow-hidden rounded-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 card-interactive"
@@ -130,13 +153,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
-      aria-label={`View project: ${project.title}`}
+      aria-label={t('projects.viewProject', { title: language === 'zh' && project.titleZh ? project.titleZh : project.title })}
     >
       {/* Project Image */}
       <div className="relative h-48 overflow-hidden">
         <div className="w-full h-full flex items-center justify-center project-image-placeholder">
-          <div className="text-6xl font-bold opacity-20 text-theme-primary">
-            {project.title.charAt(0)}
+          <div className="text-center">
+            <div className="text-6xl font-bold opacity-20 text-theme-primary mb-2">
+              {(language === 'zh' && project.titleZh ? project.titleZh : project.title).charAt(0)}
+            </div>
+            <div className="text-xs text-theme-secondary opacity-60 font-mono">
+              {generateProjectNumber()}
+            </div>
           </div>
         </div>
         
@@ -154,7 +182,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="p-3 rounded-full bg-white bg-opacity-20 backdrop-blur-sm text-white focus:outline-none focus:ring-2 focus:ring-white"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              aria-label={`View ${project.title} demo`}
+              aria-label={t('projects.viewProjectDemo', { title: language === 'zh' && project.titleZh ? project.titleZh : project.title })}
             >
               <Eye size={20} />
             </motion.button>
@@ -168,7 +196,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="p-3 rounded-full bg-white bg-opacity-20 backdrop-blur-sm text-white focus:outline-none focus:ring-2 focus:ring-white"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              aria-label={`View ${project.title} source code`}
+              aria-label={t('projects.viewProjectSourceCode', { title: language === 'zh' && project.titleZh ? project.titleZh : project.title })}
             >
               <Github size={20} />
             </motion.button>
@@ -180,8 +208,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-xl font-bold group-hover:text-theme-primary transition-colors duration-300 text-theme-primary">
-          {project.title}
-        </h3>
+            {language === 'zh' && project.titleZh ? project.titleZh : project.title}
+          </h3>
           {plan && (
             <div className="flex items-center gap-1 text-theme-secondary">
               <div className="w-4 h-4 flex items-center justify-center">
@@ -192,7 +220,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </div>
         
         <p className="text-sm leading-relaxed mb-4 text-theme-secondary">
-          {project.description}
+          {language === 'zh' && project.descriptionZh ? project.descriptionZh : project.description}
         </p>
         
         {/* Tags */}
@@ -219,10 +247,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               }}
               className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 ring-theme-primary btn-secondary"
               whileHover={{ scale: 1.05 }}
-              aria-label={`View ${project.title} source code on GitHub`}
+              aria-label={t('projects.viewProjectOnGitHub', { title: language === 'zh' && project.titleZh ? project.titleZh : project.title })}
             >
               <Github size={16} />
-              <span>{language === "en" ? "Code" : "代码"}</span>
+              <span>{t('projects.code')}</span>
             </motion.button>
           )}
           {project.demo && (
@@ -234,10 +262,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-theme-primary ring-offset-theme-background btn-primary"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              aria-label={`View ${project.title} live demo`}
+              aria-label={t('projects.viewLiveDemo', { title: language === 'zh' && project.titleZh ? project.titleZh : project.title })}
             >
               <ExternalLink size={16} />
-              <span>{language === "en" ? "Demo" : "演示"}</span>
+              <span>{t('projects.demo')}</span>
             </motion.button>
           )}
         </div>
@@ -279,13 +307,14 @@ const ProjectGallery: React.FC = () => {
     []
   );
   const [currentPlan, setCurrentPlan] = useState<Plan | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [selectedFilter, setSelectedFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { colors } = useTheme();
   const { language } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Set CSS variables based on current theme
@@ -323,7 +352,7 @@ const ProjectGallery: React.FC = () => {
         }
       } catch (err) {
         if (isMounted) {
-          setError(language === "en" ? "Failed to load data" : "加载数据失败");
+          setError(t('projects.failedToLoadData'));
           setLoading(false);
         }
       }
@@ -344,15 +373,26 @@ const ProjectGallery: React.FC = () => {
     const planFilters = plans.map((plan) =>
       language === "en" ? plan.name.split(" ")[0] : plan.nameZh.substring(0, 2)
     );
-    return [language === "en" ? "All" : "全部", ...planFilters, ...allTags];
-  }, [projects, plans, language]);
+    return [t('projects.all'), ...planFilters, ...allTags];
+  }, [projects, plans, language, t]);
+
+  // Set default filter when filters are available or when language changes
+  useEffect(() => {
+    if (filters.length > 0) {
+      const currentAllText = t('projects.all');
+      // If no filter is selected or if the current filter is the old "All" text, set to current language "All"
+      if (selectedFilter === "" || selectedFilter === "All" || selectedFilter === "全部") {
+        setSelectedFilter(currentAllText);
+      }
+    }
+  }, [filters, selectedFilter, t, language]);
 
   // Filter projects based on selected filter and search query
   useEffect(() => {
     let filtered = projects;
 
     // Apply tag/plan filter
-    if (selectedFilter !== "All" && selectedFilter !== "全部") {
+    if (selectedFilter !== t('projects.all')) {
       filtered = projects.filter((project) => {
         const plan = plans.find((p) => p.id === project.planId);
         const planMatch =
@@ -370,13 +410,15 @@ const ProjectGallery: React.FC = () => {
       filtered = filtered.filter(
         (project) =>
           project.title.toLowerCase().includes(query) ||
+          (project.titleZh && project.titleZh.toLowerCase().includes(query)) ||
           project.description.toLowerCase().includes(query) ||
+          (project.descriptionZh && project.descriptionZh.toLowerCase().includes(query)) ||
           project.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
     setFilteredProjects(filtered);
-  }, [projects, plans, selectedFilter, searchQuery]);
+  }, [projects, plans, selectedFilter, searchQuery, t]);
 
   const handleFilterChange = useCallback((filter: string) => {
     setSelectedFilter(filter);
@@ -410,7 +452,7 @@ const ProjectGallery: React.FC = () => {
         >
           <div className="w-16 h-16 mx-auto mb-4 rounded-full loading-gradient" />
           <p className="text-theme-secondary">
-            {language === "en" ? "Loading projects..." : "加载项目中..."}
+            {t('projects.loadingProjects')}
           </p>
         </motion.div>
       </div>
@@ -428,7 +470,7 @@ const ProjectGallery: React.FC = () => {
         >
           <AlertCircle size={48} className="mx-auto mb-4 text-theme-error" />
           <h2 className="text-xl font-semibold mb-2 text-theme-primary">
-            {language === "en" ? "Error Loading Data" : "数据加载出错"}
+            {t('projects.errorLoadingData')}
           </h2>
           <p className="text-theme-secondary">{error}</p>
         </motion.div>
@@ -452,7 +494,7 @@ const ProjectGallery: React.FC = () => {
           transition={{ duration: 0.6 }}
         >
           <h1 className="text-5xl md:text-6xl font-bold mb-8 text-theme-primary">
-            {language === "en" ? "Projects" : "项目"}
+            {t('projects.title')}
           </h1>
 
           {/* 简约计划信息作为副标题 */}
@@ -463,6 +505,21 @@ const ProjectGallery: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <CurrentPlanSubtitle plan={currentPlan} language={language} />
+              <motion.div
+                className="mt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <motion.button
+                  onClick={() => navigate('/plans')}
+                  className="text-sm text-theme-primary hover:text-theme-accent transition-colors duration-200 font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {t('projects.viewAllStrategicPlans')}
+                </motion.button>
+              </motion.div>
             </motion.div>
           )}
         </motion.div>
@@ -483,9 +540,7 @@ const ProjectGallery: React.FC = () => {
               />
               <input
                 type="text"
-                placeholder={
-                  language === "en" ? "Search projects..." : "搜索项目..."
-                }
+                placeholder={t('projects.searchPlaceholder')}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="w-full pl-12 pr-12 py-3 rounded-xl border border-theme-border bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-theme-primary focus:border-transparent transition-all duration-300"
@@ -494,7 +549,7 @@ const ProjectGallery: React.FC = () => {
                 <button
                   onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-secondary hover:text-theme-primary transition-colors"
-                  aria-label="Clear search"
+                  aria-label={t('projects.clearSearch')}
                 >
                   <X size={20} />
                 </button>
@@ -512,13 +567,13 @@ const ProjectGallery: React.FC = () => {
           <div className="flex items-center space-x-2 mb-2">
             <Filter size={16} className="text-theme-secondary" />
             <span className="text-sm font-medium text-theme-secondary">
-                {language === "en" ? "Filter by Technique:" : "基于技术栈筛选："}
+                {t('projects.filterByTechnique')}
             </span>
           </div>
             <div
               className="flex flex-wrap gap-2"
               role="group"
-              aria-label="Project filters"
+              aria-label={t('projects.projectFilters')}
             >
             {filters.map((filter) => (
               <FilterButton
@@ -567,12 +622,10 @@ const ProjectGallery: React.FC = () => {
               <Filter size={32} className="text-theme-secondary" />
             </div>
             <h3 className="text-xl font-semibold mb-2 text-theme-primary">
-              {language === "en" ? "No projects found" : "未找到项目"}
+              {t('projects.noProjectsFound')}
             </h3>
             <p className="text-theme-secondary">
-              {language === "en"
-                ? "Try adjusting your search or filter criteria."
-                : "尝试调整搜索条件或筛选器。"}
+              {t('projects.adjustSearchCriteria')}
             </p>
           </motion.div>
         )}

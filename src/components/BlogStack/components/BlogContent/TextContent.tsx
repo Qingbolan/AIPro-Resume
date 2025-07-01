@@ -71,11 +71,28 @@ export const TextContent: React.FC<TextContentProps> = ({
       ([, a], [, b]) => a.startOffset - b.startOffset
     );
 
+    // Remove overlapping annotations (keep first one in case of overlap)
+    const nonOverlappingAnnotations: typeof sortedAnnotations = [];
+    let lastEndOffset = -1;
+
+    sortedAnnotations.forEach(([annotationId, annotation]) => {
+      if (annotation.startOffset >= lastEndOffset) {
+        nonOverlappingAnnotations.push([annotationId, annotation]);
+        lastEndOffset = annotation.endOffset;
+      }
+    });
+
     let lastIndex = 0;
     const parts: (string | JSX.Element)[] = [];
 
-    sortedAnnotations.forEach(([annotationId, annotation], annotationIndex) => {
-      const { startOffset, endOffset, selectedText } = annotation;
+    nonOverlappingAnnotations.forEach(([annotationId, annotation], annotationIndex) => {
+      const { startOffset, endOffset } = annotation;
+      
+      // Validate annotation boundaries
+      if (startOffset < 0 || endOffset > text.length || startOffset >= endOffset) {
+        console.warn(`Invalid annotation boundaries for ${annotationId}:`, { startOffset, endOffset, textLength: text.length });
+        return;
+      }
       
       // Add text before annotation
       if (startOffset > lastIndex) {
@@ -86,6 +103,9 @@ export const TextContent: React.FC<TextContentProps> = ({
           parts.push(beforeText);
         }
       }
+      
+      // Get the actual text from the content (more reliable than stored selectedText)
+      const actualSelectedText = text.slice(startOffset, endOffset);
       
       // Add highlighted annotation with inline compact indicator
       const isHighlighted = highlightedAnnotation === annotationId;
@@ -113,7 +133,7 @@ export const TextContent: React.FC<TextContentProps> = ({
             onClick={() => onHighlightAnnotation(annotationId)}
             title={annotation.text}
           >
-            {selectedText}
+            {actualSelectedText}
           </span>
           
           {/* Compact inline annotation indicator */}
@@ -149,7 +169,7 @@ export const TextContent: React.FC<TextContentProps> = ({
                    style={{ 
                      fontFamily: 'Georgia, "Times New Roman", Charter, serif'
                    }}>
-                  "{selectedText}"
+                  "{actualSelectedText}"
                 </p>
                 
                 {/* Annotation content */}
@@ -258,7 +278,8 @@ export const TextContent: React.FC<TextContentProps> = ({
           <div className="absolute -right-16 top-0 hidden lg:flex flex-col items-center">
             <div className="flex items-center justify-center w-8 h-8 rounded-full 
                             bg-theme-accent/10 border border-theme-accent/30 
-                            backdrop-blur-sm hover:bg-theme-accent/20 transition-all duration-200">
+                            backdrop-blur-sm hover:bg-theme-accent/20 transition-all duration-200"
+                 title={`${contentAnnotations.length} ${language === 'en' ? 'annotation(s)' : '条批注'}`}>
               <MessageCircle size={14} className="text-theme-accent" />
             </div>
             <span className="text-xs font-medium text-theme-accent mt-1 bg-theme-accent/10 
@@ -357,6 +378,7 @@ export const TextContent: React.FC<TextContentProps> = ({
                   }}
                   rows={4}
                   autoFocus
+                  maxLength={500}
                 />
                 
                 <div className="flex items-center justify-between mt-4">

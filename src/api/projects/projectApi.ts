@@ -101,12 +101,21 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2024,
       name: "ZIYUN2024",
+      nameZh: "紫韵2024",
       description: "Focusing on AI and advanced web technologies",
+      descriptionZh: "专注于AI及先进的网页技术",
+      icon: "Brain",
+      image: "/logo.svg",
       projectCount: 3,
       objectives: [
         "Master advanced AI techniques",
         "Develop a cutting-edge web application",
         "Contribute to open-source projects"
+      ],
+      objectivesZh: [
+        "掌握先进的AI技术",
+        "开发尖端的网页应用",
+        "为开源项目做出贡献"
       ],
       projects: [
         { id: 1, name: "AI Chatbot", description: "An intelligent chatbot using NLP" },
@@ -116,12 +125,21 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2023,
       name: "YANGFAN2023",
+      nameZh: "扬帆2023",
       description: "Exploring blockchain and decentralized applications",
+      descriptionZh: "探索区块链和去中心化应用",
+      icon: "Anchor",
+      image: null,
       projectCount: 2,
       objectives: [
         "Develop a blockchain-based application",
         "Research on smart contract security",
         "Participate in a blockchain hackathon"
+      ],
+      objectivesZh: [
+        "开发基于区块链的应用程序",
+        "研究智能合约安全性",
+        "参与区块链黑客马拉松"
       ],
       projects: [
         { id: 5, name: "Blockchain Voting System", description: "A decentralized voting system using blockchain technology" },
@@ -130,11 +148,19 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2022,
       name: "WENXIN2022",
+      nameZh: "问心2022",
       description: "Developing web and mobile solutions",
+      descriptionZh: "开发网页和移动解决方案",
+      icon: "Heart",
+      image: null,
       projectCount: 1,
       objectives: [
         "Enhance web development skills",
         "Build scalable mobile applications"
+      ],
+      objectivesZh: [
+        "提升网页开发技能",
+        "构建可扩展的移动应用程序"
       ],
       projects: [
         { id: 2, name: "E-commerce Platform", description: "A full-stack online shopping platform" },
@@ -143,11 +169,19 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2021,
       name: "WANXIANG2021",
+      nameZh: "万象2021",
       description: "Focus on mobile app development",
+      descriptionZh: "专注于移动应用开发",
+      icon: "Smartphone",
+      image: null,
       projectCount: 1,
       objectives: [
         "Develop cross-platform mobile applications",
         "Integrate with backend services"
+      ],
+      objectivesZh: [
+        "开发跨平台移动应用",
+        "与后端服务集成"
       ],
       projects: [
         { id: 4, name: "Mobile Fitness App", description: "A cross-platform mobile application for fitness tracking" },
@@ -158,9 +192,18 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2024,
       name: "紫韵2024",
+      nameZh: "紫韵2024",
       description: "专注于AI及先进的网页技术",
+      descriptionZh: "专注于AI及先进的网页技术",
+      icon: "Brain",
+      image: "/logo.svg",
       projectCount: 3,
       objectives: [
+        "掌握先进的AI技术",
+        "开发尖端的网页应用",
+        "为开源项目做出贡献"
+      ],
+      objectivesZh: [
         "掌握先进的AI技术",
         "开发尖端的网页应用",
         "为开源项目做出贡献"
@@ -173,9 +216,18 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2023,
       name: "扬帆2023",
+      nameZh: "扬帆2023",
       description: "探索区块链和去中心化应用",
+      descriptionZh: "探索区块链和去中心化应用",
+      icon: "Anchor",
+      image: null,
       projectCount: 2,
       objectives: [
+        "开发基于区块链的应用程序",
+        "研究智能合约安全性",
+        "参与区块链黑客马拉松"
+      ],
+      objectivesZh: [
         "开发基于区块链的应用程序",
         "研究智能合约安全性",
         "参与区块链黑客马拉松"
@@ -187,9 +239,17 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2022,
       name: "问心2022",
+      nameZh: "问心2022",
       description: "开发网页和移动解决方案",
+      descriptionZh: "开发网页和移动解决方案",
+      icon: "Heart",
+      image: null,
       projectCount: 1,
       objectives: [
+        "提升网页开发技能",
+        "构建可扩展的移动应用程序"
+      ],
+      objectivesZh: [
         "提升网页开发技能",
         "构建可扩展的移动应用程序"
       ],
@@ -200,9 +260,17 @@ const annualPlans: Record<Language, AnnualPlan[]> = {
     {
       year: 2021,
       name: "游薪2021",
+      nameZh: "游薪2021",
       description: "专注于移动应用开发",
+      descriptionZh: "专注于移动应用开发",
+      icon: "Smartphone",
+      image: null,
       projectCount: 1,
       objectives: [
+        "开发跨平台移动应用",
+        "与后端服务集成"
+      ],
+      objectivesZh: [
         "开发跨平台移动应用",
         "与后端服务集成"
       ],
@@ -587,8 +655,8 @@ best_arch = searcher.search(dataset='cifar10')`,
       },
       github: 'https://github.com/example/nas',
       demo: 'https://nas-demo.example.com',
-      planId: 'undergraduate',
-      year: 2023
+      planId: 'ZIYUN2024',
+      year: 2024
     }
   },
   zh: {
@@ -912,8 +980,8 @@ best_arch = searcher.search(dataset='cifar10')`,
       },
       github: 'https://github.com/example/nas',
       demo: 'https://nas-demo.example.com',
-      planId: 'undergraduate',
-      year: 2023
+      planId: 'ZIYUN2024',
+      year: 2024
     }
   }
 };
