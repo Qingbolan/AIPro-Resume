@@ -73,6 +73,11 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
   const [seriesData, setSeriesData] = useState<SeriesData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Handle responsive sidebar states
   useEffect(() => {
     const handleResize = () => {
@@ -415,7 +420,7 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
 
       {/* Fixed Header - Y轴 0，考虑顶部导航栏 */}
       <motion.div
-        className={`fixed top-12 xs:top-14 sm:top-16 left-0 right-0 z-40 bg-theme-background/95 backdrop-blur-sm border-b border-theme-border ${metaSidebarCollapsed ? 'ml-12' : 'ml-80'} ${tocCollapsed ? 'mr-12' : 'mr-60'}`}
+        className={`fixed top-12 xs:top-14 sm:top-16 left-0 right-0 z-40 border-b border-theme-border ${metaSidebarCollapsed ? 'ml-12' : 'ml-80'} ${tocCollapsed ? 'mr-12' : 'mr-60'}`}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >

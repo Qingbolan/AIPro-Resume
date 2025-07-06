@@ -45,19 +45,9 @@ const CurrentPlanSubtitle: React.FC<CurrentPlanProps> = ({
           <span className="text-lg font-semibold text-theme-primary">
             {language === "en" ? plan.name : plan.nameZh}
           </span>
-                      <span className="text-sm text-theme-secondary ml-2">
-              {plan.startYear} - {plan.endYear || t('projects.ongoing')} • {" "}
-              <span className={`font-medium ${
-                plan.status === "active" ? "text-green-600" :
-                plan.status === "completed" ? "text-blue-600" :
-                "text-yellow-600"
-              }`}>
-                {plan.status === "active" ? t('projects.active') :
-                 plan.status === "completed" ? t('projects.completed') :
-                 t('projects.planned')
-                }
-              </span>
-            </span>
+          <span className="text-sm text-theme-secondary ml-2">
+            {plan.startYear} - {t('projects.ongoing')}
+          </span>
           <span className="text-base font-medium text-theme-primary italic">
             "{language === "en" ? plan.slogan : plan.sloganZh}"
           </span>
@@ -324,6 +314,11 @@ const ProjectGallery: React.FC = () => {
       root.style.setProperty(`--color-${key}`, value);
     });
   }, [colors]);
+
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Load data from APIs
   useEffect(() => {

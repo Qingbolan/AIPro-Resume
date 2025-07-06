@@ -207,6 +207,11 @@ const IdeaPage: React.FC = () => {
     });
   }, [colors]);
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Load ideas
   useEffect(() => {
     let isMounted = true;

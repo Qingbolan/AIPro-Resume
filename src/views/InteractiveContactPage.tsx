@@ -19,6 +19,11 @@ const InteractiveContactPage: React.FC = () => {
   const { colors } = useTheme();
   const { language } = useLanguage();
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Set CSS variables based on current theme
   useEffect(() => {
     const root = document.documentElement;

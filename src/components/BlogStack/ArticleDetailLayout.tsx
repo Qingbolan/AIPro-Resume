@@ -70,6 +70,11 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
   const [bookmarked, setBookmarked] = useState(false);
   const [videoMuted, setVideoMuted] = useState(false);
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Handle responsive sidebar states
   useEffect(() => {
     const handleResize = () => {
@@ -374,7 +379,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
 
       {/* Fixed Header - Y轴 0，考虑顶部导航栏 */}
       <motion.div
-        className={`fixed top-12 xs:top-14 sm:top-16 left-0 right-0 z-40 bg-theme-background/95 backdrop-blur-sm border-b border-theme-border ${metaSidebarCollapsed ? 'ml-12' : 'ml-60'} ${tocCollapsed ? 'mr-12' : 'mr-60'}`}
+        className={`fixed top-12 xs:top-14 sm:top-16 left-0 right-0 z-40 border-b border-theme-border ${metaSidebarCollapsed ? 'ml-12' : 'ml-60'} ${tocCollapsed ? 'mr-12' : 'mr-60'}`}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -438,7 +443,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
           {!metaSidebarCollapsed && (
             <>
               {/* Article Meta Info */}
-              <div className="bg-theme-background rounded-lg p-4 border border-theme-border">
+              <div className="rounded-lg p-4 border border-theme-border">
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center gap-2 text-theme-secondary">
                     <User size={12} />
@@ -462,7 +467,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
               </div>
 
               {/* Statistics */}
-              <div className="bg-theme-background rounded-lg p-4 border border-theme-border">
+              <div className="rounded-lg p-4 border border-theme-border">
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-theme-secondary">{language === 'en' ? 'Views' : '浏览量'}</span>
@@ -485,7 +490,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
 
               {/* Tags */}
               {post.tags && post.tags.length > 0 && (
-                <div className="bg-theme-background rounded-lg p-4 pl-2 border border-theme-border">
+                <div className="rounded-lg p-4 pl-2 border border-theme-border">
                   <div className="flex flex-wrap gap-1">
                     {post.tags.map((tag, index) => (
                       <span
@@ -501,7 +506,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
 
 
               {/* Quick Actions */}
-              <div className="bg-theme-background rounded-lg p-4 border border-theme-border">
+              <div className="rounded-lg p-4 border border-theme-border">
                 <div className="gap-1">
                   <button
                     onClick={handleLike}
@@ -683,7 +688,7 @@ const ArticleDetailLayout: React.FC<ArticleDetailLayoutProps> = ({
           {!tocCollapsed && (
             <>
               {/* Table of Contents */}
-              <div className="bg-theme-background rounded-lg p-4 border border-theme-border">
+              <div className="rounded-lg p-4 border border-theme-border">
                   {tableOfContents.map((item) => (
                     <button
                       key={item.id}
