@@ -1,39 +1,6 @@
 // Icon mapping utility for dynamic icon loading
 import React from 'react';
-import { 
-  GraduationCap, 
-  Brain, 
-  Zap, 
-  Briefcase, 
-  Target, 
-  Calendar,
-  TrendingUp,
-  Code,
-  LucideIcon
-} from 'lucide-react';
-
-// Type for icon names
-export type IconName = 'GraduationCap' | 'Brain' | 'Zap' | 'Briefcase' | 'Target' | 'Calendar' | 'TrendingUp' | 'Code';
-
-// Interface for icon props
-interface IconProps {
-  size?: number;
-  color?: string;
-  className?: string;
-  [key: string]: any;
-}
-
-// Interface for plan object - using import to avoid conflicts
-import type { Plan as ProjectPlan } from '../types';
-
-// Interface for plan display props
-interface PlanDisplayProps {
-  size?: number;
-  className?: string;
-}
-
-// Map of icon names to actual icon components
-const iconMap: Record<IconName, LucideIcon> = {
+import {
   GraduationCap,
   Brain,
   Zap,
@@ -41,7 +8,50 @@ const iconMap: Record<IconName, LucideIcon> = {
   Target,
   Calendar,
   TrendingUp,
-  Code
+  Code,
+  Anchor,
+  Heart,
+  Smartphone,
+  Droplets,
+  LucideIcon
+} from 'lucide-react';
+
+// Type for icon names
+export type IconName = 'GraduationCap' | 'Brain' | 'Zap' | 'Briefcase' | 'Target' | 'Calendar' | 'TrendingUp' | 'Code' | 'Anchor' | 'Heart' | 'Smartphone' | 'Droplets';
+
+// Interface for icon props
+export interface IconProps {
+  size?: number;
+  className?: string;
+  color?: string;
+}
+
+// Interface for plan object - using import to avoid conflicts
+import type { Plan as ProjectPlan, AnnualPlan } from '../types/api';
+import type { Plan as IndexPlan } from '../types';
+
+// Union type for plan objects
+type PlanType = ProjectPlan | AnnualPlan | IndexPlan;
+
+// Interface for plan display props
+export interface PlanDisplayProps extends IconProps {
+  onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+}
+
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  GraduationCap,
+  Brain,
+  Zap,
+  Briefcase,
+  Target,
+  Calendar,
+  TrendingUp,
+  Code,
+  Anchor,
+  Heart,
+  Smartphone,
+  Droplets
 };
 
 /**
@@ -61,46 +71,46 @@ export const getIcon = (iconName: IconName, props: IconProps = {}): React.ReactE
 
 /**
  * Get plan display element (icon or image)
- * @param plan - Plan object with icon and/or image properties
+ * @param plan - Plan object with icon and/or image properties (ProjectPlan, AnnualPlan, or IndexPlan)
  * @param props - Props for styling (size, className, etc.)
  * @returns React element or null
  */
-export const getPlanDisplay = (plan: ProjectPlan, props: PlanDisplayProps = {}): React.ReactElement | null => {
+export const getPlanDisplay = (plan: PlanType, props: PlanDisplayProps = {}): React.ReactElement | null => {
   const { size = 16, className = '' } = props;
   
-  // If plan has custom image, use it
-  if (plan.image) {
-    const isSvg = plan.image.endsWith('.svg');
+  // Check if plan has image property and if it exists
+  if ('image' in plan && plan.image) {
+    const planName = 'nameZh' in plan ? plan.nameZh : ('name' in plan ? (plan as any).name : 'Plan');
     return React.createElement('img', {
       src: plan.image,
-      alt: plan.name,
-      className: `${isSvg ? 'rounded-none' : 'rounded-full'} object-cover ${className}`,
+      alt: planName,
+      className: `w-${size} h-${size} object-cover ${className}`,
       style: { width: size, height: size },
       onError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         // Fallback to icon if image fails to load
-        console.warn(`Failed to load image for plan ${plan.id}, falling back to icon`);
-        if (plan.icon && e.currentTarget && e.currentTarget.parentNode && plan.icon in iconMap) {
+        const planId = 'id' in plan ? (plan as any).id : ('name' in plan ? (plan as any).name : 'unknown');
+        console.warn(`Failed to load image for plan ${planId}, falling back to icon`);
+        if ('icon' in plan && plan.icon && plan.icon in iconMap) {
           // Create a new img element with the icon as fallback
-          const fallbackImg = document.createElement('div');
-          fallbackImg.className = `${className}`;
-          fallbackImg.style.width = `${size}px`;
-          fallbackImg.style.height = `${size}px`;
-          fallbackImg.style.display = 'flex';
-          fallbackImg.style.alignItems = 'center';
-          fallbackImg.style.justifyContent = 'center';
-          fallbackImg.textContent = '?';
-          e.currentTarget.parentNode.replaceChild(fallbackImg, e.currentTarget);
+          const parent = e.currentTarget.parentNode;
+          if (parent) {
+            const IconComponent = iconMap[plan.icon];
+            const iconElement = React.createElement(IconComponent, { size, className });
+            // Replace the img with icon component
+            parent.replaceChild(React.createElement('div', {}, iconElement) as any, e.currentTarget);
+          }
         }
       }
     });
   }
   
-  // Fall back to icon if available
-  if (plan.icon && plan.icon in iconMap) {
-    return getIcon(plan.icon as IconName, { size, className });
+  // Check if plan has icon property and if it exists in iconMap
+  if ('icon' in plan && plan.icon && plan.icon in iconMap) {
+    const IconComponent = iconMap[plan.icon];
+    return React.createElement(IconComponent, { size, className });
   }
   
-  // No display available
+  // No valid icon or image found
   return null;
 };
 

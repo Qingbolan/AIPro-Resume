@@ -120,7 +120,9 @@ export interface Plan {
 export interface ProjectWithPlan {
   id: string;
   title: string;
+  titleZh?: string;
   description: string;
+  descriptionZh?: string;
   image: string;
   tags: string[];
   github?: string;
@@ -342,9 +344,14 @@ export interface ProjectBlogReference {
 export interface AnnualPlan {
   year: number;
   name: string;
+  nameZh: string;
   description: string;
+  descriptionZh: string;
+  icon: string;
+  image: string | null;
   projectCount: number;
   objectives: string[];
+  objectivesZh: string[];
   projects: Array<{
     id: number;
     name: string;

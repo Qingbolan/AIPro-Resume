@@ -323,6 +323,11 @@ const BlogStack: React.FC = () => {
     });
   }, [colors]);
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Handle URL parameters
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);

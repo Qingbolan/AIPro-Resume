@@ -471,6 +471,11 @@ const ResumeWebsite: React.FC = () => {
   const { language } = useLanguage();
   const { t } = useTranslation();
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Set CSS variables based on current theme
   useEffect(() => {
     const root = document.documentElement;

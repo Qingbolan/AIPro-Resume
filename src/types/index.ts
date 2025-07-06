@@ -14,7 +14,9 @@ export interface Language {
 export interface ProjectData {
   id: string;
   title: string;
+  titleZh?: string;
   description: string;
+  descriptionZh?: string;
   image: string;
   tags: string[];
   link?: string;

@@ -1,14 +1,21 @@
 // Central API exports
 export * from './home/resumeApi';
-export * from './getRecentMessages';
-// export * from './newsApi';
-export * from './planApi';
-export * from './getAIResponse';
-export * from './getRecentGoal';
 export * from './projects/projectApi';
 export * from './ideas/ideaApi';
 export * from './blog/blogApi';
-export * from './sendMessage';
+
+// Export specific functions from plans/planApi to avoid conflicts
+export { 
+  fetchAnnualPlans, 
+  fetchCurrentAnnualPlan, 
+  fetchAnnualPlanByName,
+  fetchProjectsWithAnnualPlans,
+  fetchProjectsByAnnualPlan,
+  // Backward compatibility exports
+  fetchPlans,
+  fetchCurrentPlan,
+  fetchProjectsWithPlans
+} from './plans/planApi';
 
 // Re-export types for convenience
 export type {
@@ -22,17 +29,10 @@ export type {
   ExperienceItem,
   RecentUpdate,
   ResumeSection,
-  Message,
-  NewsItem,
   Plan,
   ProjectWithPlan,
   Project,
   ProjectDetail,
   AnnualPlan,
-  GraphData,
-  RecentGoalData,
-  FormData,
-  ApiResponse,
-  SendMessageResponse,
-  VerifyEmailResponse
+  GraphData
 } from '../types/api'; 

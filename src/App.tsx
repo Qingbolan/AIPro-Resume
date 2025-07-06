@@ -11,6 +11,7 @@ import IdeaPage from './views/IdeaPage';
 import IdeaDetail from './components/IdeaPage/IdeaDetail';
 import BlogStack from './views/BlogStack';
 import BlogDetail from './components/BlogStack/BlogDetail';
+import PlansPage from './views/PlansPage';
 import { ThemeProvider } from './components/ThemeContext';
 import { LanguageProvider } from './components/LanguageContext';
 
@@ -26,6 +27,7 @@ const App: React.FC = () => {
               <Route path="/contact" element={<InteractiveContactPage />} />
               <Route path="/projects" element={<ProjectGallery />} />
               <Route path="/projects/:id" element={<ProjectDetail />} />
+              <Route path="/plans" element={<PlansPage />} />
               <Route path="/ideas" element={<IdeaPage />} />
               <Route path="/ideas/:id" element={<IdeaDetail />} />
               <Route path="/blog" element={<BlogStack />} />

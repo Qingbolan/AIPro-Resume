@@ -11,9 +11,10 @@ import {
   Shield,
   Calendar,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../LanguageContext';
 import { getPlanDisplay } from '../../utils/iconMap';
-import { fetchPlanById } from '../../api/planApi';
+import { fetchAnnualPlanByName } from '../../api/plans/planApi';
 import { fetchProjectDetailById } from '../../api';
 import ProjectTabs from '../ProjectTabs';
 import type { ProjectDetail as ProjectDetailType } from '../../types/api';
@@ -21,6 +22,7 @@ import type { ProjectDetail as ProjectDetailType } from '../../types/api';
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const { t } = useTranslation();
   const [plan, setPlan] = useState<any>(null);
   const [project, setProject] = useState<ProjectDetailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,11 +46,11 @@ const ProjectDetail: React.FC = () => {
         if (projectData) {
           setProject(projectData);
         } else {
-          setError(language === 'en' ? 'Project not found' : '项目未找到');
+          setError(t('projects.projectNotFound'));
         }
       } catch (err) {
         console.error('Error loading project:', err);
-        setError(language === 'en' ? 'Failed to load project' : '加载项目失败');
+        setError(t('projects.failedToLoadProject'));
       } finally {
         setLoading(false);
       }
@@ -62,7 +64,7 @@ const ProjectDetail: React.FC = () => {
     const loadPlan = async () => {
       if (project?.planId) {
         try {
-          const planData = await fetchPlanById(project.planId, language);
+          const planData = await fetchAnnualPlanByName(project.planId, language);
           setPlan(planData);
         } catch (error) {
           console.error('Failed to load plan:', error);
@@ -79,7 +81,7 @@ const ProjectDetail: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-primary mx-auto mb-4"></div>
           <p className="text-theme-secondary">
-            {language === 'en' ? 'Loading project...' : '加载项目中...'}
+            {t('projects.loadingProject')}
           </p>
         </div>
       </div>
@@ -91,13 +93,13 @@ const ProjectDetail: React.FC = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-theme-primary mb-4">
-            {error || (language === 'en' ? 'Project Not Found' : '项目未找到')}
+            {error || t('projects.projectNotFound')}
           </h1>
           <Link 
             to="/projects"
             className="text-blue-600 hover:underline"
           >
-            {language === 'en' ? 'Back to Projects' : '返回项目列表'}
+            {t('projects.backToProjects')}
           </Link>
         </div>
       </div>
@@ -123,7 +125,7 @@ const ProjectDetail: React.FC = () => {
               className="flex items-center gap-1 hover:text-theme-primary transition-colors"
             >
               <ArrowLeft size={16} />
-              {language === 'en' ? 'Projects' : '项目'}
+              {t('projects.title')}
             </Link>
             <span>/</span>
             <span className="text-theme-primary">{project.title}</span>
@@ -167,15 +169,15 @@ const ProjectDetail: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-6 text-sm text-theme-secondary">
                   <div className="flex items-center gap-1">
                     <Star size={16} />
-                    <span>{project.metrics?.stars || 0} stars</span>
+                    <span>{project.metrics?.stars || 0} {t('projects.stars')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <GitFork size={16} />
-                    <span>{project.community?.forks || 0} forks</span>
+                    <span>{project.community?.forks || 0} {t('projects.forks')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Download size={16} />
-                    <span>{project.metrics?.downloads || 0} downloads</span>
+                    <span>{project.metrics?.downloads || 0} {t('projects.downloads')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Shield size={16} />
@@ -183,7 +185,7 @@ const ProjectDetail: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar size={16} />
-                    <span>{language === 'en' ? 'Updated' : '更新于'} {project.status?.lastUpdated}</span>
+                    <span>{t('projects.updated')} {project.status?.lastUpdated}</span>
                   </div>
                 </div>
               </div>
@@ -198,7 +200,7 @@ const ProjectDetail: React.FC = () => {
                     className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <ExternalLink size={16} />
-                    {language === 'en' ? 'Live Demo' : '在线演示'}
+                    {t('projects.liveDemo')}
                   </a>
                 )}
                 {project.github && (
@@ -209,12 +211,12 @@ const ProjectDetail: React.FC = () => {
                     className="flex items-center justify-center gap-2 border border-theme-border text-theme-primary px-4 py-2 rounded-lg hover:bg-theme-surface transition-colors"
                   >
                     <Github size={16} />
-                    {language === 'en' ? 'Source Code' : '源代码'}
+                    {t('projects.sourceCode')}
                   </a>
                 )}
                 <button className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
                   <Download size={16} />
-                  {language === 'en' ? 'Download' : '下载'} v{project.versions?.latest || '1.0.0'}
+                  {t('projects.download')} v{project.versions?.latest || '1.0.0'}
                 </button>
               </div>
             </div>

@@ -19,6 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
+import { useTranslation } from 'react-i18next';
 import CommunityFeedback from './CommunityFeedback';
 import { Link } from 'react-router-dom';
 
@@ -28,47 +29,48 @@ interface ProjectTabsProps {
 
 const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
   const { language } = useLanguage();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('readme');
 
   const tabs = [
     { 
       id: 'readme', 
-      label: language === 'en' ? 'README' : '说明文档', 
+      label: t('projects.readme'), 
       icon: <BookOpen size={16} /> 
     },
     { 
       id: 'relatedblogs', 
-      label: language === 'en' ? 'Related Blogs' : '相关博客', 
+      label: t('projects.relatedBlogs'), 
       icon: <FileText size={16} /> 
     },
     { 
       id: 'releases', 
-      label: language === 'en' ? 'Releases' : '版本发布', 
+      label: t('projects.releases'), 
       icon: <Download size={16} /> 
     },
     { 
       id: 'quickstart', 
-      label: language === 'en' ? 'Quick Start' : '快速开始', 
+      label: t('projects.quickStart'), 
       icon: <Play size={16} /> 
     },
     { 
       id: 'community', 
-      label: language === 'en' ? 'Community' : '社区', 
+      label: t('projects.community'), 
       icon: <Users size={16} /> 
     },
     { 
       id: 'issues', 
-      label: language === 'en' ? 'Issues' : '问题反馈', 
+      label: t('projects.issues'), 
       icon: <Bug size={16} /> 
     },
     { 
       id: 'dependencies', 
-      label: language === 'en' ? 'Dependencies' : '依赖管理', 
+      label: t('projects.dependencies'), 
       icon: <Settings size={16} /> 
     },
     { 
       id: 'license', 
-      label: language === 'en' ? 'License' : '开源协议', 
+      label: t('projects.license'), 
       icon: <Scale size={16} /> 
     }
   ];
@@ -84,13 +86,13 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
             ? 'bg-green-100 text-green-800' 
             : 'bg-red-100 text-red-800'
         }`}>
-          Build: {projectData.status?.buildStatus || 'Unknown'}
+          {t('projects.build')}: {projectData.status?.buildStatus || t('projects.unknown')}
         </span>
         <span className="px-2 py-1 rounded text-sm font-medium bg-blue-100 text-blue-800">
-          Coverage: {projectData.status?.coverage || 0}%
+          {t('projects.coverage')}: {projectData.status?.coverage || 0}%
         </span>
         <span className="px-2 py-1 rounded text-sm font-medium bg-gray-100 text-gray-800">
-          {projectData.status?.license || 'License'}
+          {projectData.status?.license || t('projects.license')}
         </span>
       </div>
       
@@ -99,7 +101,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
       </p>
       
       <h3 className="text-lg font-semibold mb-3 text-theme-primary">
-        {language === 'en' ? 'Key Features' : '主要特性'}
+        {t('projects.keyFeatures')}
       </h3>
       <ul className="space-y-2 mb-6">
         {(language === 'en' ? projectData.features : projectData.featuresZh)?.map((feature: string, index: number) => (
@@ -117,7 +119,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
       <div>
         <h3 className="text-lg font-semibold mb-3 text-theme-primary flex items-center gap-2">
           <Terminal size={20} />
-          {language === 'en' ? 'Installation' : '安装'}
+          {t('projects.installation')}
         </h3>
         <div className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
           <pre className="text-sm">
@@ -128,7 +130,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
       
       <div>
         <h3 className="text-lg font-semibold mb-3 text-theme-primary">
-          {language === 'en' ? 'Basic Usage' : '基本用法'}
+          {t('projects.basicUsage')}
         </h3>
         <div className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
           <pre className="text-sm">
@@ -139,7 +141,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
       
       <div>
         <h3 className="text-lg font-semibold mb-3 text-theme-primary">
-          {language === 'en' ? 'Requirements' : '系统要求'}
+          {t('projects.requirements')}
         </h3>
         <ul className="space-y-2">
           {projectData.quickStart?.requirements?.map((req: string, index: number) => (
@@ -157,7 +159,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-theme-primary">
-          {language === 'en' ? 'Latest Release' : '最新版本'}: v{projectData.versions?.latest || '1.0.0'}
+          {t('projects.latestRelease')}: v{projectData.versions?.latest || '1.0.0'}
         </h3>
       </div>
       
@@ -169,7 +171,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
           </div>
           <p className="text-theme-secondary mb-3">{release.description}</p>
           <div className="flex items-center gap-4 text-sm text-theme-secondary">
-            <span>↓ {release.downloadCount} downloads</span>
+            <span>↓ {release.downloadCount} {t('projects.downloads')}</span>
             {release.assets?.map((asset: any, assetIndex: number) => (
               <button 
                 key={assetIndex}
@@ -192,10 +194,10 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
     <div className="space-y-4">
       <div className="flex items-center gap-4 mb-4">
         <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-          {projectData.community?.issues?.open || 0} Open
+          {projectData.community?.issues?.open || 0} {t('projects.open')}
         </span>
         <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-          {projectData.community?.issues?.closed || 0} Closed
+          {projectData.community?.issues?.closed || 0} {t('projects.closed')}
         </span>
       </div>
       
@@ -207,7 +209,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
                 <h4 className="font-medium text-theme-primary mb-1">{issue.title}</h4>
                 <div className="flex items-center gap-2 text-sm text-theme-secondary">
                   <span>#{issue.id}</span>
-                  <span>by {issue.author}</span>
+                  <span>{t('projects.by')} {issue.author}</span>
                   <span>{issue.created}</span>
                 </div>
               </div>
@@ -229,7 +231,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <h3 className="text-lg font-semibold mb-3 text-theme-primary">
-          {language === 'en' ? 'Production Dependencies' : '生产依赖'}
+          {t('projects.productionDependencies')}
         </h3>
         <div className="space-y-2">
           {projectData.dependencies?.production?.map((dep: any, index: number) => (
@@ -249,7 +251,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
       
       <div>
         <h3 className="text-lg font-semibold mb-3 text-theme-primary">
-          {language === 'en' ? 'Development Dependencies' : '开发依赖'}
+          {t('projects.developmentDependencies')}
         </h3>
         <div className="space-y-2">
           {projectData.dependencies?.development?.map((dep: any, index: number) => (
@@ -270,13 +272,10 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
     <div className="space-y-4">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-theme-primary mb-2">
-          {language === 'en' ? 'Related Blog Posts' : '相关博客文章'}
+          {t('projects.relatedBlogPosts')}
         </h3>
         <p className="text-theme-secondary">
-          {language === 'en' 
-            ? 'Explore blog posts and articles related to this project, including technical insights, development stories, and deep dives into the technologies used.'
-            : '探索与此项目相关的博客文章，包括技术见解、开发故事和所使用技术的深入探讨。'
-          }
+          {t('projects.exploreRelatedBlogs')}
         </p>
       </div>
 
@@ -296,10 +295,10 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
                       blog.relevance === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {language === 'en' ? blog.relevance : 
-                        blog.relevance === 'high' ? '高相关' :
-                        blog.relevance === 'medium' ? '中等相关' : '低相关'
-                      } {language === 'en' ? 'relevance' : ''}
+                      {blog.relevance === 'high' ? t('projects.highRelevance') :
+                        blog.relevance === 'medium' ? t('projects.mediumRelevance') :
+                        t('projects.lowRelevance')
+                      }
                     </span>
                     <span className="text-xs text-theme-secondary">{blog.category}</span>
                   </div>
@@ -330,7 +329,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
                   to={blog.url}
                   className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
                 >
-                  {language === 'en' ? 'Read Article' : '阅读文章'}
+                  {t('projects.readArticle')}
                   <ExternalLink size={14} />
                 </Link>
               </div>
@@ -355,13 +354,10 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
         <div className="text-center py-12">
           <FileText size={48} className="mx-auto mb-4 text-theme-secondary opacity-50" />
           <h4 className="text-lg font-medium text-theme-primary mb-2">
-            {language === 'en' ? 'No Related Blogs Yet' : '暂无相关博客'}
+            {t('projects.noRelatedBlogsYet')}
           </h4>
           <p className="text-theme-secondary">
-            {language === 'en' 
-              ? 'Check back later for blog posts and articles related to this project.'
-              : '稍后查看与此项目相关的博客文章。'
-            }
+            {t('projects.checkBackLater')}
           </p>
         </div>
       )}
@@ -390,7 +386,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
                     rel="noopener noreferrer"
                     className="text-sm text-blue-600 hover:underline flex items-center gap-1"
                   >
-                    {language === 'en' ? 'View on OSI' : '在OSI查看'}
+                    {t('projects.viewOnOSI')}
                     <ExternalLink size={12} />
                   </a>
                 </div>
@@ -412,7 +408,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle size={20} className="text-green-600" />
                 <h4 className="font-semibold text-theme-primary">
-                  {language === 'en' ? 'Permissions' : '允许'}
+                  {t('projects.permissions')}
                 </h4>
               </div>
               <ul className="space-y-2">
@@ -433,7 +429,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle size={20} className="text-yellow-600" />
                 <h4 className="font-semibold text-theme-primary">
-                  {language === 'en' ? 'Conditions' : '条件'}
+                  {t('projects.conditions')}
                 </h4>
               </div>
               <ul className="space-y-2">
@@ -454,7 +450,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
               <div className="flex items-center gap-2 mb-3">
                 <XCircle size={20} className="text-red-600" />
                 <h4 className="font-semibold text-theme-primary">
-                  {language === 'en' ? 'Limitations' : '限制'}
+                  {t('projects.limitations')}
                 </h4>
               </div>
               <ul className="space-y-2">
@@ -475,7 +471,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
           <div className="border border-theme-border rounded-lg">
             <div className="p-4 border-b border-theme-border">
               <h4 className="font-semibold text-theme-primary">
-                {language === 'en' ? 'Full License Text' : '完整协议文本'}
+                {t('projects.fullLicenseText')}
               </h4>
             </div>
             <div className="p-4">
@@ -498,7 +494,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
               )}
               className="px-4 py-2 bg-theme-primary text-white rounded-lg hover:bg-theme-primary/90 transition-colors"
             >
-              {language === 'en' ? 'Copy License Text' : '复制协议文本'}
+              {t('projects.copyLicenseText')}
             </button>
             <a
               href={projectData.licenseInfo.url}
@@ -506,7 +502,7 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
               rel="noopener noreferrer"
               className="px-4 py-2 border border-theme-border text-theme-primary rounded-lg hover:bg-theme-surface transition-colors"
             >
-              {language === 'en' ? 'Learn More' : '了解更多'}
+              {t('projects.learnMore')}
             </a>
           </div>
         </>
@@ -514,13 +510,10 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ projectData }) => {
         <div className="text-center py-12">
           <Scale size={48} className="mx-auto mb-4 text-theme-secondary opacity-50" />
           <h4 className="text-lg font-medium text-theme-primary mb-2">
-            {language === 'en' ? 'No License Information' : '无协议信息'}
+            {t('projects.noLicenseInformation')}
           </h4>
           <p className="text-theme-secondary">
-            {language === 'en' 
-              ? 'License information is not available for this project.'
-              : '此项目的协议信息不可用。'
-            }
+            {t('projects.licenseNotAvailable')}
           </p>
         </div>
       )}

@@ -171,6 +171,11 @@ const RecentUpdates: React.FC = () => {
     });
   }, [colors]);
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Load recent data
   useEffect(() => {
     let isMounted = true;
