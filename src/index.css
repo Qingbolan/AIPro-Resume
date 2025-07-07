@@ -1,18 +1,18 @@
-/* Enhanced Apple-style Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Mono:wght@300;400;500;600;700&display=swap');
+/* Modern Typography System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* Tailwind Base with Enhanced CSS Variables */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global CSS Variables for Apple-style Design */
+/* Modern Typography Variables */
 :root {
-  /* Typography - Apple's font stack */
-  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'JetBrains Mono', monospace;
+  /* Typography - Clean, modern font stack */
+  --font-system: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
   
   /* Spacing and sizing - Apple's spacing scale */
   --content-max-width: 1120px;
@@ -76,14 +76,13 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
-               'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 
-               'Helvetica Neue', sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   font-weight: 400;
   overflow-x: hidden;
+  font-size: 16px; /* Modern standard font size */
 }
 
 /* Remove all default borders and outlines */
@@ -673,27 +672,71 @@ img {
   animation: gradient-shift 3s ease infinite;
 }
 
-/* Typography improvements */
+/* Modern Typography Scale */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.025em;
+  margin: 0;
 }
 
 h1 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: 3rem;    /* 48px */
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 h2 {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 h3 {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-size: 1.875rem; /* 30px */
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h4 {
+  font-size: 1.5rem;  /* 24px */
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h5 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h6 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 p {
-  line-height: 1.7;
+  font-size: 1rem;    /* 16px */
+  line-height: 1.6;
+  font-weight: 400;
+  margin: 0;
+}
+
+.text-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+}
+
+.text-lg {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.6;
+}
+
+.text-xl {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.5;
 }
 
 /* Selection styles */
@@ -742,4 +785,45 @@ p {
   .no-print {
     display: none !important;
   }
+}
+
+/* Fluent Design specific utilities */
+.fluent-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fluent-card {
+  background: rgba(50, 49, 48, 0.8);
+  border: 1px solid rgba(72, 70, 68, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fluent-glass {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.fluent-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fluent-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dark .fluent-hover:hover {
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+}
+
+.fluent-subtle-gradient {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(250, 249, 248, 0.9));
+}
+
+.dark .fluent-subtle-gradient {
+  background: linear-gradient(145deg, rgba(50, 49, 48, 0.9), rgba(45, 44, 43, 0.9));
 }

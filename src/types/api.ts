@@ -15,6 +15,9 @@ export interface EducationItem {
   degree: string;
   date: string;
   details: string[];
+  logo?: string;
+  website?: string;
+  location?: string;
 }
 
 export interface ResearchItem {
@@ -29,6 +32,9 @@ export interface ExperienceItem {
   role: string;
   date: string;
   details: string[];
+  logo?: string;
+  website?: string;
+  location?: string;
 }
 
 export interface RecentUpdate {

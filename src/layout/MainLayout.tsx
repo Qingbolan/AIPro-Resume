@@ -2,6 +2,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TopNavigation from './TopNavigation';
 import { useTheme } from '../components/ThemeContext';
+import SimpleBackground from '../components/NeuralBackground';
 interface MainLayoutProps {
   children: ReactNode;
 }
@@ -26,16 +27,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div 
-      className="min-h-screen relative overflow-hidden bg-theme-background"
-      style={{
-        // backgroundImage: 'url(/home-background-light.jpg)',
-        // backgroundSize: 'cover',
-        backgroundPosition: 'center top',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Simple Clean Background */}
+      <SimpleBackground />
+      
       {/* Global Reading Progress Bar */}
       <div className="fixed top-0 left-0 z-50 w-full h-1">
         <div 
@@ -46,9 +41,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           }}
         />
       </div>
-
-      {/* Background overlay for better content readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white/80 dark:from-black/60 dark:via-black/40 dark:to-black/70" />
       
       {/* Navigation */}
       <div className="relative z-20">

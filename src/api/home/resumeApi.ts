@@ -36,12 +36,18 @@ const resumeData: Record<Language, ResumeData> = {
             school: "National University of Singapore (NUS)",
             degree: "Master of Computing (ARTIFICIAL INTELLIGENCE specialization)",
             date: "Aug 2024 – Future (Dec 2025)",
+            logo: "/educations/nus.png",
+            website: "https://www.nus.edu.sg/",
+            location: "Singapore",
             details: []
           },
           {
             school: "Macau University of Science and Technology (MUST)",
             degree: "Bachelor of Science in Computer Science (Minor in Artificial Intelligence)",
             date: "Sep 2020 – Jun 2024",
+            logo: "/educations/must.png",
+            website: "https://www.must.edu.mo/",
+            location: "Macau, China",
             details: [
               "GPA: 3.76/4 (Ranked in top 5%, 4/160+)",
               "Received full scholarship of 250,000 CNY for Master's program",
@@ -88,8 +94,11 @@ const resumeData: Record<Language, ResumeData> = {
         content: [
           {
             company: "HPC-AI Tech",
-            role: "AI Engineer",
+            role: "AI Engineer Intern",
             date: "Jan 2025 – Now",
+            logo: "/experiences/hpc-ai.jpeg",
+            website: "https://hpc-ai.tech/",
+            location: "Singapore",
             details: [
               "Open-Sora Team(AIGC text2video): Research on Improving Speed and Quality of Text-to-Video Generation"
             ]
@@ -98,14 +107,20 @@ const resumeData: Record<Language, ResumeData> = {
             company: "Beijing Stats City Data Technology Co., Ltd.",
             role: "Full Stack Engineer",
             date: "Jan 2024 – Sep 2024",
+            logo: "/experiences/scholarhero.png",
+            website: "https://scholarhero.cn/",
+            location: "Beijing, China",
             details: [
               "Scholar Hero: Led a student startup team to develop an AI-powered educational application. Currently, it has 300 users, received recognition and funding support from the Communication University of China, and attracted attention from top Chinese universities. Published a paper as the first author, with patents and software copyrights pending."
             ]
           },
           {
             company: "Lenovo (Beijing) Co. Ltd",
-            role: "Research Intern",
+            role: "Python Develop Engineer Intern",
             date: "Jun 2023 – Sep 2023",
+            logo: "/experiences/lenovo.jpeg",
+            website: "https://www.lenovo.com/",
+            location: "Beijing, China",
             details: [
               "Knowledge and Training System: Led a team of 3 interns to fine-tune large language models and develop Lenovo's internal AI training system (intelligent recommendation and virtual teaching) using Flask and Vue3. Established the internal network for project deployment, configuring network equipment including NAS and computational resources.",
               "Stable Diffusion Launcher: This is the precursor to the AI image generation software pre-installed on Lenovo AI PCs."
@@ -115,6 +130,9 @@ const resumeData: Record<Language, ResumeData> = {
             company: "Ipsos China",
             role: "Market Research Analysis Intern",
             date: "Jul 2022 – Aug 2022",
+            logo: "/experiences/ipsos.jpeg",
+            website: "https://www.ipsos.com/en-cn",
+            location: "Beijing, China",
             details: [
               "Used Octopus crawler tool to collect product data for AIoT smart in-vehicle devices, extracted and analyzed questionnaire data using SPSS, and conducted industry surveys on current AIoT smart in-vehicle devices using Microsoft Excel.",
               "Gained familiarity with market research processes, improved data collection, organization, and analysis skills, and received the Outstanding Project Award for the market research internship project."
@@ -224,12 +242,18 @@ const resumeData: Record<Language, ResumeData> = {
             school: "新加坡国立大学 (NUS)",
             degree: "计算机硕士（人工智能专业）",
             date: "2024年8月 – 未来（2025年12月）",
+            logo: "/educations/nus.png",
+            website: "https://www.nus.edu.sg/",
+            location: "新加坡",
             details: []
           },
           {
             school: "澳门科技大学（MUST）",
             degree: "计算机科学学士（辅修人工智能）",
             date: "2020年9月 – 2024年6月",
+            logo: "/educations/must.png",
+            website: "https://www.must.edu.mo/",
+            location: "中国澳门",
             details: [
               "GPA: 3.76/4（前5%，4/160+）",
               "获得硕士项目全额奖学金250,000 CNY",
@@ -276,8 +300,11 @@ const resumeData: Record<Language, ResumeData> = {
         content: [
           {
             company: "潞晨科技",
-            role: "AI工程师", 
+            role: "AI工程师实习生", 
             date: "2025年1月 – 至今",
+            logo: "/experiences/hpc-ai.jpeg",
+            website: "https://hpc-ai.tech/",
+            location: "新加坡",
             details: [
               "Open-Sora团队(AIGC 文本生视频)：研究提升文本到视频生成的速度和质量"
             ]
@@ -286,14 +313,20 @@ const resumeData: Record<Language, ResumeData> = {
             company: "北京统计之都数据科技有限公司",
             role: "全栈工程师",
             date: "2024年1月 – 2024年9月",
+            logo: "/experiences/scholarhero.png",
+            website: "https://scholarhero.cn/",
+            location: "中国北京",
             details: [
               "Scholar Hero：领导一个学生创业团队开发AI驱动的教育应用。目前拥有300名用户，获得中国传媒大学的认可和资金支持，并吸引了中国顶尖大学的关注。作为第一作者发表论文，正在申请专利和软件版权。"
             ]
           },
           {
             company: "联想（北京）有限公司",
-            role: "研究实习生",
+            role: "Python开发工程师实习生",
             date: "2023年6月 – 2023年9月",
+            logo: "/experiences/lenovo.jpeg",
+            website: "https://www.lenovo.com/",
+            location: "中国北京",
             details: [
               "知识与培训系统：领导一个3名实习生的团队微调大型语言模型，并使用Flask和Vue3开发联想内部的AI培训系统（智能推荐与虚拟教学）。建立项目部署的内部网络，配置包括NAS和计算资源在内的网络设备。",
               "Stable Diffusion Launcher：这是联想AI PC预装的AI图像生成软件的前身。"
@@ -303,6 +336,9 @@ const resumeData: Record<Language, ResumeData> = {
             company: "益普索中国",
             role: "市场研究分析实习生",
             date: "2022年7月 – 2022年8月",
+            logo: "/experiences/ipsos.jpeg",
+            website: "https://www.ipsos.com/en-cn",
+            location: "中国北京",
             details: [
               "使用Octopus爬虫工具收集AIoT智能车载设备的产品数据，使用SPSS提取和分析问卷数据，并使用Microsoft Excel进行当前AIoT智能车载设备的行业调查。",
               "熟悉市场研究流程，提升了数据收集、组织和分析能力，并因市场研究实习项目获得优秀项目奖。"

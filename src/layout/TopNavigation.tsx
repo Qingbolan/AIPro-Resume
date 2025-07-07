@@ -239,7 +239,7 @@ const Logo: React.FC = () => {
   return (
     <Link to="/" className="flex items-center space-x-2 xs:space-x-3 group">
       <motion.div
-        className="relative flex items-center justify-center w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded-lg xs:rounded-xl overflow-hidden"
+        className="relative flex items-center justify-center w-6 h-6 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded-lg xs:rounded-xl overflow-hidden"
         style={{
           boxShadow: `0 4px 20px ${colors.primary}25`,
         }}
@@ -266,11 +266,11 @@ const Logo: React.FC = () => {
         >
           Silan Hu
         </motion.div>
-        <div 
+        {/* <div 
           className="text-[10px] text-nowrap tracking-wider uppercase opacity-60 leading-tight -mt-0.5" 
         >
           ZIYUN·2025
-        </div>
+        </div> */}
       </div>
     </Link>
   );
