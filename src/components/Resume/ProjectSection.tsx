@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, MapPin, Phone, Globe } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 
 interface ContactInfo {
   type: string;
@@ -23,10 +24,10 @@ interface ProjectSectionProps {
 const ProjectSection: React.FC<ProjectSectionProps> = ({ 
   name, 
   title, 
-  current, 
   contacts, 
   socialLinks 
 }) => {
+  const { language } = useLanguage();
   const socialIcons = useMemo(() => {
     return socialLinks.map(link => ({
       icon: link.type === 'github' ? <Github size={20} /> : 
@@ -76,12 +77,15 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({
 
         {/* Current Status */}
         <motion.p
-          className="text-base sm:text-lg mb-8 text-theme-secondary max-w-2xl mx-auto"
+          className="text-base sm:text-lg mb-8 text-theme-secondary max-w-2xl mx-auto text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {current}
+          {language === 'en' 
+            ? "Looking for PhD position in CS(AI) • Pursue Easy AI for Everyone"
+            : "寻求计算机科学(AI)博士职位 • 追求易得易用的AI造福每一个人"
+          }
         </motion.p>
 
         {/* Contact Info */}
