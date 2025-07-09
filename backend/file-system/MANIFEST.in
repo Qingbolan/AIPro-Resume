@@ -1,0 +1,4 @@
+include silan/bin/*
+recursive-include silan/bin *
+include README.md
+include LICENSE
