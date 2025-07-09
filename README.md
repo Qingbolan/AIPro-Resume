@@ -388,8 +388,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Silan Hu** - AI Researcher & Full Stack Developer
 
 - Website: [silan.tech](https://silan.tech/)
-- GitHub: [@silan-hu](https://github.com/silan-hu)
-- LinkedIn: [Silan Hu](https://linkedin.com/in/silan-hu)
+- GitHub: [@Qingbolan](https://github.com/Qingbolan)
+- LinkedIn: [Silan Hu](https://linkedin.com/in/Qingbolan)
 
 ## Acknowledgments
 
