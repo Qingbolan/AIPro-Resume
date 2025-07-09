@@ -30,20 +30,6 @@ func (slu *SocialLinkUpdate) Where(ps ...predicate.SocialLink) *SocialLinkUpdate
 	return slu
 }
 
-// SetUserID sets the "user_id" field.
-func (slu *SocialLinkUpdate) SetUserID(u uuid.UUID) *SocialLinkUpdate {
-	slu.mutation.SetUserID(u)
-	return slu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (slu *SocialLinkUpdate) SetNillableUserID(u *uuid.UUID) *SocialLinkUpdate {
-	if u != nil {
-		slu.SetUserID(*u)
-	}
-	return slu
-}
-
 // SetPlatform sets the "platform" field.
 func (slu *SocialLinkUpdate) SetPlatform(s string) *SocialLinkUpdate {
 	slu.mutation.SetPlatform(s)
@@ -265,9 +251,6 @@ func (slu *SocialLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := slu.mutation.UserID(); ok {
-		_spec.SetField(sociallink.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := slu.mutation.Platform(); ok {
 		_spec.SetField(sociallink.FieldPlatform, field.TypeString, value)
 	}
@@ -348,20 +331,6 @@ type SocialLinkUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SocialLinkMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (sluo *SocialLinkUpdateOne) SetUserID(u uuid.UUID) *SocialLinkUpdateOne {
-	sluo.mutation.SetUserID(u)
-	return sluo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (sluo *SocialLinkUpdateOne) SetNillableUserID(u *uuid.UUID) *SocialLinkUpdateOne {
-	if u != nil {
-		sluo.SetUserID(*u)
-	}
-	return sluo
 }
 
 // SetPlatform sets the "platform" field.
@@ -614,9 +583,6 @@ func (sluo *SocialLinkUpdateOne) sqlSave(ctx context.Context) (_node *SocialLink
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := sluo.mutation.UserID(); ok {
-		_spec.SetField(sociallink.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := sluo.mutation.Platform(); ok {
 		_spec.SetField(sociallink.FieldPlatform, field.TypeString, value)

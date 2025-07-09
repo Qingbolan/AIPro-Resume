@@ -56,11 +56,6 @@ func IDLTE(id uuid.UUID) predicate.PersonalInfo {
 	return predicate.PersonalInfo(sql.FieldLTE(FieldID, id))
 }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldEQ(FieldUserID, v))
-}
-
 // Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
 func Phone(v string) predicate.PersonalInfo {
 	return predicate.PersonalInfo(sql.FieldEQ(FieldPhone, v))
@@ -114,46 +109,6 @@ func CreatedAt(v time.Time) predicate.PersonalInfo {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.PersonalInfo {
 	return predicate.PersonalInfo(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v uuid.UUID) predicate.PersonalInfo {
-	return predicate.PersonalInfo(sql.FieldLTE(FieldUserID, v))
 }
 
 // PhoneEQ applies the EQ predicate on the "phone" field.

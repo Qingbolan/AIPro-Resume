@@ -22,12 +22,6 @@ type PublicationCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (pc *PublicationCreate) SetUserID(u uuid.UUID) *PublicationCreate {
-	pc.mutation.SetUserID(u)
-	return pc
-}
-
 // SetTitle sets the "title" field.
 func (pc *PublicationCreate) SetTitle(s string) *PublicationCreate {
 	pc.mutation.SetTitle(s)
@@ -346,9 +340,6 @@ func (pc *PublicationCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PublicationCreate) check() error {
-	if _, ok := pc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Publication.user_id"`)}
-	}
 	if _, ok := pc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Publication.title"`)}
 	}
@@ -459,10 +450,6 @@ func (pc *PublicationCreate) createSpec() (*Publication, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := pc.mutation.UserID(); ok {
-		_spec.SetField(publication.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := pc.mutation.Title(); ok {
 		_spec.SetField(publication.FieldTitle, field.TypeString, value)

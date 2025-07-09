@@ -387,7 +387,7 @@ type PlanProject struct {
 }
 
 type Project struct {
-	ID          int      `json:"id"`
+	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
@@ -409,7 +409,7 @@ type ProjectBlogRef struct {
 }
 
 type ProjectByIdRequest struct {
-	ID       int    `path:"id"`
+	ID       string `path:"id"`
 	Language string `form:"lang,default=en"`
 }
 
@@ -663,7 +663,7 @@ type UpdatePersonalInfoRequest struct {
 }
 
 type UpdateProjectRequest struct {
-	ID          int      `path:"id"`
+	ID          string   `path:"id"`
 	Name        string   `json:"name,optional"`
 	Description string   `json:"description,optional"`
 	Tags        []string `json:"tags,optional"`

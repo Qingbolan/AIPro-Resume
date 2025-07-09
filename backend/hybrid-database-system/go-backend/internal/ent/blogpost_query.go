@@ -445,12 +445,12 @@ func (bpq *BlogPostQuery) WithComments(opts ...func(*BlogCommentQuery)) *BlogPos
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.BlogPost.Query().
-//		GroupBy(blogpost.FieldUserID).
+//		GroupBy(blogpost.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bpq *BlogPostQuery) GroupBy(field string, fields ...string) *BlogPostGroupBy {
@@ -468,11 +468,11 @@ func (bpq *BlogPostQuery) GroupBy(field string, fields ...string) *BlogPostGroup
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.BlogPost.Query().
-//		Select(blogpost.FieldUserID).
+//		Select(blogpost.FieldTitle).
 //		Scan(ctx, &v)
 func (bpq *BlogPostQuery) Select(fields ...string) *BlogPostSelect {
 	bpq.ctx.Fields = append(bpq.ctx.Fields, fields...)

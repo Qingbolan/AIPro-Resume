@@ -22,12 +22,6 @@ type WorkExperienceCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (wec *WorkExperienceCreate) SetUserID(u uuid.UUID) *WorkExperienceCreate {
-	wec.mutation.SetUserID(u)
-	return wec
-}
-
 // SetCompany sets the "company" field.
 func (wec *WorkExperienceCreate) SetCompany(s string) *WorkExperienceCreate {
 	wec.mutation.SetCompany(s)
@@ -258,9 +252,6 @@ func (wec *WorkExperienceCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (wec *WorkExperienceCreate) check() error {
-	if _, ok := wec.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "WorkExperience.user_id"`)}
-	}
 	if _, ok := wec.mutation.Company(); !ok {
 		return &ValidationError{Name: "company", err: errors.New(`ent: missing required field "WorkExperience.company"`)}
 	}
@@ -338,10 +329,6 @@ func (wec *WorkExperienceCreate) createSpec() (*WorkExperience, *sqlgraph.Create
 	if id, ok := wec.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := wec.mutation.UserID(); ok {
-		_spec.SetField(workexperience.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := wec.mutation.Company(); ok {
 		_spec.SetField(workexperience.FieldCompany, field.TypeString, value)

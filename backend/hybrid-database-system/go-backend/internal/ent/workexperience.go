@@ -19,8 +19,6 @@ type WorkExperience struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Company holds the value of the "company" field.
 	Company string `json:"company,omitempty"`
 	// Position holds the value of the "position" field.
@@ -83,7 +81,7 @@ func (*WorkExperience) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case workexperience.FieldStartDate, workexperience.FieldEndDate, workexperience.FieldCreatedAt, workexperience.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case workexperience.FieldID, workexperience.FieldUserID:
+		case workexperience.FieldID:
 			values[i] = new(uuid.UUID)
 		case workexperience.ForeignKeys[0]: // user_work_experience
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -107,12 +105,6 @@ func (we *WorkExperience) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				we.ID = *value
-			}
-		case workexperience.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				we.UserID = *value
 			}
 		case workexperience.FieldCompany:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -228,9 +220,6 @@ func (we *WorkExperience) String() string {
 	var builder strings.Builder
 	builder.WriteString("WorkExperience(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", we.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", we.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("company=")
 	builder.WriteString(we.Company)
 	builder.WriteString(", ")

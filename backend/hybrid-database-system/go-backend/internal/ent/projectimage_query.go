@@ -300,12 +300,12 @@ func (piq *ProjectImageQuery) WithProject(opts ...func(*ProjectQuery)) *ProjectI
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		ImageURL string `json:"image_url,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ProjectImage.Query().
-//		GroupBy(projectimage.FieldProjectID).
+//		GroupBy(projectimage.FieldImageURL).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (piq *ProjectImageQuery) GroupBy(field string, fields ...string) *ProjectImageGroupBy {
@@ -323,11 +323,11 @@ func (piq *ProjectImageQuery) GroupBy(field string, fields ...string) *ProjectIm
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		ImageURL string `json:"image_url,omitempty"`
 //	}
 //
 //	client.ProjectImage.Query().
-//		Select(projectimage.FieldProjectID).
+//		Select(projectimage.FieldImageURL).
 //		Scan(ctx, &v)
 func (piq *ProjectImageQuery) Select(fields ...string) *ProjectImageSelect {
 	piq.ctx.Fields = append(piq.ctx.Fields, fields...)

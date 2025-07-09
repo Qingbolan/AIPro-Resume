@@ -70,7 +70,6 @@ type AwardMutation struct {
 	op                    Op
 	typ                   string
 	id                    *uuid.UUID
-	user_id               *uuid.UUID
 	title                 *string
 	awarding_organization *string
 	award_date            *time.Time
@@ -193,42 +192,6 @@ func (m *AwardMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *AwardMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *AwardMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Award entity.
-// If the Award object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AwardMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *AwardMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -770,10 +733,7 @@ func (m *AwardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AwardMutation) Fields() []string {
-	fields := make([]string, 0, 11)
-	if m.user_id != nil {
-		fields = append(fields, award.FieldUserID)
-	}
+	fields := make([]string, 0, 10)
 	if m.title != nil {
 		fields = append(fields, award.FieldTitle)
 	}
@@ -812,8 +772,6 @@ func (m *AwardMutation) Fields() []string {
 // schema.
 func (m *AwardMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case award.FieldUserID:
-		return m.UserID()
 	case award.FieldTitle:
 		return m.Title()
 	case award.FieldAwardingOrganization:
@@ -843,8 +801,6 @@ func (m *AwardMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AwardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case award.FieldUserID:
-		return m.OldUserID(ctx)
 	case award.FieldTitle:
 		return m.OldTitle(ctx)
 	case award.FieldAwardingOrganization:
@@ -874,13 +830,6 @@ func (m *AwardMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *AwardMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case award.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case award.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -1060,9 +1009,6 @@ func (m *AwardMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AwardMutation) ResetField(name string) error {
 	switch name {
-	case award.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case award.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -3456,9 +3402,6 @@ type BlogPostMutation struct {
 	op                      Op
 	typ                     string
 	id                      *uuid.UUID
-	user_id                 *uuid.UUID
-	category_id             *uuid.UUID
-	series_id               *uuid.UUID
 	title                   *string
 	slug                    *string
 	excerpt                 *string
@@ -3600,140 +3543,6 @@ func (m *BlogPostMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *BlogPostMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *BlogPostMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the BlogPost entity.
-// If the BlogPost object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogPostMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *BlogPostMutation) ResetUserID() {
-	m.user_id = nil
-}
-
-// SetCategoryID sets the "category_id" field.
-func (m *BlogPostMutation) SetCategoryID(u uuid.UUID) {
-	m.category_id = &u
-}
-
-// CategoryID returns the value of the "category_id" field in the mutation.
-func (m *BlogPostMutation) CategoryID() (r uuid.UUID, exists bool) {
-	v := m.category_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCategoryID returns the old "category_id" field's value of the BlogPost entity.
-// If the BlogPost object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogPostMutation) OldCategoryID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCategoryID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCategoryID: %w", err)
-	}
-	return oldValue.CategoryID, nil
-}
-
-// ClearCategoryID clears the value of the "category_id" field.
-func (m *BlogPostMutation) ClearCategoryID() {
-	m.category_id = nil
-	m.clearedFields[blogpost.FieldCategoryID] = struct{}{}
-}
-
-// CategoryIDCleared returns if the "category_id" field was cleared in this mutation.
-func (m *BlogPostMutation) CategoryIDCleared() bool {
-	_, ok := m.clearedFields[blogpost.FieldCategoryID]
-	return ok
-}
-
-// ResetCategoryID resets all changes to the "category_id" field.
-func (m *BlogPostMutation) ResetCategoryID() {
-	m.category_id = nil
-	delete(m.clearedFields, blogpost.FieldCategoryID)
-}
-
-// SetSeriesID sets the "series_id" field.
-func (m *BlogPostMutation) SetSeriesID(u uuid.UUID) {
-	m.series_id = &u
-}
-
-// SeriesID returns the value of the "series_id" field in the mutation.
-func (m *BlogPostMutation) SeriesID() (r uuid.UUID, exists bool) {
-	v := m.series_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSeriesID returns the old "series_id" field's value of the BlogPost entity.
-// If the BlogPost object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogPostMutation) OldSeriesID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSeriesID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSeriesID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSeriesID: %w", err)
-	}
-	return oldValue.SeriesID, nil
-}
-
-// ClearSeriesID clears the value of the "series_id" field.
-func (m *BlogPostMutation) ClearSeriesID() {
-	m.series_id = nil
-	m.clearedFields[blogpost.FieldSeriesID] = struct{}{}
-}
-
-// SeriesIDCleared returns if the "series_id" field was cleared in this mutation.
-func (m *BlogPostMutation) SeriesIDCleared() bool {
-	_, ok := m.clearedFields[blogpost.FieldSeriesID]
-	return ok
-}
-
-// ResetSeriesID resets all changes to the "series_id" field.
-func (m *BlogPostMutation) ResetSeriesID() {
-	m.series_id = nil
-	delete(m.clearedFields, blogpost.FieldSeriesID)
 }
 
 // SetTitle sets the "title" field.
@@ -4738,16 +4547,7 @@ func (m *BlogPostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlogPostMutation) Fields() []string {
-	fields := make([]string, 0, 19)
-	if m.user_id != nil {
-		fields = append(fields, blogpost.FieldUserID)
-	}
-	if m.category_id != nil {
-		fields = append(fields, blogpost.FieldCategoryID)
-	}
-	if m.series_id != nil {
-		fields = append(fields, blogpost.FieldSeriesID)
-	}
+	fields := make([]string, 0, 16)
 	if m.title != nil {
 		fields = append(fields, blogpost.FieldTitle)
 	}
@@ -4804,12 +4604,6 @@ func (m *BlogPostMutation) Fields() []string {
 // schema.
 func (m *BlogPostMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case blogpost.FieldUserID:
-		return m.UserID()
-	case blogpost.FieldCategoryID:
-		return m.CategoryID()
-	case blogpost.FieldSeriesID:
-		return m.SeriesID()
 	case blogpost.FieldTitle:
 		return m.Title()
 	case blogpost.FieldSlug:
@@ -4851,12 +4645,6 @@ func (m *BlogPostMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *BlogPostMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case blogpost.FieldUserID:
-		return m.OldUserID(ctx)
-	case blogpost.FieldCategoryID:
-		return m.OldCategoryID(ctx)
-	case blogpost.FieldSeriesID:
-		return m.OldSeriesID(ctx)
 	case blogpost.FieldTitle:
 		return m.OldTitle(ctx)
 	case blogpost.FieldSlug:
@@ -4898,27 +4686,6 @@ func (m *BlogPostMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *BlogPostMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case blogpost.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case blogpost.FieldCategoryID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCategoryID(v)
-		return nil
-	case blogpost.FieldSeriesID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSeriesID(v)
-		return nil
 	case blogpost.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -5124,12 +4891,6 @@ func (m *BlogPostMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *BlogPostMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(blogpost.FieldCategoryID) {
-		fields = append(fields, blogpost.FieldCategoryID)
-	}
-	if m.FieldCleared(blogpost.FieldSeriesID) {
-		fields = append(fields, blogpost.FieldSeriesID)
-	}
 	if m.FieldCleared(blogpost.FieldExcerpt) {
 		fields = append(fields, blogpost.FieldExcerpt)
 	}
@@ -5159,12 +4920,6 @@ func (m *BlogPostMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *BlogPostMutation) ClearField(name string) error {
 	switch name {
-	case blogpost.FieldCategoryID:
-		m.ClearCategoryID()
-		return nil
-	case blogpost.FieldSeriesID:
-		m.ClearSeriesID()
-		return nil
 	case blogpost.FieldExcerpt:
 		m.ClearExcerpt()
 		return nil
@@ -5188,15 +4943,6 @@ func (m *BlogPostMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *BlogPostMutation) ResetField(name string) error {
 	switch name {
-	case blogpost.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case blogpost.FieldCategoryID:
-		m.ResetCategoryID()
-		return nil
-	case blogpost.FieldSeriesID:
-		m.ResetSeriesID()
-		return nil
 	case blogpost.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -5419,7 +5165,6 @@ type BlogSeriesMutation struct {
 	op                 Op
 	typ                string
 	id                 *uuid.UUID
-	user_id            *uuid.UUID
 	title              *string
 	slug               *string
 	description        *string
@@ -5542,42 +5287,6 @@ func (m *BlogSeriesMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *BlogSeriesMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *BlogSeriesMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the BlogSeries entity.
-// If the BlogSeries object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogSeriesMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *BlogSeriesMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -6041,10 +5750,7 @@ func (m *BlogSeriesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlogSeriesMutation) Fields() []string {
-	fields := make([]string, 0, 9)
-	if m.user_id != nil {
-		fields = append(fields, blogseries.FieldUserID)
-	}
+	fields := make([]string, 0, 8)
 	if m.title != nil {
 		fields = append(fields, blogseries.FieldTitle)
 	}
@@ -6077,8 +5783,6 @@ func (m *BlogSeriesMutation) Fields() []string {
 // schema.
 func (m *BlogSeriesMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case blogseries.FieldUserID:
-		return m.UserID()
 	case blogseries.FieldTitle:
 		return m.Title()
 	case blogseries.FieldSlug:
@@ -6104,8 +5808,6 @@ func (m *BlogSeriesMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *BlogSeriesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case blogseries.FieldUserID:
-		return m.OldUserID(ctx)
 	case blogseries.FieldTitle:
 		return m.OldTitle(ctx)
 	case blogseries.FieldSlug:
@@ -6131,13 +5833,6 @@ func (m *BlogSeriesMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *BlogSeriesMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case blogseries.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case blogseries.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -6273,9 +5968,6 @@ func (m *BlogSeriesMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *BlogSeriesMutation) ResetField(name string) error {
 	switch name {
-	case blogseries.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case blogseries.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -7238,7 +6930,6 @@ type EducationMutation struct {
 	op                   Op
 	typ                  string
 	id                   *uuid.UUID
-	user_id              *uuid.UUID
 	institution          *string
 	degree               *string
 	field_of_study       *string
@@ -7363,42 +7054,6 @@ func (m *EducationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *EducationMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *EducationMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Education entity.
-// If the Education object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EducationMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *EducationMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetInstitution sets the "institution" field.
@@ -8053,10 +7708,7 @@ func (m *EducationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EducationMutation) Fields() []string {
-	fields := make([]string, 0, 14)
-	if m.user_id != nil {
-		fields = append(fields, education.FieldUserID)
-	}
+	fields := make([]string, 0, 13)
 	if m.institution != nil {
 		fields = append(fields, education.FieldInstitution)
 	}
@@ -8104,8 +7756,6 @@ func (m *EducationMutation) Fields() []string {
 // schema.
 func (m *EducationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case education.FieldUserID:
-		return m.UserID()
 	case education.FieldInstitution:
 		return m.Institution()
 	case education.FieldDegree:
@@ -8141,8 +7791,6 @@ func (m *EducationMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *EducationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case education.FieldUserID:
-		return m.OldUserID(ctx)
 	case education.FieldInstitution:
 		return m.OldInstitution(ctx)
 	case education.FieldDegree:
@@ -8178,13 +7826,6 @@ func (m *EducationMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *EducationMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case education.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case education.FieldInstitution:
 		v, ok := value.(string)
 		if !ok {
@@ -8385,9 +8026,6 @@ func (m *EducationMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *EducationMutation) ResetField(name string) error {
 	switch name {
-	case education.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case education.FieldInstitution:
 		m.ResetInstitution()
 		return nil
@@ -8511,7 +8149,6 @@ type IdeaMutation struct {
 	op                           Op
 	typ                          string
 	id                           *uuid.UUID
-	user_id                      *uuid.UUID
 	title                        *string
 	slug                         *string
 	abstract                     *string
@@ -8644,42 +8281,6 @@ func (m *IdeaMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *IdeaMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *IdeaMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Idea entity.
-// If the Idea object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdeaMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *IdeaMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -9576,10 +9177,7 @@ func (m *IdeaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *IdeaMutation) Fields() []string {
-	fields := make([]string, 0, 19)
-	if m.user_id != nil {
-		fields = append(fields, idea.FieldUserID)
-	}
+	fields := make([]string, 0, 18)
 	if m.title != nil {
 		fields = append(fields, idea.FieldTitle)
 	}
@@ -9642,8 +9240,6 @@ func (m *IdeaMutation) Fields() []string {
 // schema.
 func (m *IdeaMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case idea.FieldUserID:
-		return m.UserID()
 	case idea.FieldTitle:
 		return m.Title()
 	case idea.FieldSlug:
@@ -9689,8 +9285,6 @@ func (m *IdeaMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *IdeaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case idea.FieldUserID:
-		return m.OldUserID(ctx)
 	case idea.FieldTitle:
 		return m.OldTitle(ctx)
 	case idea.FieldSlug:
@@ -9736,13 +9330,6 @@ func (m *IdeaMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *IdeaMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case idea.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case idea.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -10014,9 +9601,6 @@ func (m *IdeaMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *IdeaMutation) ResetField(name string) error {
 	switch name {
-	case idea.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case idea.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -10697,7 +10281,6 @@ type PersonalInfoMutation struct {
 	op             Op
 	typ            string
 	id             *uuid.UUID
-	user_id        *uuid.UUID
 	phone          *string
 	website        *string
 	location       *string
@@ -10819,42 +10402,6 @@ func (m *PersonalInfoMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *PersonalInfoMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *PersonalInfoMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the PersonalInfo entity.
-// If the PersonalInfo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PersonalInfoMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *PersonalInfoMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetPhone sets the "phone" field.
@@ -11443,10 +10990,7 @@ func (m *PersonalInfoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PersonalInfoMutation) Fields() []string {
-	fields := make([]string, 0, 12)
-	if m.user_id != nil {
-		fields = append(fields, personalinfo.FieldUserID)
-	}
+	fields := make([]string, 0, 11)
 	if m.phone != nil {
 		fields = append(fields, personalinfo.FieldPhone)
 	}
@@ -11488,8 +11032,6 @@ func (m *PersonalInfoMutation) Fields() []string {
 // schema.
 func (m *PersonalInfoMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case personalinfo.FieldUserID:
-		return m.UserID()
 	case personalinfo.FieldPhone:
 		return m.Phone()
 	case personalinfo.FieldWebsite:
@@ -11521,8 +11063,6 @@ func (m *PersonalInfoMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PersonalInfoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case personalinfo.FieldUserID:
-		return m.OldUserID(ctx)
 	case personalinfo.FieldPhone:
 		return m.OldPhone(ctx)
 	case personalinfo.FieldWebsite:
@@ -11554,13 +11094,6 @@ func (m *PersonalInfoMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *PersonalInfoMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case personalinfo.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case personalinfo.FieldPhone:
 		v, ok := value.(string)
 		if !ok {
@@ -11744,9 +11277,6 @@ func (m *PersonalInfoMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PersonalInfoMutation) ResetField(name string) error {
 	switch name {
-	case personalinfo.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case personalinfo.FieldPhone:
 		m.ResetPhone()
 		return nil
@@ -11864,7 +11394,6 @@ type ProjectMutation struct {
 	op                  Op
 	typ                 string
 	id                  *uuid.UUID
-	user_id             *uuid.UUID
 	title               *string
 	slug                *string
 	description         *string
@@ -12004,42 +11533,6 @@ func (m *ProjectMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *ProjectMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *ProjectMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Project entity.
-// If the Project object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *ProjectMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -13061,10 +12554,7 @@ func (m *ProjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectMutation) Fields() []string {
-	fields := make([]string, 0, 19)
-	if m.user_id != nil {
-		fields = append(fields, project.FieldUserID)
-	}
+	fields := make([]string, 0, 18)
 	if m.title != nil {
 		fields = append(fields, project.FieldTitle)
 	}
@@ -13127,8 +12617,6 @@ func (m *ProjectMutation) Fields() []string {
 // schema.
 func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case project.FieldUserID:
-		return m.UserID()
 	case project.FieldTitle:
 		return m.Title()
 	case project.FieldSlug:
@@ -13174,8 +12662,6 @@ func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case project.FieldUserID:
-		return m.OldUserID(ctx)
 	case project.FieldTitle:
 		return m.OldTitle(ctx)
 	case project.FieldSlug:
@@ -13221,13 +12707,6 @@ func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case project.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case project.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -13487,9 +12966,6 @@ func (m *ProjectMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProjectMutation) ResetField(name string) error {
 	switch name {
-	case project.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case project.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -13700,7 +13176,6 @@ type ProjectDetailMutation struct {
 	op                        Op
 	typ                       string
 	id                        *uuid.UUID
-	project_id                *uuid.UUID
 	full_description          *string
 	features                  *[]string
 	appendfeatures            []string
@@ -13834,42 +13309,6 @@ func (m *ProjectDetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetProjectID sets the "project_id" field.
-func (m *ProjectDetailMutation) SetProjectID(u uuid.UUID) {
-	m.project_id = &u
-}
-
-// ProjectID returns the value of the "project_id" field in the mutation.
-func (m *ProjectDetailMutation) ProjectID() (r uuid.UUID, exists bool) {
-	v := m.project_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProjectID returns the old "project_id" field's value of the ProjectDetail entity.
-// If the ProjectDetail object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectDetailMutation) OldProjectID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProjectID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProjectID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProjectID: %w", err)
-	}
-	return oldValue.ProjectID, nil
-}
-
-// ResetProjectID resets all changes to the "project_id" field.
-func (m *ProjectDetailMutation) ResetProjectID() {
-	m.project_id = nil
 }
 
 // SetFullDescription sets the "full_description" field.
@@ -14881,10 +14320,7 @@ func (m *ProjectDetailMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectDetailMutation) Fields() []string {
-	fields := make([]string, 0, 19)
-	if m.project_id != nil {
-		fields = append(fields, projectdetail.FieldProjectID)
-	}
+	fields := make([]string, 0, 18)
 	if m.full_description != nil {
 		fields = append(fields, projectdetail.FieldFullDescription)
 	}
@@ -14947,8 +14383,6 @@ func (m *ProjectDetailMutation) Fields() []string {
 // schema.
 func (m *ProjectDetailMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case projectdetail.FieldProjectID:
-		return m.ProjectID()
 	case projectdetail.FieldFullDescription:
 		return m.FullDescription()
 	case projectdetail.FieldFeatures:
@@ -14994,8 +14428,6 @@ func (m *ProjectDetailMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProjectDetailMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case projectdetail.FieldProjectID:
-		return m.OldProjectID(ctx)
 	case projectdetail.FieldFullDescription:
 		return m.OldFullDescription(ctx)
 	case projectdetail.FieldFeatures:
@@ -15041,13 +14473,6 @@ func (m *ProjectDetailMutation) OldField(ctx context.Context, name string) (ent.
 // type.
 func (m *ProjectDetailMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case projectdetail.FieldProjectID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProjectID(v)
-		return nil
 	case projectdetail.FieldFullDescription:
 		v, ok := value.(string)
 		if !ok {
@@ -15322,9 +14747,6 @@ func (m *ProjectDetailMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProjectDetailMutation) ResetField(name string) error {
 	switch name {
-	case projectdetail.FieldProjectID:
-		m.ResetProjectID()
-		return nil
 	case projectdetail.FieldFullDescription:
 		m.ResetFullDescription()
 		return nil
@@ -15463,7 +14885,6 @@ type ProjectImageMutation struct {
 	op             Op
 	typ            string
 	id             *uuid.UUID
-	project_id     *uuid.UUID
 	image_url      *string
 	title          *string
 	description    *string
@@ -15593,42 +15014,6 @@ func (m *ProjectImageMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetProjectID sets the "project_id" field.
-func (m *ProjectImageMutation) SetProjectID(u uuid.UUID) {
-	m.project_id = &u
-}
-
-// ProjectID returns the value of the "project_id" field in the mutation.
-func (m *ProjectImageMutation) ProjectID() (r uuid.UUID, exists bool) {
-	v := m.project_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProjectID returns the old "project_id" field's value of the ProjectImage entity.
-// If the ProjectImage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectImageMutation) OldProjectID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProjectID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProjectID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProjectID: %w", err)
-	}
-	return oldValue.ProjectID, nil
-}
-
-// ResetProjectID resets all changes to the "project_id" field.
-func (m *ProjectImageMutation) ResetProjectID() {
-	m.project_id = nil
 }
 
 // SetImageURL sets the "image_url" field.
@@ -16431,10 +15816,7 @@ func (m *ProjectImageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectImageMutation) Fields() []string {
-	fields := make([]string, 0, 16)
-	if m.project_id != nil {
-		fields = append(fields, projectimage.FieldProjectID)
-	}
+	fields := make([]string, 0, 15)
 	if m.image_url != nil {
 		fields = append(fields, projectimage.FieldImageURL)
 	}
@@ -16488,8 +15870,6 @@ func (m *ProjectImageMutation) Fields() []string {
 // schema.
 func (m *ProjectImageMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case projectimage.FieldProjectID:
-		return m.ProjectID()
 	case projectimage.FieldImageURL:
 		return m.ImageURL()
 	case projectimage.FieldTitle:
@@ -16529,8 +15909,6 @@ func (m *ProjectImageMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProjectImageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case projectimage.FieldProjectID:
-		return m.OldProjectID(ctx)
 	case projectimage.FieldImageURL:
 		return m.OldImageURL(ctx)
 	case projectimage.FieldTitle:
@@ -16570,13 +15948,6 @@ func (m *ProjectImageMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *ProjectImageMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case projectimage.FieldProjectID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProjectID(v)
-		return nil
 	case projectimage.FieldImageURL:
 		v, ok := value.(string)
 		if !ok {
@@ -16833,9 +16204,6 @@ func (m *ProjectImageMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProjectImageMutation) ResetField(name string) error {
 	switch name {
-	case projectimage.FieldProjectID:
-		m.ResetProjectID()
-		return nil
 	case projectimage.FieldImageURL:
 		m.ResetImageURL()
 		return nil
@@ -16965,7 +16333,6 @@ type ProjectTechnologyMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
-	project_id        *uuid.UUID
 	technology_name   *string
 	category          *string
 	version           *string
@@ -17087,42 +16454,6 @@ func (m *ProjectTechnologyMutation) IDs(ctx context.Context) ([]uuid.UUID, error
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetProjectID sets the "project_id" field.
-func (m *ProjectTechnologyMutation) SetProjectID(u uuid.UUID) {
-	m.project_id = &u
-}
-
-// ProjectID returns the value of the "project_id" field in the mutation.
-func (m *ProjectTechnologyMutation) ProjectID() (r uuid.UUID, exists bool) {
-	v := m.project_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProjectID returns the old "project_id" field's value of the ProjectTechnology entity.
-// If the ProjectTechnology object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectTechnologyMutation) OldProjectID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProjectID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProjectID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProjectID: %w", err)
-	}
-	return oldValue.ProjectID, nil
-}
-
-// ResetProjectID resets all changes to the "project_id" field.
-func (m *ProjectTechnologyMutation) ResetProjectID() {
-	m.project_id = nil
 }
 
 // SetTechnologyName sets the "technology_name" field.
@@ -17656,10 +16987,7 @@ func (m *ProjectTechnologyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectTechnologyMutation) Fields() []string {
-	fields := make([]string, 0, 11)
-	if m.project_id != nil {
-		fields = append(fields, projecttechnology.FieldProjectID)
-	}
+	fields := make([]string, 0, 10)
 	if m.technology_name != nil {
 		fields = append(fields, projecttechnology.FieldTechnologyName)
 	}
@@ -17698,8 +17026,6 @@ func (m *ProjectTechnologyMutation) Fields() []string {
 // schema.
 func (m *ProjectTechnologyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case projecttechnology.FieldProjectID:
-		return m.ProjectID()
 	case projecttechnology.FieldTechnologyName:
 		return m.TechnologyName()
 	case projecttechnology.FieldCategory:
@@ -17729,8 +17055,6 @@ func (m *ProjectTechnologyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProjectTechnologyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case projecttechnology.FieldProjectID:
-		return m.OldProjectID(ctx)
 	case projecttechnology.FieldTechnologyName:
 		return m.OldTechnologyName(ctx)
 	case projecttechnology.FieldCategory:
@@ -17760,13 +17084,6 @@ func (m *ProjectTechnologyMutation) OldField(ctx context.Context, name string) (
 // type.
 func (m *ProjectTechnologyMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case projecttechnology.FieldProjectID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProjectID(v)
-		return nil
 	case projecttechnology.FieldTechnologyName:
 		v, ok := value.(string)
 		if !ok {
@@ -17940,9 +17257,6 @@ func (m *ProjectTechnologyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProjectTechnologyMutation) ResetField(name string) error {
 	switch name {
-	case projecttechnology.FieldProjectID:
-		m.ResetProjectID()
-		return nil
 	case projecttechnology.FieldTechnologyName:
 		m.ResetTechnologyName()
 		return nil
@@ -18057,7 +17371,6 @@ type PublicationMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
-	user_id           *uuid.UUID
 	title             *string
 	publication_type  *string
 	journal_name      *string
@@ -18187,42 +17500,6 @@ func (m *PublicationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *PublicationMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *PublicationMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Publication entity.
-// If the Publication object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PublicationMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *PublicationMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -19080,10 +18357,7 @@ func (m *PublicationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PublicationMutation) Fields() []string {
-	fields := make([]string, 0, 18)
-	if m.user_id != nil {
-		fields = append(fields, publication.FieldUserID)
-	}
+	fields := make([]string, 0, 17)
 	if m.title != nil {
 		fields = append(fields, publication.FieldTitle)
 	}
@@ -19143,8 +18417,6 @@ func (m *PublicationMutation) Fields() []string {
 // schema.
 func (m *PublicationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case publication.FieldUserID:
-		return m.UserID()
 	case publication.FieldTitle:
 		return m.Title()
 	case publication.FieldPublicationType:
@@ -19188,8 +18460,6 @@ func (m *PublicationMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PublicationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case publication.FieldUserID:
-		return m.OldUserID(ctx)
 	case publication.FieldTitle:
 		return m.OldTitle(ctx)
 	case publication.FieldPublicationType:
@@ -19233,13 +18503,6 @@ func (m *PublicationMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *PublicationMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case publication.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case publication.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -19498,9 +18761,6 @@ func (m *PublicationMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PublicationMutation) ResetField(name string) error {
 	switch name {
-	case publication.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case publication.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -19636,7 +18896,6 @@ type ResearchProjectMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
-	user_id           *uuid.UUID
 	title             *string
 	start_date        *time.Time
 	end_date          *time.Time
@@ -19760,42 +19019,6 @@ func (m *ResearchProjectMutation) IDs(ctx context.Context) ([]uuid.UUID, error) 
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *ResearchProjectMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *ResearchProjectMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the ResearchProject entity.
-// If the ResearchProject object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResearchProjectMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *ResearchProjectMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -20386,10 +19609,7 @@ func (m *ResearchProjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResearchProjectMutation) Fields() []string {
-	fields := make([]string, 0, 12)
-	if m.user_id != nil {
-		fields = append(fields, researchproject.FieldUserID)
-	}
+	fields := make([]string, 0, 11)
 	if m.title != nil {
 		fields = append(fields, researchproject.FieldTitle)
 	}
@@ -20431,8 +19651,6 @@ func (m *ResearchProjectMutation) Fields() []string {
 // schema.
 func (m *ResearchProjectMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case researchproject.FieldUserID:
-		return m.UserID()
 	case researchproject.FieldTitle:
 		return m.Title()
 	case researchproject.FieldStartDate:
@@ -20464,8 +19682,6 @@ func (m *ResearchProjectMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ResearchProjectMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case researchproject.FieldUserID:
-		return m.OldUserID(ctx)
 	case researchproject.FieldTitle:
 		return m.OldTitle(ctx)
 	case researchproject.FieldStartDate:
@@ -20497,13 +19713,6 @@ func (m *ResearchProjectMutation) OldField(ctx context.Context, name string) (en
 // type.
 func (m *ResearchProjectMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case researchproject.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case researchproject.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -20696,9 +19905,6 @@ func (m *ResearchProjectMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ResearchProjectMutation) ResetField(name string) error {
 	switch name {
-	case researchproject.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case researchproject.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -20816,7 +20022,6 @@ type SocialLinkMutation struct {
 	op            Op
 	typ           string
 	id            *uuid.UUID
-	user_id       *uuid.UUID
 	platform      *string
 	url           *string
 	username      *string
@@ -20936,42 +20141,6 @@ func (m *SocialLinkMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *SocialLinkMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *SocialLinkMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the SocialLink entity.
-// If the SocialLink object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SocialLinkMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *SocialLinkMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetPlatform sets the "platform" field.
@@ -21381,10 +20550,7 @@ func (m *SocialLinkMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SocialLinkMutation) Fields() []string {
-	fields := make([]string, 0, 9)
-	if m.user_id != nil {
-		fields = append(fields, sociallink.FieldUserID)
-	}
+	fields := make([]string, 0, 8)
 	if m.platform != nil {
 		fields = append(fields, sociallink.FieldPlatform)
 	}
@@ -21417,8 +20583,6 @@ func (m *SocialLinkMutation) Fields() []string {
 // schema.
 func (m *SocialLinkMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case sociallink.FieldUserID:
-		return m.UserID()
 	case sociallink.FieldPlatform:
 		return m.Platform()
 	case sociallink.FieldURL:
@@ -21444,8 +20608,6 @@ func (m *SocialLinkMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *SocialLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case sociallink.FieldUserID:
-		return m.OldUserID(ctx)
 	case sociallink.FieldPlatform:
 		return m.OldPlatform(ctx)
 	case sociallink.FieldURL:
@@ -21471,13 +20633,6 @@ func (m *SocialLinkMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *SocialLinkMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case sociallink.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case sociallink.FieldPlatform:
 		v, ok := value.(string)
 		if !ok {
@@ -21613,9 +20768,6 @@ func (m *SocialLinkMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *SocialLinkMutation) ResetField(name string) error {
 	switch name {
-	case sociallink.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case sociallink.FieldPlatform:
 		m.ResetPlatform()
 		return nil
@@ -23633,7 +22785,6 @@ type WorkExperienceMutation struct {
 	op               Op
 	typ              string
 	id               *uuid.UUID
-	user_id          *uuid.UUID
 	company          *string
 	position         *string
 	start_date       *time.Time
@@ -23756,42 +22907,6 @@ func (m *WorkExperienceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *WorkExperienceMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *WorkExperienceMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the WorkExperience entity.
-// If the WorkExperience object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkExperienceMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *WorkExperienceMutation) ResetUserID() {
-	m.user_id = nil
 }
 
 // SetCompany sets the "company" field.
@@ -24348,10 +23463,7 @@ func (m *WorkExperienceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WorkExperienceMutation) Fields() []string {
-	fields := make([]string, 0, 12)
-	if m.user_id != nil {
-		fields = append(fields, workexperience.FieldUserID)
-	}
+	fields := make([]string, 0, 11)
 	if m.company != nil {
 		fields = append(fields, workexperience.FieldCompany)
 	}
@@ -24393,8 +23505,6 @@ func (m *WorkExperienceMutation) Fields() []string {
 // schema.
 func (m *WorkExperienceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case workexperience.FieldUserID:
-		return m.UserID()
 	case workexperience.FieldCompany:
 		return m.Company()
 	case workexperience.FieldPosition:
@@ -24426,8 +23536,6 @@ func (m *WorkExperienceMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *WorkExperienceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case workexperience.FieldUserID:
-		return m.OldUserID(ctx)
 	case workexperience.FieldCompany:
 		return m.OldCompany(ctx)
 	case workexperience.FieldPosition:
@@ -24459,13 +23567,6 @@ func (m *WorkExperienceMutation) OldField(ctx context.Context, name string) (ent
 // type.
 func (m *WorkExperienceMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case workexperience.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	case workexperience.FieldCompany:
 		v, ok := value.(string)
 		if !ok {
@@ -24640,9 +23741,6 @@ func (m *WorkExperienceMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *WorkExperienceMutation) ResetField(name string) error {
 	switch name {
-	case workexperience.FieldUserID:
-		m.ResetUserID()
-		return nil
 	case workexperience.FieldCompany:
 		m.ResetCompany()
 		return nil

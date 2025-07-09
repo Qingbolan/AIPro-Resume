@@ -16,12 +16,6 @@ const (
 	Label = "blog_post"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
-	// FieldCategoryID holds the string denoting the category_id field in the database.
-	FieldCategoryID = "category_id"
-	// FieldSeriesID holds the string denoting the series_id field in the database.
-	FieldSeriesID = "series_id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldSlug holds the string denoting the slug field in the database.
@@ -104,9 +98,6 @@ const (
 // Columns holds all SQL columns for blogpost fields.
 var Columns = []string{
 	FieldID,
-	FieldUserID,
-	FieldCategoryID,
-	FieldSeriesID,
 	FieldTitle,
 	FieldSlug,
 	FieldExcerpt,
@@ -240,21 +231,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
-}
-
-// ByCategoryID orders the results by the category_id field.
-func ByCategoryID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCategoryID, opts...).ToFunc()
-}
-
-// BySeriesID orders the results by the series_id field.
-func BySeriesID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSeriesID, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.

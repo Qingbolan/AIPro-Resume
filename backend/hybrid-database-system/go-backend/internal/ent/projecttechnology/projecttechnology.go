@@ -15,8 +15,6 @@ const (
 	Label = "project_technology"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldProjectID holds the string denoting the project_id field in the database.
-	FieldProjectID = "project_id"
 	// FieldTechnologyName holds the string denoting the technology_name field in the database.
 	FieldTechnologyName = "technology_name"
 	// FieldCategory holds the string denoting the category field in the database.
@@ -53,7 +51,6 @@ const (
 // Columns holds all SQL columns for projecttechnology fields.
 var Columns = []string{
 	FieldID,
-	FieldProjectID,
 	FieldTechnologyName,
 	FieldCategory,
 	FieldVersion,
@@ -118,11 +115,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByProjectID orders the results by the project_id field.
-func ByProjectID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectID, opts...).ToFunc()
 }
 
 // ByTechnologyName orders the results by the technology_name field.

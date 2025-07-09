@@ -300,12 +300,12 @@ func (ptq *ProjectTechnologyQuery) WithProject(opts ...func(*ProjectQuery)) *Pro
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		TechnologyName string `json:"technology_name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ProjectTechnology.Query().
-//		GroupBy(projecttechnology.FieldProjectID).
+//		GroupBy(projecttechnology.FieldTechnologyName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ptq *ProjectTechnologyQuery) GroupBy(field string, fields ...string) *ProjectTechnologyGroupBy {
@@ -323,11 +323,11 @@ func (ptq *ProjectTechnologyQuery) GroupBy(field string, fields ...string) *Proj
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		TechnologyName string `json:"technology_name,omitempty"`
 //	}
 //
 //	client.ProjectTechnology.Query().
-//		Select(projecttechnology.FieldProjectID).
+//		Select(projecttechnology.FieldTechnologyName).
 //		Scan(ctx, &v)
 func (ptq *ProjectTechnologyQuery) Select(fields ...string) *ProjectTechnologySelect {
 	ptq.ctx.Fields = append(ptq.ctx.Fields, fields...)

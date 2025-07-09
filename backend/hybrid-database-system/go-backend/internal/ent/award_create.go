@@ -22,12 +22,6 @@ type AwardCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (ac *AwardCreate) SetUserID(u uuid.UUID) *AwardCreate {
-	ac.mutation.SetUserID(u)
-	return ac
-}
-
 // SetTitle sets the "title" field.
 func (ac *AwardCreate) SetTitle(s string) *AwardCreate {
 	ac.mutation.SetTitle(s)
@@ -240,9 +234,6 @@ func (ac *AwardCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AwardCreate) check() error {
-	if _, ok := ac.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Award.user_id"`)}
-	}
 	if _, ok := ac.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Award.title"`)}
 	}
@@ -312,10 +303,6 @@ func (ac *AwardCreate) createSpec() (*Award, *sqlgraph.CreateSpec) {
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := ac.mutation.UserID(); ok {
-		_spec.SetField(award.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := ac.mutation.Title(); ok {
 		_spec.SetField(award.FieldTitle, field.TypeString, value)

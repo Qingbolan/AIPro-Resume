@@ -19,7 +19,6 @@ func (Publication) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.UUID("user_id", uuid.UUID{}),
 		field.String("title").
 			MaxLen(500),
 		field.String("publication_type").

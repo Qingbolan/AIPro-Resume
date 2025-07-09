@@ -300,12 +300,12 @@ func (eq *EducationQuery) WithUser(opts ...func(*UserQuery)) *EducationQuery {
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Institution string `json:"institution,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Education.Query().
-//		GroupBy(education.FieldUserID).
+//		GroupBy(education.FieldInstitution).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (eq *EducationQuery) GroupBy(field string, fields ...string) *EducationGroupBy {
@@ -323,11 +323,11 @@ func (eq *EducationQuery) GroupBy(field string, fields ...string) *EducationGrou
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Institution string `json:"institution,omitempty"`
 //	}
 //
 //	client.Education.Query().
-//		Select(education.FieldUserID).
+//		Select(education.FieldInstitution).
 //		Scan(ctx, &v)
 func (eq *EducationQuery) Select(fields ...string) *EducationSelect {
 	eq.ctx.Fields = append(eq.ctx.Fields, fields...)

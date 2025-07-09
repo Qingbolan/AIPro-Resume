@@ -3,6 +3,7 @@ package resume
 import (
 	"context"
 
+	"silan-backend/internal/ent/sociallink"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +26,45 @@ func NewGetPersonalInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GetPersonalInfoLogic) GetPersonalInfo(req *types.PersonalInfoRequest) (resp *types.PersonalInfo, err error) {
-	// todo: add your logic here and delete this line
+	personalInfo, err := l.svcCtx.DB.PersonalInfo.Query().WithUser().First(l.ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	user := personalInfo.Edges.User
+	socialLinks, err := l.svcCtx.DB.SocialLink.Query().Where(
+		sociallink.HasUserWith(),
+	).All(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var socialLinksResp []types.SocialLink
+	for _, link := range socialLinks {
+		socialLinksResp = append(socialLinksResp, types.SocialLink{
+			ID:          link.ID.String(),
+			Platform:    link.Platform,
+			URL:         link.URL,
+			DisplayName: link.DisplayName,
+			IsActive:    link.IsPublic,
+			SortOrder:   link.Order,
+		})
+	}
+
+	return &types.PersonalInfo{
+		ID:            personalInfo.ID.String(),
+		UserID:        user.ID.String(),
+		FullName:      user.FirstName + " " + user.LastName,
+		Title:         "",
+		CurrentStatus: "",
+		Phone:         personalInfo.Phone,
+		Email:         personalInfo.PersonalEmail,
+		Location:      personalInfo.Location,
+		Website:       personalInfo.Website,
+		AvatarURL:     user.AvatarURL,
+		IsPrimary:     true,
+		SocialLinks:   socialLinksResp,
+		CreatedAt:     personalInfo.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:     personalInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}, nil
 }

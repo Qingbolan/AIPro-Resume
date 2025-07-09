@@ -20,7 +20,6 @@ func (PersonalInfo) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New).
 			StorageKey("id"),
-		field.UUID("user_id", uuid.UUID{}),
 		field.String("phone").
 			Optional().
 			MaxLen(20),

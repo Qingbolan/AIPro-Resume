@@ -19,7 +19,6 @@ func (ProjectDetail) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.UUID("project_id", uuid.UUID{}),
 		field.Text("full_description").
 			Optional(),
 		field.JSON("features", []string{}).

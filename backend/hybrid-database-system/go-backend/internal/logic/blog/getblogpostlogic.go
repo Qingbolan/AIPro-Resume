@@ -2,7 +2,9 @@ package blog
 
 import (
 	"context"
+	"fmt"
 
+	"silan-backend/internal/ent/blogpost"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +27,64 @@ func NewGetBlogPostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetBl
 }
 
 func (l *GetBlogPostLogic) GetBlogPost(req *types.BlogRequest) (resp *types.BlogData, err error) {
-	// todo: add your logic here and delete this line
+	post, err := l.svcCtx.DB.BlogPost.Query().
+		Where(blogpost.Slug(req.Slug)).
+		WithUser().
+		WithCategory().
+		WithSeries().
+		WithTags().
+		First(l.ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	// Convert to response format
+	var publishDate string
+	if !post.PublishedAt.IsZero() {
+		publishDate = post.PublishedAt.Format("2006-01-02")
+	}
+
+	var readTime string
+	if post.ReadingTimeMinutes > 0 {
+		readTime = fmt.Sprintf("%d min read", post.ReadingTimeMinutes)
+	}
+
+	var category string
+	if post.Edges.Category != nil {
+		category = post.Edges.Category.Name
+	}
+
+	var tags []string
+	for _, tag := range post.Edges.Tags {
+		tags = append(tags, tag.Name)
+	}
+
+	var author string
+	if post.Edges.User != nil {
+		author = post.Edges.User.FirstName + " " + post.Edges.User.LastName
+	}
+
+	// Parse content - simplified for now
+	content := []types.BlogContent{
+		{
+			Type:    "text",
+			Content: post.Content,
+			ID:      post.ID.String(),
+		},
+	}
+
+	return &types.BlogData{
+		ID:          post.ID.String(),
+		Title:       post.Title,
+		Author:      author,
+		PublishDate: publishDate,
+		ReadTime:    readTime,
+		Category:    category,
+		Tags:        tags,
+		Content:     content,
+		Likes:       int64(post.LikeCount),
+		Views:       int64(post.ViewCount),
+		Summary:     post.Excerpt,
+		Type:        string(post.ContentType),
+	}, nil
 }

@@ -300,12 +300,12 @@ func (rpq *ResearchProjectQuery) WithUser(opts ...func(*UserQuery)) *ResearchPro
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ResearchProject.Query().
-//		GroupBy(researchproject.FieldUserID).
+//		GroupBy(researchproject.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rpq *ResearchProjectQuery) GroupBy(field string, fields ...string) *ResearchProjectGroupBy {
@@ -323,11 +323,11 @@ func (rpq *ResearchProjectQuery) GroupBy(field string, fields ...string) *Resear
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.ResearchProject.Query().
-//		Select(researchproject.FieldUserID).
+//		Select(researchproject.FieldTitle).
 //		Scan(ctx, &v)
 func (rpq *ResearchProjectQuery) Select(fields ...string) *ResearchProjectSelect {
 	rpq.ctx.Fields = append(rpq.ctx.Fields, fields...)

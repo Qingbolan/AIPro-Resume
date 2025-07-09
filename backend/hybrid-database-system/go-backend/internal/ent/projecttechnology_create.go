@@ -22,12 +22,6 @@ type ProjectTechnologyCreate struct {
 	hooks    []Hook
 }
 
-// SetProjectID sets the "project_id" field.
-func (ptc *ProjectTechnologyCreate) SetProjectID(u uuid.UUID) *ProjectTechnologyCreate {
-	ptc.mutation.SetProjectID(u)
-	return ptc
-}
-
 // SetTechnologyName sets the "technology_name" field.
 func (ptc *ProjectTechnologyCreate) SetTechnologyName(s string) *ProjectTechnologyCreate {
 	ptc.mutation.SetTechnologyName(s)
@@ -248,9 +242,6 @@ func (ptc *ProjectTechnologyCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ptc *ProjectTechnologyCreate) check() error {
-	if _, ok := ptc.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "ProjectTechnology.project_id"`)}
-	}
 	if _, ok := ptc.mutation.TechnologyName(); !ok {
 		return &ValidationError{Name: "technology_name", err: errors.New(`ent: missing required field "ProjectTechnology.technology_name"`)}
 	}
@@ -327,10 +318,6 @@ func (ptc *ProjectTechnologyCreate) createSpec() (*ProjectTechnology, *sqlgraph.
 	if id, ok := ptc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := ptc.mutation.ProjectID(); ok {
-		_spec.SetField(projecttechnology.FieldProjectID, field.TypeUUID, value)
-		_node.ProjectID = value
 	}
 	if value, ok := ptc.mutation.TechnologyName(); ok {
 		_spec.SetField(projecttechnology.FieldTechnologyName, field.TypeString, value)

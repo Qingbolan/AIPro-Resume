@@ -3,6 +3,8 @@ package resume
 import (
 	"context"
 
+	"silan-backend/internal/ent"
+	"silan-backend/internal/ent/education"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +27,48 @@ func NewGetEducationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetE
 }
 
 func (l *GetEducationLogic) GetEducation(req *types.ResumeRequest) (resp []types.Education, err error) {
-	// todo: add your logic here and delete this line
+	educations, err := l.svcCtx.DB.Education.Query().
+		WithUser().
+		Order(ent.Asc(education.FieldSortOrder)).
+		All(l.ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	var result []types.Education
+	for _, edu := range educations {
+		var startDate, endDate string
+		if !edu.StartDate.IsZero() {
+			startDate = edu.StartDate.Format("2006-01-02")
+		}
+		if !edu.EndDate.IsZero() {
+			endDate = edu.EndDate.Format("2006-01-02")
+		}
+
+		// Get user ID from edge relationship
+		var userID string
+		if edu.Edges.User != nil {
+			userID = edu.Edges.User.ID.String()
+		}
+
+		result = append(result, types.Education{
+			ID:                 edu.ID.String(),
+			UserID:             userID,
+			Institution:        edu.Institution,
+			Degree:             edu.Degree,
+			FieldOfStudy:       edu.FieldOfStudy,
+			StartDate:          startDate,
+			EndDate:            endDate,
+			IsCurrent:          edu.IsCurrent,
+			GPA:                edu.Gpa, // Note: GPA -> Gpa
+			Location:           edu.Location,
+			InstitutionWebsite: edu.InstitutionWebsite,
+			InstitutionLogoURL: edu.InstitutionLogoURL,
+			SortOrder:          edu.SortOrder,
+			CreatedAt:          edu.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:          edu.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return result, nil
 }

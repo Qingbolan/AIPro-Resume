@@ -22,12 +22,6 @@ type PersonalInfoCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (pic *PersonalInfoCreate) SetUserID(u uuid.UUID) *PersonalInfoCreate {
-	pic.mutation.SetUserID(u)
-	return pic
-}
-
 // SetPhone sets the "phone" field.
 func (pic *PersonalInfoCreate) SetPhone(s string) *PersonalInfoCreate {
 	pic.mutation.SetPhone(s)
@@ -258,9 +252,6 @@ func (pic *PersonalInfoCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pic *PersonalInfoCreate) check() error {
-	if _, ok := pic.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "PersonalInfo.user_id"`)}
-	}
 	if v, ok := pic.mutation.Phone(); ok {
 		if err := personalinfo.PhoneValidator(v); err != nil {
 			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "PersonalInfo.phone": %w`, err)}
@@ -344,10 +335,6 @@ func (pic *PersonalInfoCreate) createSpec() (*PersonalInfo, *sqlgraph.CreateSpec
 	if id, ok := pic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := pic.mutation.UserID(); ok {
-		_spec.SetField(personalinfo.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := pic.mutation.Phone(); ok {
 		_spec.SetField(personalinfo.FieldPhone, field.TypeString, value)

@@ -19,8 +19,6 @@ type BlogSeries struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Slug holds the value of the "slug" field.
@@ -88,7 +86,7 @@ func (*BlogSeries) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case blogseries.FieldCreatedAt, blogseries.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case blogseries.FieldID, blogseries.FieldUserID:
+		case blogseries.FieldID:
 			values[i] = new(uuid.UUID)
 		case blogseries.ForeignKeys[0]: // user_blog_series
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -112,12 +110,6 @@ func (bs *BlogSeries) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				bs.ID = *value
-			}
-		case blogseries.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				bs.UserID = *value
 			}
 		case blogseries.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -220,9 +212,6 @@ func (bs *BlogSeries) String() string {
 	var builder strings.Builder
 	builder.WriteString("BlogSeries(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", bs.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", bs.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(bs.Title)
 	builder.WriteString(", ")

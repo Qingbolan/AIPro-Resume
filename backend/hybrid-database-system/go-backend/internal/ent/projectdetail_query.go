@@ -300,12 +300,12 @@ func (pdq *ProjectDetailQuery) WithProject(opts ...func(*ProjectQuery)) *Project
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		FullDescription string `json:"full_description,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ProjectDetail.Query().
-//		GroupBy(projectdetail.FieldProjectID).
+//		GroupBy(projectdetail.FieldFullDescription).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pdq *ProjectDetailQuery) GroupBy(field string, fields ...string) *ProjectDetailGroupBy {
@@ -323,11 +323,11 @@ func (pdq *ProjectDetailQuery) GroupBy(field string, fields ...string) *ProjectD
 // Example:
 //
 //	var v []struct {
-//		ProjectID uuid.UUID `json:"project_id,omitempty"`
+//		FullDescription string `json:"full_description,omitempty"`
 //	}
 //
 //	client.ProjectDetail.Query().
-//		Select(projectdetail.FieldProjectID).
+//		Select(projectdetail.FieldFullDescription).
 //		Scan(ctx, &v)
 func (pdq *ProjectDetailQuery) Select(fields ...string) *ProjectDetailSelect {
 	pdq.ctx.Fields = append(pdq.ctx.Fields, fields...)

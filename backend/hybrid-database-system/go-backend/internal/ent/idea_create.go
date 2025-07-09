@@ -22,12 +22,6 @@ type IdeaCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (ic *IdeaCreate) SetUserID(u uuid.UUID) *IdeaCreate {
-	ic.mutation.SetUserID(u)
-	return ic
-}
-
 // SetTitle sets the "title" field.
 func (ic *IdeaCreate) SetTitle(s string) *IdeaCreate {
 	ic.mutation.SetTitle(s)
@@ -376,9 +370,6 @@ func (ic *IdeaCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ic *IdeaCreate) check() error {
-	if _, ok := ic.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Idea.user_id"`)}
-	}
 	if _, ok := ic.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Idea.title"`)}
 	}
@@ -466,10 +457,6 @@ func (ic *IdeaCreate) createSpec() (*Idea, *sqlgraph.CreateSpec) {
 	if id, ok := ic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := ic.mutation.UserID(); ok {
-		_spec.SetField(idea.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := ic.mutation.Title(); ok {
 		_spec.SetField(idea.FieldTitle, field.TypeString, value)

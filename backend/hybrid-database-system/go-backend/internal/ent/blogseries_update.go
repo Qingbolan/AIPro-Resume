@@ -31,20 +31,6 @@ func (bsu *BlogSeriesUpdate) Where(ps ...predicate.BlogSeries) *BlogSeriesUpdate
 	return bsu
 }
 
-// SetUserID sets the "user_id" field.
-func (bsu *BlogSeriesUpdate) SetUserID(u uuid.UUID) *BlogSeriesUpdate {
-	bsu.mutation.SetUserID(u)
-	return bsu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (bsu *BlogSeriesUpdate) SetNillableUserID(u *uuid.UUID) *BlogSeriesUpdate {
-	if u != nil {
-		bsu.SetUserID(*u)
-	}
-	return bsu
-}
-
 // SetTitle sets the "title" field.
 func (bsu *BlogSeriesUpdate) SetTitle(s string) *BlogSeriesUpdate {
 	bsu.mutation.SetTitle(s)
@@ -302,9 +288,6 @@ func (bsu *BlogSeriesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := bsu.mutation.UserID(); ok {
-		_spec.SetField(blogseries.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := bsu.mutation.Title(); ok {
 		_spec.SetField(blogseries.FieldTitle, field.TypeString, value)
 	}
@@ -430,20 +413,6 @@ type BlogSeriesUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BlogSeriesMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (bsuo *BlogSeriesUpdateOne) SetUserID(u uuid.UUID) *BlogSeriesUpdateOne {
-	bsuo.mutation.SetUserID(u)
-	return bsuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (bsuo *BlogSeriesUpdateOne) SetNillableUserID(u *uuid.UUID) *BlogSeriesUpdateOne {
-	if u != nil {
-		bsuo.SetUserID(*u)
-	}
-	return bsuo
 }
 
 // SetTitle sets the "title" field.
@@ -732,9 +701,6 @@ func (bsuo *BlogSeriesUpdateOne) sqlSave(ctx context.Context) (_node *BlogSeries
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := bsuo.mutation.UserID(); ok {
-		_spec.SetField(blogseries.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := bsuo.mutation.Title(); ok {
 		_spec.SetField(blogseries.FieldTitle, field.TypeString, value)

@@ -22,12 +22,6 @@ type SocialLinkCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (slc *SocialLinkCreate) SetUserID(u uuid.UUID) *SocialLinkCreate {
-	slc.mutation.SetUserID(u)
-	return slc
-}
-
 // SetPlatform sets the "platform" field.
 func (slc *SocialLinkCreate) SetPlatform(s string) *SocialLinkCreate {
 	slc.mutation.SetPlatform(s)
@@ -208,9 +202,6 @@ func (slc *SocialLinkCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (slc *SocialLinkCreate) check() error {
-	if _, ok := slc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "SocialLink.user_id"`)}
-	}
 	if _, ok := slc.mutation.Platform(); !ok {
 		return &ValidationError{Name: "platform", err: errors.New(`ent: missing required field "SocialLink.platform"`)}
 	}
@@ -286,10 +277,6 @@ func (slc *SocialLinkCreate) createSpec() (*SocialLink, *sqlgraph.CreateSpec) {
 	if id, ok := slc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := slc.mutation.UserID(); ok {
-		_spec.SetField(sociallink.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := slc.mutation.Platform(); ok {
 		_spec.SetField(sociallink.FieldPlatform, field.TypeString, value)

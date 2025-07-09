@@ -23,12 +23,6 @@ type BlogSeriesCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (bsc *BlogSeriesCreate) SetUserID(u uuid.UUID) *BlogSeriesCreate {
-	bsc.mutation.SetUserID(u)
-	return bsc
-}
-
 // SetTitle sets the "title" field.
 func (bsc *BlogSeriesCreate) SetTitle(s string) *BlogSeriesCreate {
 	bsc.mutation.SetTitle(s)
@@ -232,9 +226,6 @@ func (bsc *BlogSeriesCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (bsc *BlogSeriesCreate) check() error {
-	if _, ok := bsc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "BlogSeries.user_id"`)}
-	}
 	if _, ok := bsc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "BlogSeries.title"`)}
 	}
@@ -302,10 +293,6 @@ func (bsc *BlogSeriesCreate) createSpec() (*BlogSeries, *sqlgraph.CreateSpec) {
 	if id, ok := bsc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := bsc.mutation.UserID(); ok {
-		_spec.SetField(blogseries.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := bsc.mutation.Title(); ok {
 		_spec.SetField(blogseries.FieldTitle, field.TypeString, value)

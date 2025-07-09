@@ -15,8 +15,6 @@ const (
 	Label = "personal_info"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
 	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
 	// FieldWebsite holds the string denoting the website field in the database.
@@ -55,7 +53,6 @@ const (
 // Columns holds all SQL columns for personalinfo fields.
 var Columns = []string{
 	FieldID,
-	FieldUserID,
 	FieldPhone,
 	FieldWebsite,
 	FieldLocation,
@@ -123,11 +120,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByPhone orders the results by the phone field.

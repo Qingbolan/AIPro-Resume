@@ -30,20 +30,6 @@ func (piu *PersonalInfoUpdate) Where(ps ...predicate.PersonalInfo) *PersonalInfo
 	return piu
 }
 
-// SetUserID sets the "user_id" field.
-func (piu *PersonalInfoUpdate) SetUserID(u uuid.UUID) *PersonalInfoUpdate {
-	piu.mutation.SetUserID(u)
-	return piu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (piu *PersonalInfoUpdate) SetNillableUserID(u *uuid.UUID) *PersonalInfoUpdate {
-	if u != nil {
-		piu.SetUserID(*u)
-	}
-	return piu
-}
-
 // SetPhone sets the "phone" field.
 func (piu *PersonalInfoUpdate) SetPhone(s string) *PersonalInfoUpdate {
 	piu.mutation.SetPhone(s)
@@ -362,9 +348,6 @@ func (piu *PersonalInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := piu.mutation.UserID(); ok {
-		_spec.SetField(personalinfo.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := piu.mutation.Phone(); ok {
 		_spec.SetField(personalinfo.FieldPhone, field.TypeString, value)
 	}
@@ -472,20 +455,6 @@ type PersonalInfoUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PersonalInfoMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (piuo *PersonalInfoUpdateOne) SetUserID(u uuid.UUID) *PersonalInfoUpdateOne {
-	piuo.mutation.SetUserID(u)
-	return piuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (piuo *PersonalInfoUpdateOne) SetNillableUserID(u *uuid.UUID) *PersonalInfoUpdateOne {
-	if u != nil {
-		piuo.SetUserID(*u)
-	}
-	return piuo
 }
 
 // SetPhone sets the "phone" field.
@@ -835,9 +804,6 @@ func (piuo *PersonalInfoUpdateOne) sqlSave(ctx context.Context) (_node *Personal
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := piuo.mutation.UserID(); ok {
-		_spec.SetField(personalinfo.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := piuo.mutation.Phone(); ok {
 		_spec.SetField(personalinfo.FieldPhone, field.TypeString, value)

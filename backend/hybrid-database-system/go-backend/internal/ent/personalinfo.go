@@ -19,8 +19,6 @@ type PersonalInfo struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 	// Website holds the value of the "website" field.
@@ -79,7 +77,7 @@ func (*PersonalInfo) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case personalinfo.FieldCreatedAt, personalinfo.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case personalinfo.FieldID, personalinfo.FieldUserID:
+		case personalinfo.FieldID:
 			values[i] = new(uuid.UUID)
 		case personalinfo.ForeignKeys[0]: // user_personal_info
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -103,12 +101,6 @@ func (pi *PersonalInfo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pi.ID = *value
-			}
-		case personalinfo.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				pi.UserID = *value
 			}
 		case personalinfo.FieldPhone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -224,9 +216,6 @@ func (pi *PersonalInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("PersonalInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pi.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", pi.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("phone=")
 	builder.WriteString(pi.Phone)
 	builder.WriteString(", ")

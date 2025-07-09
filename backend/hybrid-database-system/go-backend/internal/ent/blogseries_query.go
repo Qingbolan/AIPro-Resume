@@ -337,12 +337,12 @@ func (bsq *BlogSeriesQuery) WithBlogPosts(opts ...func(*BlogPostQuery)) *BlogSer
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.BlogSeries.Query().
-//		GroupBy(blogseries.FieldUserID).
+//		GroupBy(blogseries.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bsq *BlogSeriesQuery) GroupBy(field string, fields ...string) *BlogSeriesGroupBy {
@@ -360,11 +360,11 @@ func (bsq *BlogSeriesQuery) GroupBy(field string, fields ...string) *BlogSeriesG
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.BlogSeries.Query().
-//		Select(blogseries.FieldUserID).
+//		Select(blogseries.FieldTitle).
 //		Scan(ctx, &v)
 func (bsq *BlogSeriesQuery) Select(fields ...string) *BlogSeriesSelect {
 	bsq.ctx.Fields = append(bsq.ctx.Fields, fields...)

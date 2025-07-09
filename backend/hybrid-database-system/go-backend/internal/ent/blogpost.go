@@ -21,12 +21,6 @@ type BlogPost struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
-	// CategoryID holds the value of the "category_id" field.
-	CategoryID uuid.UUID `json:"category_id,omitempty"`
-	// SeriesID holds the value of the "series_id" field.
-	SeriesID uuid.UUID `json:"series_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Slug holds the value of the "slug" field.
@@ -149,7 +143,7 @@ func (*BlogPost) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case blogpost.FieldPublishedAt, blogpost.FieldCreatedAt, blogpost.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case blogpost.FieldID, blogpost.FieldUserID, blogpost.FieldCategoryID, blogpost.FieldSeriesID:
+		case blogpost.FieldID:
 			values[i] = new(uuid.UUID)
 		case blogpost.ForeignKeys[0]: // blog_category_blog_posts
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -177,24 +171,6 @@ func (bp *BlogPost) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				bp.ID = *value
-			}
-		case blogpost.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				bp.UserID = *value
-			}
-		case blogpost.FieldCategoryID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field category_id", values[i])
-			} else if value != nil {
-				bp.CategoryID = *value
-			}
-		case blogpost.FieldSeriesID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field series_id", values[i])
-			} else if value != nil {
-				bp.SeriesID = *value
 			}
 		case blogpost.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -374,15 +350,6 @@ func (bp *BlogPost) String() string {
 	var builder strings.Builder
 	builder.WriteString("BlogPost(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", bp.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", bp.UserID))
-	builder.WriteString(", ")
-	builder.WriteString("category_id=")
-	builder.WriteString(fmt.Sprintf("%v", bp.CategoryID))
-	builder.WriteString(", ")
-	builder.WriteString("series_id=")
-	builder.WriteString(fmt.Sprintf("%v", bp.SeriesID))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(bp.Title)
 	builder.WriteString(", ")

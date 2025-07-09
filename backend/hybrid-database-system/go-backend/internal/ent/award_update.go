@@ -30,20 +30,6 @@ func (au *AwardUpdate) Where(ps ...predicate.Award) *AwardUpdate {
 	return au
 }
 
-// SetUserID sets the "user_id" field.
-func (au *AwardUpdate) SetUserID(u uuid.UUID) *AwardUpdate {
-	au.mutation.SetUserID(u)
-	return au
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (au *AwardUpdate) SetNillableUserID(u *uuid.UUID) *AwardUpdate {
-	if u != nil {
-		au.SetUserID(*u)
-	}
-	return au
-}
-
 // SetTitle sets the "title" field.
 func (au *AwardUpdate) SetTitle(s string) *AwardUpdate {
 	au.mutation.SetTitle(s)
@@ -323,9 +309,6 @@ func (au *AwardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := au.mutation.UserID(); ok {
-		_spec.SetField(award.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := au.mutation.Title(); ok {
 		_spec.SetField(award.FieldTitle, field.TypeString, value)
 	}
@@ -424,20 +407,6 @@ type AwardUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AwardMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (auo *AwardUpdateOne) SetUserID(u uuid.UUID) *AwardUpdateOne {
-	auo.mutation.SetUserID(u)
-	return auo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (auo *AwardUpdateOne) SetNillableUserID(u *uuid.UUID) *AwardUpdateOne {
-	if u != nil {
-		auo.SetUserID(*u)
-	}
-	return auo
 }
 
 // SetTitle sets the "title" field.
@@ -748,9 +717,6 @@ func (auo *AwardUpdateOne) sqlSave(ctx context.Context) (_node *Award, err error
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := auo.mutation.UserID(); ok {
-		_spec.SetField(award.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := auo.mutation.Title(); ok {
 		_spec.SetField(award.FieldTitle, field.TypeString, value)

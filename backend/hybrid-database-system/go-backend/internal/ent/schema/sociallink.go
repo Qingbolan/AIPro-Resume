@@ -20,7 +20,6 @@ func (SocialLink) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New).
 			StorageKey("id"),
-		field.UUID("user_id", uuid.UUID{}),
 		field.String("platform").
 			MaxLen(50),
 		field.String("url").

@@ -25,12 +25,6 @@ type ProjectCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (pc *ProjectCreate) SetUserID(u uuid.UUID) *ProjectCreate {
-	pc.mutation.SetUserID(u)
-	return pc
-}
-
 // SetTitle sets the "title" field.
 func (pc *ProjectCreate) SetTitle(s string) *ProjectCreate {
 	pc.mutation.SetTitle(s)
@@ -428,9 +422,6 @@ func (pc *ProjectCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProjectCreate) check() error {
-	if _, ok := pc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Project.user_id"`)}
-	}
 	if _, ok := pc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Project.title"`)}
 	}
@@ -538,10 +529,6 @@ func (pc *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := pc.mutation.UserID(); ok {
-		_spec.SetField(project.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := pc.mutation.Title(); ok {
 		_spec.SetField(project.FieldTitle, field.TypeString, value)

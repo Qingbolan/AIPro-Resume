@@ -25,7 +25,6 @@ func NewSearchProjectDetailsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *SearchProjectDetailsLogic) SearchProjectDetails(req *types.ProjectSearchRequest) (resp []types.ProjectDetail, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// Return empty slice as placeholder
+	return []types.ProjectDetail{}, nil
 }

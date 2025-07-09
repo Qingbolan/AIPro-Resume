@@ -30,20 +30,6 @@ func (piu *ProjectImageUpdate) Where(ps ...predicate.ProjectImage) *ProjectImage
 	return piu
 }
 
-// SetProjectID sets the "project_id" field.
-func (piu *ProjectImageUpdate) SetProjectID(u uuid.UUID) *ProjectImageUpdate {
-	piu.mutation.SetProjectID(u)
-	return piu
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (piu *ProjectImageUpdate) SetNillableProjectID(u *uuid.UUID) *ProjectImageUpdate {
-	if u != nil {
-		piu.SetProjectID(*u)
-	}
-	return piu
-}
-
 // SetImageURL sets the "image_url" field.
 func (piu *ProjectImageUpdate) SetImageURL(s string) *ProjectImageUpdate {
 	piu.mutation.SetImageURL(s)
@@ -435,9 +421,6 @@ func (piu *ProjectImageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := piu.mutation.ProjectID(); ok {
-		_spec.SetField(projectimage.FieldProjectID, field.TypeUUID, value)
-	}
 	if value, ok := piu.mutation.ImageURL(); ok {
 		_spec.SetField(projectimage.FieldImageURL, field.TypeString, value)
 	}
@@ -566,20 +549,6 @@ type ProjectImageUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProjectImageMutation
-}
-
-// SetProjectID sets the "project_id" field.
-func (piuo *ProjectImageUpdateOne) SetProjectID(u uuid.UUID) *ProjectImageUpdateOne {
-	piuo.mutation.SetProjectID(u)
-	return piuo
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (piuo *ProjectImageUpdateOne) SetNillableProjectID(u *uuid.UUID) *ProjectImageUpdateOne {
-	if u != nil {
-		piuo.SetProjectID(*u)
-	}
-	return piuo
 }
 
 // SetImageURL sets the "image_url" field.
@@ -1002,9 +971,6 @@ func (piuo *ProjectImageUpdateOne) sqlSave(ctx context.Context) (_node *ProjectI
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := piuo.mutation.ProjectID(); ok {
-		_spec.SetField(projectimage.FieldProjectID, field.TypeUUID, value)
 	}
 	if value, ok := piuo.mutation.ImageURL(); ok {
 		_spec.SetField(projectimage.FieldImageURL, field.TypeString, value)

@@ -26,40 +26,6 @@ type BlogPostCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (bpc *BlogPostCreate) SetUserID(u uuid.UUID) *BlogPostCreate {
-	bpc.mutation.SetUserID(u)
-	return bpc
-}
-
-// SetCategoryID sets the "category_id" field.
-func (bpc *BlogPostCreate) SetCategoryID(u uuid.UUID) *BlogPostCreate {
-	bpc.mutation.SetCategoryID(u)
-	return bpc
-}
-
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (bpc *BlogPostCreate) SetNillableCategoryID(u *uuid.UUID) *BlogPostCreate {
-	if u != nil {
-		bpc.SetCategoryID(*u)
-	}
-	return bpc
-}
-
-// SetSeriesID sets the "series_id" field.
-func (bpc *BlogPostCreate) SetSeriesID(u uuid.UUID) *BlogPostCreate {
-	bpc.mutation.SetSeriesID(u)
-	return bpc
-}
-
-// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (bpc *BlogPostCreate) SetNillableSeriesID(u *uuid.UUID) *BlogPostCreate {
-	if u != nil {
-		bpc.SetSeriesID(*u)
-	}
-	return bpc
-}
-
 // SetTitle sets the "title" field.
 func (bpc *BlogPostCreate) SetTitle(s string) *BlogPostCreate {
 	bpc.mutation.SetTitle(s)
@@ -436,9 +402,6 @@ func (bpc *BlogPostCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (bpc *BlogPostCreate) check() error {
-	if _, ok := bpc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "BlogPost.user_id"`)}
-	}
 	if _, ok := bpc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "BlogPost.title"`)}
 	}
@@ -531,18 +494,6 @@ func (bpc *BlogPostCreate) createSpec() (*BlogPost, *sqlgraph.CreateSpec) {
 	if id, ok := bpc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := bpc.mutation.UserID(); ok {
-		_spec.SetField(blogpost.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
-	}
-	if value, ok := bpc.mutation.CategoryID(); ok {
-		_spec.SetField(blogpost.FieldCategoryID, field.TypeUUID, value)
-		_node.CategoryID = value
-	}
-	if value, ok := bpc.mutation.SeriesID(); ok {
-		_spec.SetField(blogpost.FieldSeriesID, field.TypeUUID, value)
-		_node.SeriesID = value
 	}
 	if value, ok := bpc.mutation.Title(); ok {
 		_spec.SetField(blogpost.FieldTitle, field.TypeString, value)

@@ -19,7 +19,6 @@ func (Education) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.UUID("user_id", uuid.UUID{}),
 		field.String("institution").
 			MaxLen(200),
 		field.String("degree").

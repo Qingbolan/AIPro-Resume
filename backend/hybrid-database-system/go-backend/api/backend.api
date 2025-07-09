@@ -143,7 +143,7 @@ type (
 	// Project types
 	// Project types (updated to match frontend exactly)
 	Project {
-		ID          int      `json:"id"`
+		ID          string   `json:"id"`
 		Name        string   `json:"name"`
 		Description string   `json:"description"`
 		Tags        []string `json:"tags"`
@@ -276,7 +276,7 @@ type (
 	}
 	// Project by ID request (frontend uses numeric ID)
 	ProjectByIdRequest {
-		ID       int    `path:"id"`
+		ID       string `path:"id"`
 		Language string `form:"lang,default=en"`
 	}
 	ProjectListResponse {
@@ -302,7 +302,7 @@ type (
 		AnnualPlan  string   `json:"annual_plan"`
 	}
 	UpdateProjectRequest {
-		ID          int      `path:"id"`
+		ID          string   `path:"id"`
 		Name        string   `json:"name,optional"`
 		Description string   `json:"description,optional"`
 		Tags        []string `json:"tags,optional"`

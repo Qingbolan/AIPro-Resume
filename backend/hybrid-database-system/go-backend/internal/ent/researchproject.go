@@ -19,8 +19,6 @@ type ResearchProject struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// StartDate holds the value of the "start_date" field.
@@ -85,7 +83,7 @@ func (*ResearchProject) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case researchproject.FieldStartDate, researchproject.FieldEndDate, researchproject.FieldCreatedAt, researchproject.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case researchproject.FieldID, researchproject.FieldUserID:
+		case researchproject.FieldID:
 			values[i] = new(uuid.UUID)
 		case researchproject.ForeignKeys[0]: // user_research_projects
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -109,12 +107,6 @@ func (rp *ResearchProject) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				rp.ID = *value
-			}
-		case researchproject.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				rp.UserID = *value
 			}
 		case researchproject.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -230,9 +222,6 @@ func (rp *ResearchProject) String() string {
 	var builder strings.Builder
 	builder.WriteString("ResearchProject(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", rp.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", rp.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(rp.Title)
 	builder.WriteString(", ")

@@ -15,8 +15,6 @@ const (
 	Label = "work_experience"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
 	// FieldCompany holds the string denoting the company field in the database.
 	FieldCompany = "company"
 	// FieldPosition holds the string denoting the position field in the database.
@@ -55,7 +53,6 @@ const (
 // Columns holds all SQL columns for workexperience fields.
 var Columns = []string{
 	FieldID,
-	FieldUserID,
 	FieldCompany,
 	FieldPosition,
 	FieldStartDate,
@@ -121,11 +118,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByCompany orders the results by the company field.

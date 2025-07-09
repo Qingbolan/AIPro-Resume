@@ -19,8 +19,6 @@ type SocialLink struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Platform holds the value of the "platform" field.
 	Platform string `json:"platform,omitempty"`
 	// URL holds the value of the "url" field.
@@ -77,7 +75,7 @@ func (*SocialLink) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case sociallink.FieldCreatedAt, sociallink.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case sociallink.FieldID, sociallink.FieldUserID:
+		case sociallink.FieldID:
 			values[i] = new(uuid.UUID)
 		case sociallink.ForeignKeys[0]: // user_social_links
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -101,12 +99,6 @@ func (sl *SocialLink) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				sl.ID = *value
-			}
-		case sociallink.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				sl.UserID = *value
 			}
 		case sociallink.FieldPlatform:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -204,9 +196,6 @@ func (sl *SocialLink) String() string {
 	var builder strings.Builder
 	builder.WriteString("SocialLink(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", sl.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", sl.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("platform=")
 	builder.WriteString(sl.Platform)
 	builder.WriteString(", ")
