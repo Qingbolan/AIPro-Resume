@@ -9,7 +9,8 @@
 /coverage
 __pycache__
 # production
-/build
+/dist
+/api-test-portfolio
 
 # misc
 .DS_Store
