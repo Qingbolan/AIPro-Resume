@@ -22,12 +22,6 @@ type ResearchProjectCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (rpc *ResearchProjectCreate) SetUserID(u uuid.UUID) *ResearchProjectCreate {
-	rpc.mutation.SetUserID(u)
-	return rpc
-}
-
 // SetTitle sets the "title" field.
 func (rpc *ResearchProjectCreate) SetTitle(s string) *ResearchProjectCreate {
 	rpc.mutation.SetTitle(s)
@@ -266,9 +260,6 @@ func (rpc *ResearchProjectCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rpc *ResearchProjectCreate) check() error {
-	if _, ok := rpc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "ResearchProject.user_id"`)}
-	}
 	if _, ok := rpc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "ResearchProject.title"`)}
 	}
@@ -338,10 +329,6 @@ func (rpc *ResearchProjectCreate) createSpec() (*ResearchProject, *sqlgraph.Crea
 	if id, ok := rpc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := rpc.mutation.UserID(); ok {
-		_spec.SetField(researchproject.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := rpc.mutation.Title(); ok {
 		_spec.SetField(researchproject.FieldTitle, field.TypeString, value)

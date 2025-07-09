@@ -2,7 +2,6 @@ package blog
 
 import (
 	"context"
-
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +24,18 @@ func NewSearchBlogPostsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *S
 }
 
 func (l *SearchBlogPostsLogic) SearchBlogPosts(req *types.BlogSearchRequest) (resp *types.BlogListResponse, err error) {
-	// todo: add your logic here and delete this line
+	// Convert search request to blog list request
+	blogListReq := &types.BlogListRequest{
+		Page:     req.Page,
+		Size:     req.Size,
+		Category: req.Category,
+		Search:   req.Query,
+		Tag:      req.Tags,
+		Author:   req.Author,
+		Language: req.Language,
+	}
 
-	return
+	// Use the existing GetBlogPosts logic
+	getBlogPostsLogic := NewGetBlogPostsLogic(l.ctx, l.svcCtx)
+	return getBlogPostsLogic.GetBlogPosts(blogListReq)
 }

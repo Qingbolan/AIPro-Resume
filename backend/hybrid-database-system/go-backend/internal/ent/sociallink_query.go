@@ -300,12 +300,12 @@ func (slq *SocialLinkQuery) WithUser(opts ...func(*UserQuery)) *SocialLinkQuery 
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Platform string `json:"platform,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.SocialLink.Query().
-//		GroupBy(sociallink.FieldUserID).
+//		GroupBy(sociallink.FieldPlatform).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (slq *SocialLinkQuery) GroupBy(field string, fields ...string) *SocialLinkGroupBy {
@@ -323,11 +323,11 @@ func (slq *SocialLinkQuery) GroupBy(field string, fields ...string) *SocialLinkG
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Platform string `json:"platform,omitempty"`
 //	}
 //
 //	client.SocialLink.Query().
-//		Select(sociallink.FieldUserID).
+//		Select(sociallink.FieldPlatform).
 //		Scan(ctx, &v)
 func (slq *SocialLinkQuery) Select(fields ...string) *SocialLinkSelect {
 	slq.ctx.Fields = append(slq.ctx.Fields, fields...)

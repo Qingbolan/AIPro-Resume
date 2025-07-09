@@ -3,6 +3,8 @@ package resume
 import (
 	"context"
 
+	"silan-backend/internal/ent"
+	"silan-backend/internal/ent/workexperience"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +27,46 @@ func NewGetWorkExperienceLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetWorkExperienceLogic) GetWorkExperience(req *types.ResumeRequest) (resp []types.WorkExperience, err error) {
-	// todo: add your logic here and delete this line
+	workExperiences, err := l.svcCtx.DB.WorkExperience.Query().
+		WithUser().
+		Order(ent.Asc(workexperience.FieldSortOrder)).
+		All(l.ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	var result []types.WorkExperience
+	for _, we := range workExperiences {
+		var startDate, endDate string
+		if !we.StartDate.IsZero() {
+			startDate = we.StartDate.Format("2006-01-02")
+		}
+		if !we.EndDate.IsZero() {
+			endDate = we.EndDate.Format("2006-01-02")
+		}
+
+		// Get user ID from edge relationship
+		var userID string
+		if we.Edges.User != nil {
+			userID = we.Edges.User.ID.String()
+		}
+
+		result = append(result, types.WorkExperience{
+			ID:             we.ID.String(),
+			UserID:         userID,
+			Company:        we.Company,
+			Position:       we.Position,
+			StartDate:      startDate,
+			EndDate:        endDate,
+			IsCurrent:      we.IsCurrent,
+			Location:       we.Location,
+			CompanyWebsite: we.CompanyWebsite,
+			CompanyLogoURL: we.CompanyLogoURL,
+			SortOrder:      we.SortOrder,
+			CreatedAt:      we.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:      we.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return result, nil
 }

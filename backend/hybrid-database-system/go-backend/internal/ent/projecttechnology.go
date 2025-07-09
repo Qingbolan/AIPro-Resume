@@ -19,8 +19,6 @@ type ProjectTechnology struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ProjectID holds the value of the "project_id" field.
-	ProjectID uuid.UUID `json:"project_id,omitempty"`
 	// TechnologyName holds the value of the "technology_name" field.
 	TechnologyName string `json:"technology_name,omitempty"`
 	// Category holds the value of the "category" field.
@@ -79,7 +77,7 @@ func (*ProjectTechnology) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case projecttechnology.FieldCreatedAt, projecttechnology.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case projecttechnology.FieldID, projecttechnology.FieldProjectID:
+		case projecttechnology.FieldID:
 			values[i] = new(uuid.UUID)
 		case projecttechnology.ForeignKeys[0]: // project_technologies
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -103,12 +101,6 @@ func (pt *ProjectTechnology) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pt.ID = *value
-			}
-		case projecttechnology.FieldProjectID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
-			} else if value != nil {
-				pt.ProjectID = *value
 			}
 		case projecttechnology.FieldTechnologyName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -218,9 +210,6 @@ func (pt *ProjectTechnology) String() string {
 	var builder strings.Builder
 	builder.WriteString("ProjectTechnology(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pt.ID))
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", pt.ProjectID))
-	builder.WriteString(", ")
 	builder.WriteString("technology_name=")
 	builder.WriteString(pt.TechnologyName)
 	builder.WriteString(", ")

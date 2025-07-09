@@ -30,20 +30,6 @@ func (rpu *ResearchProjectUpdate) Where(ps ...predicate.ResearchProject) *Resear
 	return rpu
 }
 
-// SetUserID sets the "user_id" field.
-func (rpu *ResearchProjectUpdate) SetUserID(u uuid.UUID) *ResearchProjectUpdate {
-	rpu.mutation.SetUserID(u)
-	return rpu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (rpu *ResearchProjectUpdate) SetNillableUserID(u *uuid.UUID) *ResearchProjectUpdate {
-	if u != nil {
-		rpu.SetUserID(*u)
-	}
-	return rpu
-}
-
 // SetTitle sets the "title" field.
 func (rpu *ResearchProjectUpdate) SetTitle(s string) *ResearchProjectUpdate {
 	rpu.mutation.SetTitle(s)
@@ -343,9 +329,6 @@ func (rpu *ResearchProjectUpdate) sqlSave(ctx context.Context) (n int, err error
 			}
 		}
 	}
-	if value, ok := rpu.mutation.UserID(); ok {
-		_spec.SetField(researchproject.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := rpu.mutation.Title(); ok {
 		_spec.SetField(researchproject.FieldTitle, field.TypeString, value)
 	}
@@ -450,20 +433,6 @@ type ResearchProjectUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ResearchProjectMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (rpuo *ResearchProjectUpdateOne) SetUserID(u uuid.UUID) *ResearchProjectUpdateOne {
-	rpuo.mutation.SetUserID(u)
-	return rpuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (rpuo *ResearchProjectUpdateOne) SetNillableUserID(u *uuid.UUID) *ResearchProjectUpdateOne {
-	if u != nil {
-		rpuo.SetUserID(*u)
-	}
-	return rpuo
 }
 
 // SetTitle sets the "title" field.
@@ -794,9 +763,6 @@ func (rpuo *ResearchProjectUpdateOne) sqlSave(ctx context.Context) (_node *Resea
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := rpuo.mutation.UserID(); ok {
-		_spec.SetField(researchproject.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := rpuo.mutation.Title(); ok {
 		_spec.SetField(researchproject.FieldTitle, field.TypeString, value)

@@ -22,12 +22,6 @@ type ProjectImageCreate struct {
 	hooks    []Hook
 }
 
-// SetProjectID sets the "project_id" field.
-func (pic *ProjectImageCreate) SetProjectID(u uuid.UUID) *ProjectImageCreate {
-	pic.mutation.SetProjectID(u)
-	return pic
-}
-
 // SetImageURL sets the "image_url" field.
 func (pic *ProjectImageCreate) SetImageURL(s string) *ProjectImageCreate {
 	pic.mutation.SetImageURL(s)
@@ -330,9 +324,6 @@ func (pic *ProjectImageCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pic *ProjectImageCreate) check() error {
-	if _, ok := pic.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "ProjectImage.project_id"`)}
-	}
 	if _, ok := pic.mutation.ImageURL(); !ok {
 		return &ValidationError{Name: "image_url", err: errors.New(`ent: missing required field "ProjectImage.image_url"`)}
 	}
@@ -418,10 +409,6 @@ func (pic *ProjectImageCreate) createSpec() (*ProjectImage, *sqlgraph.CreateSpec
 	if id, ok := pic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := pic.mutation.ProjectID(); ok {
-		_spec.SetField(projectimage.FieldProjectID, field.TypeUUID, value)
-		_node.ProjectID = value
 	}
 	if value, ok := pic.mutation.ImageURL(); ok {
 		_spec.SetField(projectimage.FieldImageURL, field.TypeString, value)

@@ -3,6 +3,8 @@ package blog
 import (
 	"context"
 
+	"silan-backend/internal/ent"
+	"silan-backend/internal/ent/blogtag"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +27,23 @@ func NewGetBlogTagsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetBl
 }
 
 func (l *GetBlogTagsLogic) GetBlogTags(req *types.BlogTagsRequest) (resp []types.BlogTag, err error) {
-	// todo: add your logic here and delete this line
+	tags, err := l.svcCtx.DB.BlogTag.Query().
+		WithBlogPosts().
+		Order(ent.Asc(blogtag.FieldName)).
+		All(l.ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	var result []types.BlogTag
+	for _, tag := range tags {
+		result = append(result, types.BlogTag{
+			ID:         tag.ID.String(),
+			Name:       tag.Name,
+			Slug:       tag.Slug,
+			UsageCount: len(tag.Edges.BlogPosts),
+		})
+	}
+
+	return result, nil
 }

@@ -22,12 +22,6 @@ type EducationCreate struct {
 	hooks    []Hook
 }
 
-// SetUserID sets the "user_id" field.
-func (ec *EducationCreate) SetUserID(u uuid.UUID) *EducationCreate {
-	ec.mutation.SetUserID(u)
-	return ec
-}
-
 // SetInstitution sets the "institution" field.
 func (ec *EducationCreate) SetInstitution(s string) *EducationCreate {
 	ec.mutation.SetInstitution(s)
@@ -286,9 +280,6 @@ func (ec *EducationCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ec *EducationCreate) check() error {
-	if _, ok := ec.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Education.user_id"`)}
-	}
 	if _, ok := ec.mutation.Institution(); !ok {
 		return &ValidationError{Name: "institution", err: errors.New(`ent: missing required field "Education.institution"`)}
 	}
@@ -376,10 +367,6 @@ func (ec *EducationCreate) createSpec() (*Education, *sqlgraph.CreateSpec) {
 	if id, ok := ec.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := ec.mutation.UserID(); ok {
-		_spec.SetField(education.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := ec.mutation.Institution(); ok {
 		_spec.SetField(education.FieldInstitution, field.TypeString, value)

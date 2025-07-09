@@ -19,8 +19,6 @@ type Idea struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Slug holds the value of the "slug" field.
@@ -99,7 +97,7 @@ func (*Idea) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case idea.FieldCreatedAt, idea.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case idea.FieldID, idea.FieldUserID:
+		case idea.FieldID:
 			values[i] = new(uuid.UUID)
 		case idea.ForeignKeys[0]: // user_ideas
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -123,12 +121,6 @@ func (i *Idea) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[j])
 			} else if value != nil {
 				i.ID = *value
-			}
-		case idea.FieldUserID:
-			if value, ok := values[j].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[j])
-			} else if value != nil {
-				i.UserID = *value
 			}
 		case idea.FieldTitle:
 			if value, ok := values[j].(*sql.NullString); !ok {
@@ -286,9 +278,6 @@ func (i *Idea) String() string {
 	var builder strings.Builder
 	builder.WriteString("Idea(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", i.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(i.Title)
 	builder.WriteString(", ")

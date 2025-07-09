@@ -30,20 +30,6 @@ func (pu *PublicationUpdate) Where(ps ...predicate.Publication) *PublicationUpda
 	return pu
 }
 
-// SetUserID sets the "user_id" field.
-func (pu *PublicationUpdate) SetUserID(u uuid.UUID) *PublicationUpdate {
-	pu.mutation.SetUserID(u)
-	return pu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (pu *PublicationUpdate) SetNillableUserID(u *uuid.UUID) *PublicationUpdate {
-	if u != nil {
-		pu.SetUserID(*u)
-	}
-	return pu
-}
-
 // SetTitle sets the "title" field.
 func (pu *PublicationUpdate) SetTitle(s string) *PublicationUpdate {
 	pu.mutation.SetTitle(s)
@@ -486,9 +472,6 @@ func (pu *PublicationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.UserID(); ok {
-		_spec.SetField(publication.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := pu.mutation.Title(); ok {
 		_spec.SetField(publication.FieldTitle, field.TypeString, value)
 	}
@@ -623,20 +606,6 @@ type PublicationUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PublicationMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (puo *PublicationUpdateOne) SetUserID(u uuid.UUID) *PublicationUpdateOne {
-	puo.mutation.SetUserID(u)
-	return puo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (puo *PublicationUpdateOne) SetNillableUserID(u *uuid.UUID) *PublicationUpdateOne {
-	if u != nil {
-		puo.SetUserID(*u)
-	}
-	return puo
 }
 
 // SetTitle sets the "title" field.
@@ -1110,9 +1079,6 @@ func (puo *PublicationUpdateOne) sqlSave(ctx context.Context) (_node *Publicatio
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := puo.mutation.UserID(); ok {
-		_spec.SetField(publication.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := puo.mutation.Title(); ok {
 		_spec.SetField(publication.FieldTitle, field.TypeString, value)

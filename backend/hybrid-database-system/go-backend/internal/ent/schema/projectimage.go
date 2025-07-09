@@ -19,7 +19,6 @@ func (ProjectImage) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.UUID("project_id", uuid.UUID{}),
 		field.String("image_url").
 			MaxLen(500),
 		field.String("title").

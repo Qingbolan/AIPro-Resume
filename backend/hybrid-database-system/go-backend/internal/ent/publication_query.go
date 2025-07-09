@@ -300,12 +300,12 @@ func (pq *PublicationQuery) WithUser(opts ...func(*UserQuery)) *PublicationQuery
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Publication.Query().
-//		GroupBy(publication.FieldUserID).
+//		GroupBy(publication.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PublicationQuery) GroupBy(field string, fields ...string) *PublicationGroupBy {
@@ -323,11 +323,11 @@ func (pq *PublicationQuery) GroupBy(field string, fields ...string) *Publication
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.Publication.Query().
-//		Select(publication.FieldUserID).
+//		Select(publication.FieldTitle).
 //		Scan(ctx, &v)
 func (pq *PublicationQuery) Select(fields ...string) *PublicationSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)

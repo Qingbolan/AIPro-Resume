@@ -30,20 +30,6 @@ func (iu *IdeaUpdate) Where(ps ...predicate.Idea) *IdeaUpdate {
 	return iu
 }
 
-// SetUserID sets the "user_id" field.
-func (iu *IdeaUpdate) SetUserID(u uuid.UUID) *IdeaUpdate {
-	iu.mutation.SetUserID(u)
-	return iu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (iu *IdeaUpdate) SetNillableUserID(u *uuid.UUID) *IdeaUpdate {
-	if u != nil {
-		iu.SetUserID(*u)
-	}
-	return iu
-}
-
 // SetTitle sets the "title" field.
 func (iu *IdeaUpdate) SetTitle(s string) *IdeaUpdate {
 	iu.mutation.SetTitle(s)
@@ -461,9 +447,6 @@ func (iu *IdeaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := iu.mutation.UserID(); ok {
-		_spec.SetField(idea.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := iu.mutation.Title(); ok {
 		_spec.SetField(idea.FieldTitle, field.TypeString, value)
 	}
@@ -598,20 +581,6 @@ type IdeaUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *IdeaMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (iuo *IdeaUpdateOne) SetUserID(u uuid.UUID) *IdeaUpdateOne {
-	iuo.mutation.SetUserID(u)
-	return iuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (iuo *IdeaUpdateOne) SetNillableUserID(u *uuid.UUID) *IdeaUpdateOne {
-	if u != nil {
-		iuo.SetUserID(*u)
-	}
-	return iuo
 }
 
 // SetTitle sets the "title" field.
@@ -1060,9 +1029,6 @@ func (iuo *IdeaUpdateOne) sqlSave(ctx context.Context) (_node *Idea, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := iuo.mutation.UserID(); ok {
-		_spec.SetField(idea.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := iuo.mutation.Title(); ok {
 		_spec.SetField(idea.FieldTitle, field.TypeString, value)

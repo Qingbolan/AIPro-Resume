@@ -30,20 +30,6 @@ func (ptu *ProjectTechnologyUpdate) Where(ps ...predicate.ProjectTechnology) *Pr
 	return ptu
 }
 
-// SetProjectID sets the "project_id" field.
-func (ptu *ProjectTechnologyUpdate) SetProjectID(u uuid.UUID) *ProjectTechnologyUpdate {
-	ptu.mutation.SetProjectID(u)
-	return ptu
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (ptu *ProjectTechnologyUpdate) SetNillableProjectID(u *uuid.UUID) *ProjectTechnologyUpdate {
-	if u != nil {
-		ptu.SetProjectID(*u)
-	}
-	return ptu
-}
-
 // SetTechnologyName sets the "technology_name" field.
 func (ptu *ProjectTechnologyUpdate) SetTechnologyName(s string) *ProjectTechnologyUpdate {
 	ptu.mutation.SetTechnologyName(s)
@@ -332,9 +318,6 @@ func (ptu *ProjectTechnologyUpdate) sqlSave(ctx context.Context) (n int, err err
 			}
 		}
 	}
-	if value, ok := ptu.mutation.ProjectID(); ok {
-		_spec.SetField(projecttechnology.FieldProjectID, field.TypeUUID, value)
-	}
 	if value, ok := ptu.mutation.TechnologyName(); ok {
 		_spec.SetField(projecttechnology.FieldTechnologyName, field.TypeString, value)
 	}
@@ -433,20 +416,6 @@ type ProjectTechnologyUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProjectTechnologyMutation
-}
-
-// SetProjectID sets the "project_id" field.
-func (ptuo *ProjectTechnologyUpdateOne) SetProjectID(u uuid.UUID) *ProjectTechnologyUpdateOne {
-	ptuo.mutation.SetProjectID(u)
-	return ptuo
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (ptuo *ProjectTechnologyUpdateOne) SetNillableProjectID(u *uuid.UUID) *ProjectTechnologyUpdateOne {
-	if u != nil {
-		ptuo.SetProjectID(*u)
-	}
-	return ptuo
 }
 
 // SetTechnologyName sets the "technology_name" field.
@@ -766,9 +735,6 @@ func (ptuo *ProjectTechnologyUpdateOne) sqlSave(ctx context.Context) (_node *Pro
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ptuo.mutation.ProjectID(); ok {
-		_spec.SetField(projecttechnology.FieldProjectID, field.TypeUUID, value)
 	}
 	if value, ok := ptuo.mutation.TechnologyName(); ok {
 		_spec.SetField(projecttechnology.FieldTechnologyName, field.TypeString, value)

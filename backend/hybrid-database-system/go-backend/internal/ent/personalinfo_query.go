@@ -300,12 +300,12 @@ func (piq *PersonalInfoQuery) WithUser(opts ...func(*UserQuery)) *PersonalInfoQu
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Phone string `json:"phone,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.PersonalInfo.Query().
-//		GroupBy(personalinfo.FieldUserID).
+//		GroupBy(personalinfo.FieldPhone).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (piq *PersonalInfoQuery) GroupBy(field string, fields ...string) *PersonalInfoGroupBy {
@@ -323,11 +323,11 @@ func (piq *PersonalInfoQuery) GroupBy(field string, fields ...string) *PersonalI
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Phone string `json:"phone,omitempty"`
 //	}
 //
 //	client.PersonalInfo.Query().
-//		Select(personalinfo.FieldUserID).
+//		Select(personalinfo.FieldPhone).
 //		Scan(ctx, &v)
 func (piq *PersonalInfoQuery) Select(fields ...string) *PersonalInfoSelect {
 	piq.ctx.Fields = append(piq.ctx.Fields, fields...)

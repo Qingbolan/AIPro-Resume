@@ -30,20 +30,6 @@ func (weu *WorkExperienceUpdate) Where(ps ...predicate.WorkExperience) *WorkExpe
 	return weu
 }
 
-// SetUserID sets the "user_id" field.
-func (weu *WorkExperienceUpdate) SetUserID(u uuid.UUID) *WorkExperienceUpdate {
-	weu.mutation.SetUserID(u)
-	return weu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (weu *WorkExperienceUpdate) SetNillableUserID(u *uuid.UUID) *WorkExperienceUpdate {
-	if u != nil {
-		weu.SetUserID(*u)
-	}
-	return weu
-}
-
 // SetCompany sets the "company" field.
 func (weu *WorkExperienceUpdate) SetCompany(s string) *WorkExperienceUpdate {
 	weu.mutation.SetCompany(s)
@@ -335,9 +321,6 @@ func (weu *WorkExperienceUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
-	if value, ok := weu.mutation.UserID(); ok {
-		_spec.SetField(workexperience.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := weu.mutation.Company(); ok {
 		_spec.SetField(workexperience.FieldCompany, field.TypeString, value)
 	}
@@ -436,20 +419,6 @@ type WorkExperienceUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *WorkExperienceMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (weuo *WorkExperienceUpdateOne) SetUserID(u uuid.UUID) *WorkExperienceUpdateOne {
-	weuo.mutation.SetUserID(u)
-	return weuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (weuo *WorkExperienceUpdateOne) SetNillableUserID(u *uuid.UUID) *WorkExperienceUpdateOne {
-	if u != nil {
-		weuo.SetUserID(*u)
-	}
-	return weuo
 }
 
 // SetCompany sets the "company" field.
@@ -772,9 +741,6 @@ func (weuo *WorkExperienceUpdateOne) sqlSave(ctx context.Context) (_node *WorkEx
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := weuo.mutation.UserID(); ok {
-		_spec.SetField(workexperience.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := weuo.mutation.Company(); ok {
 		_spec.SetField(workexperience.FieldCompany, field.TypeString, value)

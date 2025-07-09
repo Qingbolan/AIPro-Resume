@@ -300,12 +300,12 @@ func (aq *AwardQuery) WithUser(opts ...func(*UserQuery)) *AwardQuery {
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Award.Query().
-//		GroupBy(award.FieldUserID).
+//		GroupBy(award.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *AwardQuery) GroupBy(field string, fields ...string) *AwardGroupBy {
@@ -323,11 +323,11 @@ func (aq *AwardQuery) GroupBy(field string, fields ...string) *AwardGroupBy {
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.Award.Query().
-//		Select(award.FieldUserID).
+//		Select(award.FieldTitle).
 //		Scan(ctx, &v)
 func (aq *AwardQuery) Select(fields ...string) *AwardSelect {
 	aq.ctx.Fields = append(aq.ctx.Fields, fields...)

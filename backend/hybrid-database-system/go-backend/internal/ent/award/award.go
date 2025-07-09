@@ -15,8 +15,6 @@ const (
 	Label = "award"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldAwardingOrganization holds the string denoting the awarding_organization field in the database.
@@ -53,7 +51,6 @@ const (
 // Columns holds all SQL columns for award fields.
 var Columns = []string{
 	FieldID,
-	FieldUserID,
 	FieldTitle,
 	FieldAwardingOrganization,
 	FieldAwardDate,
@@ -114,11 +111,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.

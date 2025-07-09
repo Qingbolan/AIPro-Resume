@@ -56,11 +56,6 @@ func IDLTE(id uuid.UUID) predicate.ProjectTechnology {
 	return predicate.ProjectTechnology(sql.FieldLTE(FieldID, id))
 }
 
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldEQ(FieldProjectID, v))
-}
-
 // TechnologyName applies equality check predicate on the "technology_name" field. It's identical to TechnologyNameEQ.
 func TechnologyName(v string) predicate.ProjectTechnology {
 	return predicate.ProjectTechnology(sql.FieldEQ(FieldTechnologyName, v))
@@ -109,46 +104,6 @@ func CreatedAt(v time.Time) predicate.ProjectTechnology {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.ProjectTechnology {
 	return predicate.ProjectTechnology(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldEQ(FieldProjectID, v))
-}
-
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldNEQ(FieldProjectID, v))
-}
-
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldIn(FieldProjectID, vs...))
-}
-
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldNotIn(FieldProjectID, vs...))
-}
-
-// ProjectIDGT applies the GT predicate on the "project_id" field.
-func ProjectIDGT(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldGT(FieldProjectID, v))
-}
-
-// ProjectIDGTE applies the GTE predicate on the "project_id" field.
-func ProjectIDGTE(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldGTE(FieldProjectID, v))
-}
-
-// ProjectIDLT applies the LT predicate on the "project_id" field.
-func ProjectIDLT(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldLT(FieldProjectID, v))
-}
-
-// ProjectIDLTE applies the LTE predicate on the "project_id" field.
-func ProjectIDLTE(v uuid.UUID) predicate.ProjectTechnology {
-	return predicate.ProjectTechnology(sql.FieldLTE(FieldProjectID, v))
 }
 
 // TechnologyNameEQ applies the EQ predicate on the "technology_name" field.

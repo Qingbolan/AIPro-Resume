@@ -300,12 +300,12 @@ func (iq *IdeaQuery) WithUser(opts ...func(*UserQuery)) *IdeaQuery {
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Idea.Query().
-//		GroupBy(idea.FieldUserID).
+//		GroupBy(idea.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (iq *IdeaQuery) GroupBy(field string, fields ...string) *IdeaGroupBy {
@@ -323,11 +323,11 @@ func (iq *IdeaQuery) GroupBy(field string, fields ...string) *IdeaGroupBy {
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.Idea.Query().
-//		Select(idea.FieldUserID).
+//		Select(idea.FieldTitle).
 //		Scan(ctx, &v)
 func (iq *IdeaQuery) Select(fields ...string) *IdeaSelect {
 	iq.ctx.Fields = append(iq.ctx.Fields, fields...)

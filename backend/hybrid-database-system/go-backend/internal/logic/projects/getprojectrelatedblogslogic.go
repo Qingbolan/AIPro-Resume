@@ -25,7 +25,6 @@ func NewGetProjectRelatedBlogsLogic(ctx context.Context, svcCtx *svc.ServiceCont
 }
 
 func (l *GetProjectRelatedBlogsLogic) GetProjectRelatedBlogs(req *types.ProjectDetailRequest) (resp []types.ProjectBlogRef, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// Return empty slice as placeholder
+	return []types.ProjectBlogRef{}, nil
 }

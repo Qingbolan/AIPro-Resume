@@ -11,7 +11,6 @@ var (
 	// AwardsColumns holds the columns for the "awards" table.
 	AwardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 300},
 		{Name: "awarding_organization", Type: field.TypeString, Size: 200},
 		{Name: "award_date", Type: field.TypeTime, Nullable: true},
@@ -32,7 +31,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "awards_users_awards",
-				Columns:    []*schema.Column{AwardsColumns[12]},
+				Columns:    []*schema.Column{AwardsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -98,9 +97,6 @@ var (
 	// BlogPostsColumns holds the columns for the "blog_posts" table.
 	BlogPostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "category_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "series_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "title", Type: field.TypeString, Size: 500},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 300},
 		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -129,19 +125,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blog_posts_blog_categories_blog_posts",
-				Columns:    []*schema.Column{BlogPostsColumns[20]},
+				Columns:    []*schema.Column{BlogPostsColumns[17]},
 				RefColumns: []*schema.Column{BlogCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "blog_posts_blog_series_blog_posts",
-				Columns:    []*schema.Column{BlogPostsColumns[21]},
+				Columns:    []*schema.Column{BlogPostsColumns[18]},
 				RefColumns: []*schema.Column{BlogSeriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "blog_posts_users_blog_posts",
-				Columns:    []*schema.Column{BlogPostsColumns[22]},
+				Columns:    []*schema.Column{BlogPostsColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -150,7 +146,6 @@ var (
 	// BlogSeriesColumns holds the columns for the "blog_series" table.
 	BlogSeriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 200},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -169,7 +164,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blog_series_users_blog_series",
-				Columns:    []*schema.Column{BlogSeriesColumns[10]},
+				Columns:    []*schema.Column{BlogSeriesColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -195,7 +190,6 @@ var (
 	// EducationsColumns holds the columns for the "educations" table.
 	EducationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "institution", Type: field.TypeString, Size: 200},
 		{Name: "degree", Type: field.TypeString, Size: 200},
 		{Name: "field_of_study", Type: field.TypeString, Nullable: true, Size: 200},
@@ -219,7 +213,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "educations_users_education",
-				Columns:    []*schema.Column{EducationsColumns[15]},
+				Columns:    []*schema.Column{EducationsColumns[14]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -228,7 +222,6 @@ var (
 	// IdeasColumns holds the columns for the "ideas" table.
 	IdeasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 300},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "abstract", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -257,7 +250,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ideas_users_ideas",
-				Columns:    []*schema.Column{IdeasColumns[20]},
+				Columns:    []*schema.Column{IdeasColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -281,7 +274,6 @@ var (
 	// PersonalInfosColumns holds the columns for the "personal_infos" table.
 	PersonalInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20},
 		{Name: "website", Type: field.TypeString, Nullable: true, Size: 500},
 		{Name: "location", Type: field.TypeString, Nullable: true, Size: 255},
@@ -303,7 +295,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "personal_infos_users_personal_info",
-				Columns:    []*schema.Column{PersonalInfosColumns[13]},
+				Columns:    []*schema.Column{PersonalInfosColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -312,7 +304,6 @@ var (
 	// ProjectsColumns holds the columns for the "projects" table.
 	ProjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 300},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -341,7 +332,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "projects_users_projects",
-				Columns:    []*schema.Column{ProjectsColumns[20]},
+				Columns:    []*schema.Column{ProjectsColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -350,7 +341,6 @@ var (
 	// ProjectDetailsColumns holds the columns for the "project_details" table.
 	ProjectDetailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "project_id", Type: field.TypeUUID},
 		{Name: "full_description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "features", Type: field.TypeJSON, Nullable: true},
 		{Name: "key_achievements", Type: field.TypeJSON, Nullable: true},
@@ -379,7 +369,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_details_projects_detail",
-				Columns:    []*schema.Column{ProjectDetailsColumns[20]},
+				Columns:    []*schema.Column{ProjectDetailsColumns[19]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -388,7 +378,6 @@ var (
 	// ProjectImagesColumns holds the columns for the "project_images" table.
 	ProjectImagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "project_id", Type: field.TypeUUID},
 		{Name: "image_url", Type: field.TypeString, Size: 500},
 		{Name: "title", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -414,7 +403,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_images_projects_images",
-				Columns:    []*schema.Column{ProjectImagesColumns[17]},
+				Columns:    []*schema.Column{ProjectImagesColumns[16]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -423,7 +412,6 @@ var (
 	// ProjectTechnologiesColumns holds the columns for the "project_technologies" table.
 	ProjectTechnologiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "project_id", Type: field.TypeUUID},
 		{Name: "technology_name", Type: field.TypeString, Size: 100},
 		{Name: "category", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "version", Type: field.TypeString, Nullable: true, Size: 50},
@@ -444,7 +432,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_technologies_projects_technologies",
-				Columns:    []*schema.Column{ProjectTechnologiesColumns[12]},
+				Columns:    []*schema.Column{ProjectTechnologiesColumns[11]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -453,7 +441,6 @@ var (
 	// PublicationsColumns holds the columns for the "publications" table.
 	PublicationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 500},
 		{Name: "publication_type", Type: field.TypeString, Size: 50},
 		{Name: "journal_name", Type: field.TypeString, Nullable: true, Size: 200},
@@ -481,7 +468,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "publications_users_publications",
-				Columns:    []*schema.Column{PublicationsColumns[19]},
+				Columns:    []*schema.Column{PublicationsColumns[18]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -490,7 +477,6 @@ var (
 	// ResearchProjectsColumns holds the columns for the "research_projects" table.
 	ResearchProjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "title", Type: field.TypeString, Size: 300},
 		{Name: "start_date", Type: field.TypeTime, Nullable: true},
 		{Name: "end_date", Type: field.TypeTime, Nullable: true},
@@ -512,7 +498,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "research_projects_users_research_projects",
-				Columns:    []*schema.Column{ResearchProjectsColumns[13]},
+				Columns:    []*schema.Column{ResearchProjectsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -521,7 +507,6 @@ var (
 	// SocialLinksColumns holds the columns for the "social_links" table.
 	SocialLinksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "platform", Type: field.TypeString, Size: 50},
 		{Name: "url", Type: field.TypeString, Size: 500},
 		{Name: "username", Type: field.TypeString, Nullable: true, Size: 100},
@@ -540,7 +525,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "social_links_users_social_links",
-				Columns:    []*schema.Column{SocialLinksColumns[10]},
+				Columns:    []*schema.Column{SocialLinksColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -571,7 +556,6 @@ var (
 	// WorkExperiencesColumns holds the columns for the "work_experiences" table.
 	WorkExperiencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "company", Type: field.TypeString, Size: 200},
 		{Name: "position", Type: field.TypeString, Size: 200},
 		{Name: "start_date", Type: field.TypeTime, Nullable: true},
@@ -593,7 +577,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "work_experiences_users_work_experience",
-				Columns:    []*schema.Column{WorkExperiencesColumns[13]},
+				Columns:    []*schema.Column{WorkExperiencesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

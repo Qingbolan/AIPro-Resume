@@ -30,20 +30,6 @@ func (eu *EducationUpdate) Where(ps ...predicate.Education) *EducationUpdate {
 	return eu
 }
 
-// SetUserID sets the "user_id" field.
-func (eu *EducationUpdate) SetUserID(u uuid.UUID) *EducationUpdate {
-	eu.mutation.SetUserID(u)
-	return eu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (eu *EducationUpdate) SetNillableUserID(u *uuid.UUID) *EducationUpdate {
-	if u != nil {
-		eu.SetUserID(*u)
-	}
-	return eu
-}
-
 // SetInstitution sets the "institution" field.
 func (eu *EducationUpdate) SetInstitution(s string) *EducationUpdate {
 	eu.mutation.SetInstitution(s)
@@ -385,9 +371,6 @@ func (eu *EducationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := eu.mutation.UserID(); ok {
-		_spec.SetField(education.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := eu.mutation.Institution(); ok {
 		_spec.SetField(education.FieldInstitution, field.TypeString, value)
 	}
@@ -498,20 +481,6 @@ type EducationUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *EducationMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (euo *EducationUpdateOne) SetUserID(u uuid.UUID) *EducationUpdateOne {
-	euo.mutation.SetUserID(u)
-	return euo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (euo *EducationUpdateOne) SetNillableUserID(u *uuid.UUID) *EducationUpdateOne {
-	if u != nil {
-		euo.SetUserID(*u)
-	}
-	return euo
 }
 
 // SetInstitution sets the "institution" field.
@@ -884,9 +853,6 @@ func (euo *EducationUpdateOne) sqlSave(ctx context.Context) (_node *Education, e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := euo.mutation.UserID(); ok {
-		_spec.SetField(education.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := euo.mutation.Institution(); ok {
 		_spec.SetField(education.FieldInstitution, field.TypeString, value)

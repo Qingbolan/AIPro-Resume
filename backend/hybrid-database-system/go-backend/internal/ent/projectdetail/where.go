@@ -56,11 +56,6 @@ func IDLTE(id uuid.UUID) predicate.ProjectDetail {
 	return predicate.ProjectDetail(sql.FieldLTE(FieldID, id))
 }
 
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldEQ(FieldProjectID, v))
-}
-
 // FullDescription applies equality check predicate on the "full_description" field. It's identical to FullDescriptionEQ.
 func FullDescription(v string) predicate.ProjectDetail {
 	return predicate.ProjectDetail(sql.FieldEQ(FieldFullDescription, v))
@@ -114,46 +109,6 @@ func CreatedAt(v time.Time) predicate.ProjectDetail {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.ProjectDetail {
 	return predicate.ProjectDetail(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldEQ(FieldProjectID, v))
-}
-
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldNEQ(FieldProjectID, v))
-}
-
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldIn(FieldProjectID, vs...))
-}
-
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldNotIn(FieldProjectID, vs...))
-}
-
-// ProjectIDGT applies the GT predicate on the "project_id" field.
-func ProjectIDGT(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldGT(FieldProjectID, v))
-}
-
-// ProjectIDGTE applies the GTE predicate on the "project_id" field.
-func ProjectIDGTE(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldGTE(FieldProjectID, v))
-}
-
-// ProjectIDLT applies the LT predicate on the "project_id" field.
-func ProjectIDLT(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldLT(FieldProjectID, v))
-}
-
-// ProjectIDLTE applies the LTE predicate on the "project_id" field.
-func ProjectIDLTE(v uuid.UUID) predicate.ProjectDetail {
-	return predicate.ProjectDetail(sql.FieldLTE(FieldProjectID, v))
 }
 
 // FullDescriptionEQ applies the EQ predicate on the "full_description" field.

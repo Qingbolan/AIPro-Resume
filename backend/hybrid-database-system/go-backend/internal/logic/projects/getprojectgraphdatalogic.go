@@ -25,7 +25,9 @@ func NewGetProjectGraphDataLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *GetProjectGraphDataLogic) GetProjectGraphData(req *types.GraphRequest) (resp *types.GraphData, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// Return empty graph data as placeholder
+	return &types.GraphData{
+		Nodes: []types.GraphNode{},
+		Links: []types.GraphLink{},
+	}, nil
 }

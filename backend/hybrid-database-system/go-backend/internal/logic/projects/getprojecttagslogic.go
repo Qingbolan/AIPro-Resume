@@ -25,7 +25,6 @@ func NewGetProjectTagsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetProjectTagsLogic) GetProjectTags(req *types.ResumeRequest) (resp []string, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// Return empty slice as placeholder
+	return []string{}, nil
 }

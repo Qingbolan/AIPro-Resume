@@ -22,12 +22,6 @@ type ProjectDetailCreate struct {
 	hooks    []Hook
 }
 
-// SetProjectID sets the "project_id" field.
-func (pdc *ProjectDetailCreate) SetProjectID(u uuid.UUID) *ProjectDetailCreate {
-	pdc.mutation.SetProjectID(u)
-	return pdc
-}
-
 // SetFullDescription sets the "full_description" field.
 func (pdc *ProjectDetailCreate) SetFullDescription(s string) *ProjectDetailCreate {
 	pdc.mutation.SetFullDescription(s)
@@ -308,9 +302,6 @@ func (pdc *ProjectDetailCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pdc *ProjectDetailCreate) check() error {
-	if _, ok := pdc.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "ProjectDetail.project_id"`)}
-	}
 	if v, ok := pdc.mutation.ProjectDuration(); ok {
 		if err := projectdetail.ProjectDurationValidator(v); err != nil {
 			return &ValidationError{Name: "project_duration", err: fmt.Errorf(`ent: validator failed for field "ProjectDetail.project_duration": %w`, err)}
@@ -361,10 +352,6 @@ func (pdc *ProjectDetailCreate) createSpec() (*ProjectDetail, *sqlgraph.CreateSp
 	if id, ok := pdc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := pdc.mutation.ProjectID(); ok {
-		_spec.SetField(projectdetail.FieldProjectID, field.TypeUUID, value)
-		_node.ProjectID = value
 	}
 	if value, ok := pdc.mutation.FullDescription(); ok {
 		_spec.SetField(projectdetail.FieldFullDescription, field.TypeString, value)

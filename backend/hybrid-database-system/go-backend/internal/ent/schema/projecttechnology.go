@@ -19,7 +19,6 @@ func (ProjectTechnology) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.UUID("project_id", uuid.UUID{}),
 		field.String("technology_name").
 			MaxLen(100),
 		field.String("category").

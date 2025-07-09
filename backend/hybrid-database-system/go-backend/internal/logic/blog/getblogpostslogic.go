@@ -2,7 +2,12 @@ package blog
 
 import (
 	"context"
+	"fmt"
+	"math"
 
+	"silan-backend/internal/ent"
+	"silan-backend/internal/ent/blogcategory"
+	"silan-backend/internal/ent/blogpost"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
 
@@ -25,7 +30,101 @@ func NewGetBlogPostsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetB
 }
 
 func (l *GetBlogPostsLogic) GetBlogPosts(req *types.BlogListRequest) (resp *types.BlogListResponse, err error) {
-	// todo: add your logic here and delete this line
+	query := l.svcCtx.DB.BlogPost.Query().
+		Where(blogpost.StatusEQ(blogpost.StatusPublished)).
+		WithUser().
+		WithCategory().
+		WithTags()
 
-	return
+	// Apply filters
+	if req.Category != "" {
+		query = query.Where(blogpost.HasCategoryWith(
+			blogcategory.Slug(req.Category),
+		))
+	}
+
+	if req.Featured {
+		query = query.Where(blogpost.IsFeatured(true))
+	}
+
+	if req.ContentType != "" {
+		query = query.Where(blogpost.ContentTypeEQ(blogpost.ContentType(req.ContentType)))
+	}
+
+	if req.Search != "" {
+		query = query.Where(blogpost.Or(
+			blogpost.TitleContains(req.Search),
+			blogpost.ExcerptContains(req.Search),
+			blogpost.ContentContains(req.Search),
+		))
+	}
+
+	// Get total count
+	total, err := query.Count(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply pagination
+	offset := (req.Page - 1) * req.Size
+	posts, err := query.
+		Order(ent.Desc(blogpost.FieldPublishedAt)).
+		Limit(req.Size).
+		Offset(offset).
+		All(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []types.BlogData
+	for _, post := range posts {
+		var publishDate string
+		if !post.PublishedAt.IsZero() {
+			publishDate = post.PublishedAt.Format("2006-01-02")
+		}
+
+		var readTime string
+		if post.ReadingTimeMinutes > 0 {
+			readTime = fmt.Sprintf("%d min read", post.ReadingTimeMinutes)
+		}
+
+		var category string
+		if post.Edges.Category != nil {
+			category = post.Edges.Category.Name
+		}
+
+		var tags []string
+		for _, tag := range post.Edges.Tags {
+			tags = append(tags, tag.Name)
+		}
+
+		var author string
+		if post.Edges.User != nil {
+			author = post.Edges.User.FirstName + " " + post.Edges.User.LastName
+		}
+
+		result = append(result, types.BlogData{
+			ID:          post.ID.String(),
+			Title:       post.Title,
+			Author:      author,
+			PublishDate: publishDate,
+			ReadTime:    readTime,
+			Category:    category,
+			Tags:        tags,
+			Likes:       int64(post.LikeCount),
+			Views:       int64(post.ViewCount),
+			Summary:     post.Excerpt,
+			Type:        string(post.ContentType),
+		})
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(req.Size)))
+
+	return &types.BlogListResponse{
+		Posts:      result,
+		Total:      int64(total),
+		Page:       req.Page,
+		Size:       req.Size,
+		TotalPages: totalPages,
+	}, nil
 }

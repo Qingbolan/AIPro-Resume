@@ -25,7 +25,7 @@ func NewGetRecentUpdatesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetRecentUpdatesLogic) GetRecentUpdates(req *types.ResumeRequest) (resp []types.RecentUpdate, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// Since there's no RecentUpdate schema defined, return empty slice for now
+	// This would need to be implemented based on business requirements
+	return []types.RecentUpdate{}, nil
 }

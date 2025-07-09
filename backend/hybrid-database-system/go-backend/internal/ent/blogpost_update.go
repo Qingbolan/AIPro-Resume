@@ -34,60 +34,6 @@ func (bpu *BlogPostUpdate) Where(ps ...predicate.BlogPost) *BlogPostUpdate {
 	return bpu
 }
 
-// SetUserID sets the "user_id" field.
-func (bpu *BlogPostUpdate) SetUserID(u uuid.UUID) *BlogPostUpdate {
-	bpu.mutation.SetUserID(u)
-	return bpu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (bpu *BlogPostUpdate) SetNillableUserID(u *uuid.UUID) *BlogPostUpdate {
-	if u != nil {
-		bpu.SetUserID(*u)
-	}
-	return bpu
-}
-
-// SetCategoryID sets the "category_id" field.
-func (bpu *BlogPostUpdate) SetCategoryID(u uuid.UUID) *BlogPostUpdate {
-	bpu.mutation.SetCategoryID(u)
-	return bpu
-}
-
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (bpu *BlogPostUpdate) SetNillableCategoryID(u *uuid.UUID) *BlogPostUpdate {
-	if u != nil {
-		bpu.SetCategoryID(*u)
-	}
-	return bpu
-}
-
-// ClearCategoryID clears the value of the "category_id" field.
-func (bpu *BlogPostUpdate) ClearCategoryID() *BlogPostUpdate {
-	bpu.mutation.ClearCategoryID()
-	return bpu
-}
-
-// SetSeriesID sets the "series_id" field.
-func (bpu *BlogPostUpdate) SetSeriesID(u uuid.UUID) *BlogPostUpdate {
-	bpu.mutation.SetSeriesID(u)
-	return bpu
-}
-
-// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (bpu *BlogPostUpdate) SetNillableSeriesID(u *uuid.UUID) *BlogPostUpdate {
-	if u != nil {
-		bpu.SetSeriesID(*u)
-	}
-	return bpu
-}
-
-// ClearSeriesID clears the value of the "series_id" field.
-func (bpu *BlogPostUpdate) ClearSeriesID() *BlogPostUpdate {
-	bpu.mutation.ClearSeriesID()
-	return bpu
-}
-
 // SetTitle sets the "title" field.
 func (bpu *BlogPostUpdate) SetTitle(s string) *BlogPostUpdate {
 	bpu.mutation.SetTitle(s)
@@ -599,21 +545,6 @@ func (bpu *BlogPostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := bpu.mutation.UserID(); ok {
-		_spec.SetField(blogpost.FieldUserID, field.TypeUUID, value)
-	}
-	if value, ok := bpu.mutation.CategoryID(); ok {
-		_spec.SetField(blogpost.FieldCategoryID, field.TypeUUID, value)
-	}
-	if bpu.mutation.CategoryIDCleared() {
-		_spec.ClearField(blogpost.FieldCategoryID, field.TypeUUID)
-	}
-	if value, ok := bpu.mutation.SeriesID(); ok {
-		_spec.SetField(blogpost.FieldSeriesID, field.TypeUUID, value)
-	}
-	if bpu.mutation.SeriesIDCleared() {
-		_spec.ClearField(blogpost.FieldSeriesID, field.TypeUUID)
-	}
 	if value, ok := bpu.mutation.Title(); ok {
 		_spec.SetField(blogpost.FieldTitle, field.TypeString, value)
 	}
@@ -887,60 +818,6 @@ type BlogPostUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BlogPostMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (bpuo *BlogPostUpdateOne) SetUserID(u uuid.UUID) *BlogPostUpdateOne {
-	bpuo.mutation.SetUserID(u)
-	return bpuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (bpuo *BlogPostUpdateOne) SetNillableUserID(u *uuid.UUID) *BlogPostUpdateOne {
-	if u != nil {
-		bpuo.SetUserID(*u)
-	}
-	return bpuo
-}
-
-// SetCategoryID sets the "category_id" field.
-func (bpuo *BlogPostUpdateOne) SetCategoryID(u uuid.UUID) *BlogPostUpdateOne {
-	bpuo.mutation.SetCategoryID(u)
-	return bpuo
-}
-
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (bpuo *BlogPostUpdateOne) SetNillableCategoryID(u *uuid.UUID) *BlogPostUpdateOne {
-	if u != nil {
-		bpuo.SetCategoryID(*u)
-	}
-	return bpuo
-}
-
-// ClearCategoryID clears the value of the "category_id" field.
-func (bpuo *BlogPostUpdateOne) ClearCategoryID() *BlogPostUpdateOne {
-	bpuo.mutation.ClearCategoryID()
-	return bpuo
-}
-
-// SetSeriesID sets the "series_id" field.
-func (bpuo *BlogPostUpdateOne) SetSeriesID(u uuid.UUID) *BlogPostUpdateOne {
-	bpuo.mutation.SetSeriesID(u)
-	return bpuo
-}
-
-// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (bpuo *BlogPostUpdateOne) SetNillableSeriesID(u *uuid.UUID) *BlogPostUpdateOne {
-	if u != nil {
-		bpuo.SetSeriesID(*u)
-	}
-	return bpuo
-}
-
-// ClearSeriesID clears the value of the "series_id" field.
-func (bpuo *BlogPostUpdateOne) ClearSeriesID() *BlogPostUpdateOne {
-	bpuo.mutation.ClearSeriesID()
-	return bpuo
 }
 
 // SetTitle sets the "title" field.
@@ -1483,21 +1360,6 @@ func (bpuo *BlogPostUpdateOne) sqlSave(ctx context.Context) (_node *BlogPost, er
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := bpuo.mutation.UserID(); ok {
-		_spec.SetField(blogpost.FieldUserID, field.TypeUUID, value)
-	}
-	if value, ok := bpuo.mutation.CategoryID(); ok {
-		_spec.SetField(blogpost.FieldCategoryID, field.TypeUUID, value)
-	}
-	if bpuo.mutation.CategoryIDCleared() {
-		_spec.ClearField(blogpost.FieldCategoryID, field.TypeUUID)
-	}
-	if value, ok := bpuo.mutation.SeriesID(); ok {
-		_spec.SetField(blogpost.FieldSeriesID, field.TypeUUID, value)
-	}
-	if bpuo.mutation.SeriesIDCleared() {
-		_spec.ClearField(blogpost.FieldSeriesID, field.TypeUUID)
 	}
 	if value, ok := bpuo.mutation.Title(); ok {
 		_spec.SetField(blogpost.FieldTitle, field.TypeString, value)

@@ -19,8 +19,6 @@ type Publication struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// PublicationType holds the value of the "publication_type" field.
@@ -95,7 +93,7 @@ func (*Publication) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case publication.FieldPublicationDate, publication.FieldCreatedAt, publication.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case publication.FieldID, publication.FieldUserID:
+		case publication.FieldID:
 			values[i] = new(uuid.UUID)
 		case publication.ForeignKeys[0]: // user_publications
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -119,12 +117,6 @@ func (pu *Publication) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pu.ID = *value
-			}
-		case publication.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				pu.UserID = *value
 			}
 		case publication.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -276,9 +268,6 @@ func (pu *Publication) String() string {
 	var builder strings.Builder
 	builder.WriteString("Publication(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pu.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", pu.UserID))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(pu.Title)
 	builder.WriteString(", ")

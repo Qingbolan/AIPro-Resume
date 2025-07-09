@@ -33,20 +33,6 @@ func (pu *ProjectUpdate) Where(ps ...predicate.Project) *ProjectUpdate {
 	return pu
 }
 
-// SetUserID sets the "user_id" field.
-func (pu *ProjectUpdate) SetUserID(u uuid.UUID) *ProjectUpdate {
-	pu.mutation.SetUserID(u)
-	return pu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (pu *ProjectUpdate) SetNillableUserID(u *uuid.UUID) *ProjectUpdate {
-	if u != nil {
-		pu.SetUserID(*u)
-	}
-	return pu
-}
-
 // SetTitle sets the "title" field.
 func (pu *ProjectUpdate) SetTitle(s string) *ProjectUpdate {
 	pu.mutation.SetTitle(s)
@@ -574,9 +560,6 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.UserID(); ok {
-		_spec.SetField(project.FieldUserID, field.TypeUUID, value)
-	}
 	if value, ok := pu.mutation.Title(); ok {
 		_spec.SetField(project.FieldTitle, field.TypeString, value)
 	}
@@ -827,20 +810,6 @@ type ProjectUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProjectMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (puo *ProjectUpdateOne) SetUserID(u uuid.UUID) *ProjectUpdateOne {
-	puo.mutation.SetUserID(u)
-	return puo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (puo *ProjectUpdateOne) SetNillableUserID(u *uuid.UUID) *ProjectUpdateOne {
-	if u != nil {
-		puo.SetUserID(*u)
-	}
-	return puo
 }
 
 // SetTitle sets the "title" field.
@@ -1399,9 +1368,6 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := puo.mutation.UserID(); ok {
-		_spec.SetField(project.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := puo.mutation.Title(); ok {
 		_spec.SetField(project.FieldTitle, field.TypeString, value)

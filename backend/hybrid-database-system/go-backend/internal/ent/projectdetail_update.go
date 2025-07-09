@@ -31,20 +31,6 @@ func (pdu *ProjectDetailUpdate) Where(ps ...predicate.ProjectDetail) *ProjectDet
 	return pdu
 }
 
-// SetProjectID sets the "project_id" field.
-func (pdu *ProjectDetailUpdate) SetProjectID(u uuid.UUID) *ProjectDetailUpdate {
-	pdu.mutation.SetProjectID(u)
-	return pdu
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (pdu *ProjectDetailUpdate) SetNillableProjectID(u *uuid.UUID) *ProjectDetailUpdate {
-	if u != nil {
-		pdu.SetProjectID(*u)
-	}
-	return pdu
-}
-
 // SetFullDescription sets the "full_description" field.
 func (pdu *ProjectDetailUpdate) SetFullDescription(s string) *ProjectDetailUpdate {
 	pdu.mutation.SetFullDescription(s)
@@ -452,9 +438,6 @@ func (pdu *ProjectDetailUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if value, ok := pdu.mutation.ProjectID(); ok {
-		_spec.SetField(projectdetail.FieldProjectID, field.TypeUUID, value)
-	}
 	if value, ok := pdu.mutation.FullDescription(); ok {
 		_spec.SetField(projectdetail.FieldFullDescription, field.TypeString, value)
 	}
@@ -629,20 +612,6 @@ type ProjectDetailUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProjectDetailMutation
-}
-
-// SetProjectID sets the "project_id" field.
-func (pduo *ProjectDetailUpdateOne) SetProjectID(u uuid.UUID) *ProjectDetailUpdateOne {
-	pduo.mutation.SetProjectID(u)
-	return pduo
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (pduo *ProjectDetailUpdateOne) SetNillableProjectID(u *uuid.UUID) *ProjectDetailUpdateOne {
-	if u != nil {
-		pduo.SetProjectID(*u)
-	}
-	return pduo
 }
 
 // SetFullDescription sets the "full_description" field.
@@ -1081,9 +1050,6 @@ func (pduo *ProjectDetailUpdateOne) sqlSave(ctx context.Context) (_node *Project
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := pduo.mutation.ProjectID(); ok {
-		_spec.SetField(projectdetail.FieldProjectID, field.TypeUUID, value)
 	}
 	if value, ok := pduo.mutation.FullDescription(); ok {
 		_spec.SetField(projectdetail.FieldFullDescription, field.TypeString, value)

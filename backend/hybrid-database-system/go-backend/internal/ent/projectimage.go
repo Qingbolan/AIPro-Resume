@@ -19,8 +19,6 @@ type ProjectImage struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ProjectID holds the value of the "project_id" field.
-	ProjectID uuid.UUID `json:"project_id,omitempty"`
 	// ImageURL holds the value of the "image_url" field.
 	ImageURL string `json:"image_url,omitempty"`
 	// Title holds the value of the "title" field.
@@ -91,7 +89,7 @@ func (*ProjectImage) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case projectimage.FieldCreatedAt, projectimage.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case projectimage.FieldID, projectimage.FieldProjectID:
+		case projectimage.FieldID:
 			values[i] = new(uuid.UUID)
 		case projectimage.ForeignKeys[0]: // project_images
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -115,12 +113,6 @@ func (pi *ProjectImage) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				pi.ID = *value
-			}
-		case projectimage.FieldProjectID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
-			} else if value != nil {
-				pi.ProjectID = *value
 			}
 		case projectimage.FieldImageURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -260,9 +252,6 @@ func (pi *ProjectImage) String() string {
 	var builder strings.Builder
 	builder.WriteString("ProjectImage(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pi.ID))
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", pi.ProjectID))
-	builder.WriteString(", ")
 	builder.WriteString("image_url=")
 	builder.WriteString(pi.ImageURL)
 	builder.WriteString(", ")

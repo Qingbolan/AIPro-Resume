@@ -300,12 +300,12 @@ func (weq *WorkExperienceQuery) WithUser(opts ...func(*UserQuery)) *WorkExperien
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Company string `json:"company,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.WorkExperience.Query().
-//		GroupBy(workexperience.FieldUserID).
+//		GroupBy(workexperience.FieldCompany).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (weq *WorkExperienceQuery) GroupBy(field string, fields ...string) *WorkExperienceGroupBy {
@@ -323,11 +323,11 @@ func (weq *WorkExperienceQuery) GroupBy(field string, fields ...string) *WorkExp
 // Example:
 //
 //	var v []struct {
-//		UserID uuid.UUID `json:"user_id,omitempty"`
+//		Company string `json:"company,omitempty"`
 //	}
 //
 //	client.WorkExperience.Query().
-//		Select(workexperience.FieldUserID).
+//		Select(workexperience.FieldCompany).
 //		Scan(ctx, &v)
 func (weq *WorkExperienceQuery) Select(fields ...string) *WorkExperienceSelect {
 	weq.ctx.Fields = append(weq.ctx.Fields, fields...)
