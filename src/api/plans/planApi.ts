@@ -1,6 +1,5 @@
 import type { AnnualPlan, Project, Language, Plan, ProjectWithPlan } from '../../types/api';
-
-// Plan API - handles annual plan data management
+import { get, withFallback, formatLanguage } from '../utils';
 
 // Mock annual plans data based on the provided structure
 const mockAnnualPlansData: { en: AnnualPlan[] } = {
@@ -153,118 +152,101 @@ const mockAnnualPlansData: { en: AnnualPlan[] } = {
   ]
 };
 
-// Enhanced project data matching the provided structure
-// const mockProjectsData: { en: Project[] } = {
-//   en: [
-//     {
-//       id: 1,
-//       name: "AI Chatbot",
-//       description: "An intelligent chatbot using natural language processing techniques to provide human-like interactions.",
-//       tags: ["AI", "NLP", "Python"],
-//       year: 2023,
-//       annualPlan: "ZIYUN2024"
-//     },
-//     {
-//       id: 2,
-//       name: "E-commerce Platform",
-//       description: "A full-stack online shopping platform with user authentication, product catalog, and secure payment integration.",
-//       tags: ["Web", "React", "Node.js"],
-//       year: 2022,
-//       annualPlan: "WENXIN2022"
-//     },
-//     {
-//       id: 3,
-//       name: "Data Visualization Tool",
-//       description: "Interactive data visualizations using D3.js to represent complex datasets in an intuitive and engaging manner.",
-//       tags: ["D3.js", "Data Science"],
-//       year: 2024,
-//       annualPlan: "ZIYUN2024"
-//     },
-//     {
-//       id: 4,
-//       name: "Mobile Fitness App",
-//       description: "A cross-platform mobile application for tracking workouts, nutrition, and personal fitness goals.",
-//       tags: ["Mobile", "React Native", "Firebase"],
-//       year: 2021,
-//       annualPlan: "WANXIANG2021"
-//     },
-//     {
-//       id: 5,
-//       name: "Blockchain Voting System",
-//       description: "A decentralized voting system using blockchain technology to ensure transparency and security in elections.",
-//       tags: ["Blockchain", "Solidity", "Web3"],
-//       year: 2023,
-//       annualPlan: "YANGFAN2023"
-//     }
-//   ]
-// };
+// API Functions
 
 /**
  * Fetch all annual plans
  */
-export const fetchAnnualPlans = async (_language: Language = 'en'): Promise<AnnualPlan[]> => {
-  try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return mockAnnualPlansData.en;
-  } catch (error) {
-    console.error('Error fetching annual plans:', error);
-    throw new Error('Failed to fetch annual plans');
-  }
+export const fetchAnnualPlans = async (language: Language = 'en'): Promise<AnnualPlan[]> => {
+  const apiCall = async () => {
+    const response = await get<AnnualPlan[]>('/api/v1/plans/annual', {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  const fallbackData = mockAnnualPlansData.en;
+  return withFallback(apiCall, fallbackData);
 };
 
 /**
  * Get current active annual plan (most recent year)
  */
 export const fetchCurrentAnnualPlan = async (language: Language = 'en'): Promise<AnnualPlan | null> => {
-  try {
-    const plans = await fetchAnnualPlans(language);
-    return plans.sort((a, b) => b.year - a.year)[0] || null;
-  } catch (error) {
-    console.error('Error fetching current annual plan:', error);
-    throw new Error('Failed to fetch current annual plan');
-  }
+  const apiCall = async () => {
+    const response = await get<AnnualPlan>('/api/v1/plans/annual/current', {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  const fallbackData = mockAnnualPlansData.en.sort((a, b) => b.year - a.year)[0] || null;
+  return withFallback(apiCall, fallbackData);
 };
 
 /**
  * Get annual plan by name
  */
 export const fetchAnnualPlanByName = async (planName: string, language: Language = 'en'): Promise<AnnualPlan | null> => {
-  try {
-    const plans = await fetchAnnualPlans(language);
-    return plans.find(plan => plan.name === planName) || null;
-  } catch (error) {
-    console.error('Error fetching annual plan by name:', error);
-    throw new Error('Failed to fetch annual plan');
-  }
+  const apiCall = async () => {
+    const response = await get<AnnualPlan>(`/api/v1/plans/annual/${planName}`, {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  const fallbackData = mockAnnualPlansData.en.find(plan => plan.name === planName) || null;
+  return withFallback(apiCall, fallbackData);
 };
 
 /**
  * Fetch all projects with language support
  */
 export const fetchProjectsWithAnnualPlans = async (language: Language = 'en'): Promise<Project[]> => {
-  try {
-    // Import fetchProjects from projectApi to get language-specific data
-    const { fetchProjects } = await import('../projects/projectApi');
-    return await fetchProjects(language);
-  } catch (error) {
-    console.error('Error fetching projects with annual plans:', error);
-    throw new Error('Failed to fetch projects');
-  }
+  const apiCall = async () => {
+    const response = await get<Project[]>('/api/v1/plans/projects', {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  // Fallback: import fetchProjects from projectApi to get language-specific data
+  const fallbackAction = async () => {
+    try {
+      const { fetchProjects } = await import('../projects/projectApi');
+      return await fetchProjects({}, language);
+    } catch (error) {
+      console.warn('Failed to import projects API:', error);
+      return [];
+    }
+  };
+  
+  return withFallback(apiCall, await fallbackAction());
 };
 
 /**
  * Get projects by annual plan name
  */
 export const fetchProjectsByAnnualPlan = async (planName: string, language: Language = 'en'): Promise<Project[]> => {
-  try {
-    const projects = await fetchProjectsWithAnnualPlans(language);
-    return projects.filter(project => project.annualPlan === planName);
-  } catch (error) {
-    console.error('Error fetching projects by annual plan:', error);
-    throw new Error('Failed to fetch projects for annual plan');
-  }
+  const apiCall = async () => {
+    const response = await get<Project[]>(`/api/v1/plans/${planName}/projects`, {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  // Fallback: filter projects by plan name
+  const fallbackAction = async () => {
+    try {
+      const projects = await fetchProjectsWithAnnualPlans(language);
+      return projects.filter(project => project.annualPlan === planName);
+    } catch (error) {
+      console.warn('Failed to fetch projects by plan:', error);
+      return [];
+    }
+  };
+  
+  return withFallback(apiCall, await fallbackAction());
 };
 
 // Conversion functions for backward compatibility
@@ -312,4 +294,4 @@ export const fetchCurrentPlan = async (language: Language = 'en'): Promise<Plan 
 export const fetchProjectsWithPlans = async (language: Language = 'en'): Promise<ProjectWithPlan[]> => {
   const projects = await fetchProjectsWithAnnualPlans(language);
   return projects.map(convertProjectToProjectWithPlan);
-}; 
+};

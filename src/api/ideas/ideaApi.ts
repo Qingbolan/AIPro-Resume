@@ -1,9 +1,35 @@
 import type { IdeaData } from '../../types';
+import { get, post, put, del, withFallback, formatLanguage } from '../utils';
+import { type PaginationRequest, type SearchRequest, type ListResponse } from '../config';
 
-// Simulate API delay
-const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+// Backend API request/response types
+interface IdeaListRequest extends PaginationRequest {
+  status?: string;
+  category?: string;
+  difficulty?: string;
+  collaboration?: boolean;
+  funding?: string;
+  search?: string;
+  tags?: string;
+}
 
-// Mock ideas data with multi-language support
+interface IdeaListResponse extends ListResponse<IdeaData> {
+  ideas: IdeaData[];
+  total: number;
+  page: number;
+  size: number;
+  total_pages: number;
+}
+
+
+interface IdeaSearchRequest extends SearchRequest {
+  query?: string;
+  category?: string;
+  status?: string;
+  tags?: string;
+}
+
+// Mock ideas data for fallback
 const mockIdeasData: Record<'en' | 'zh', IdeaData[]> = {
   en: [
     {
@@ -97,6 +123,22 @@ const mockIdeasData: Record<'en' | 'zh', IdeaData[]> = {
       estimatedDuration: '4-6 months',
       openForCollaboration: true,
       fundingStatus: 'seeking'
+    },
+    {
+      id: '6',
+      title: 'Quick Prototype Testing',
+      description: 'A simple idea to test edge cases in the system',
+      category: 'Testing',
+      tags: [], // Test case for empty tags
+      status: 'draft',
+      createdAt: '2023-12-01',
+      abstract: 'This is a test idea to ensure our system handles edge cases properly.',
+      motivation: 'Testing is important for robust systems.',
+      difficulty: 'beginner',
+      researchField: 'Software Testing',
+      estimatedDuration: '1 week',
+      openForCollaboration: false,
+      fundingStatus: 'unfunded'
     }
   ],
   zh: [
@@ -201,43 +243,101 @@ const mockIdeasData: Record<'en' | 'zh', IdeaData[]> = {
       estimatedDuration: '4-6个月',
       openForCollaboration: true,
       fundingStatus: 'seeking'
+    },
+    {
+      id: '6',
+      title: '快速原型测试',
+      description: '一个测试系统边界情况的简单想法',
+      category: '测试',
+      tags: [], // Test case for empty tags
+      status: 'draft',
+      createdAt: '2023-12-01',
+      abstract: '这是一个测试想法，确保我们的系统正确处理边界情况。',
+      abstractZh: '这是一个测试想法，确保我们的系统正确处理边界情况。',
+      motivation: '测试对于健壮的系统很重要。',
+      motivationZh: '测试对于健壮的系统很重要。',
+      difficulty: 'beginner',
+      researchField: '软件测试',
+      estimatedDuration: '1周',
+      openForCollaboration: false,
+      fundingStatus: 'unfunded'
     }
   ]
 };
 
-// API functions
-export const fetchIdeas = async (language: 'en' | 'zh' = 'en'): Promise<IdeaData[]> => {
-  try {
-    // Simulate API delay
-    await delay(1000);
+// API Functions
+
+/**
+ * Get ideas list with pagination and filtering
+ */
+export const fetchIdeas = async (
+  params: Partial<IdeaListRequest> = {},
+  language: 'en' | 'zh' = 'en'
+): Promise<IdeaData[]> => {
+  const apiCall = async () => {
+    const response = await get<IdeaListResponse>('/api/v1/ideas', {
+      ...params,
+      lang: formatLanguage(language)
+    });
     
-    return mockIdeasData[language];
-  } catch (error) {
-    console.error('Error fetching ideas:', error);
-    throw new Error(language === 'en' ? 'Failed to load ideas' : '加载想法失败');
-  }
+    // Ensure consistent data structure
+    const ideas = (response.ideas || []).map(idea => ({
+      ...idea,
+      tags: idea.tags || []
+    }));
+    
+    return ideas;
+  };
+  
+  const fallbackData = mockIdeasData[language].map(idea => ({
+    ...idea,
+    tags: idea.tags || []
+  }));
+  
+  return withFallback(apiCall, fallbackData);
 };
 
+/**
+ * Get single idea by ID
+ */
 export const fetchIdeaById = async (id: string, language: 'en' | 'zh' = 'en'): Promise<IdeaData | null> => {
-  try {
-    // Simulate API delay
-    await delay(500);
+  const apiCall = async () => {
+    const response = await get<IdeaData>(`/api/v1/ideas/${id}`, {
+      lang: formatLanguage(language)
+    });
     
-    const ideas = mockIdeasData[language];
-    const idea = ideas.find(idea => idea.id === id);
+    if (!response) return null;
     
-    return idea || null;
-  } catch (error) {
-    console.error('Error fetching idea by ID:', error);
-    throw new Error(language === 'en' ? 'Failed to load idea' : '加载想法失败');
-  }
+    // Ensure consistent data structure
+    return {
+      ...response,
+      tags: response.tags || []
+    };
+  };
+  
+  const fallbackIdea = mockIdeasData[language].find(idea => idea.id === id);
+  const fallbackData = fallbackIdea ? {
+    ...fallbackIdea,
+    tags: fallbackIdea.tags || []
+  } : null;
+  
+  return withFallback(apiCall, fallbackData);
 };
 
+/**
+ * Create new idea
+ */
 export const createIdea = async (ideaData: Omit<IdeaData, 'id'>, language: 'en' | 'zh' = 'en'): Promise<IdeaData> => {
-  try {
-    // Simulate API delay
-    await delay(800);
-    
+  const apiCall = async () => {
+    const response = await post<IdeaData>('/api/v1/ideas', {
+      ...ideaData,
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  // Fallback: create idea with mock data
+  const fallbackAction = async () => {
     const newIdea: IdeaData = {
       ...ideaData,
       id: Date.now().toString(),
@@ -245,19 +345,26 @@ export const createIdea = async (ideaData: Omit<IdeaData, 'id'>, language: 'en' 
     };
     
     mockIdeasData[language].push(newIdea);
-    
     return newIdea;
-  } catch (error) {
-    console.error('Error creating idea:', error);
-    throw new Error(language === 'en' ? 'Failed to create idea' : '创建想法失败');
-  }
+  };
+  
+  return withFallback(apiCall, await fallbackAction());
 };
 
+/**
+ * Update idea
+ */
 export const updateIdea = async (id: string, updates: Partial<IdeaData>, language: 'en' | 'zh' = 'en'): Promise<IdeaData> => {
-  try {
-    // Simulate API delay
-    await delay(600);
-    
+  const apiCall = async () => {
+    const response = await put<IdeaData>(`/api/v1/ideas/${id}`, {
+      ...updates,
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  // Fallback: update idea in mock data
+  const fallbackAction = async () => {
     const ideas = mockIdeasData[language];
     const ideaIndex = ideas.findIndex(idea => idea.id === id);
     
@@ -272,19 +379,23 @@ export const updateIdea = async (id: string, updates: Partial<IdeaData>, languag
     };
     
     ideas[ideaIndex] = updatedIdea;
-    
     return updatedIdea;
-  } catch (error) {
-    console.error('Error updating idea:', error);
-    throw new Error(language === 'en' ? 'Failed to update idea' : '更新想法失败');
-  }
+  };
+  
+  return withFallback(apiCall, await fallbackAction());
 };
 
+/**
+ * Delete idea
+ */
 export const deleteIdea = async (id: string, language: 'en' | 'zh' = 'en'): Promise<boolean> => {
-  try {
-    // Simulate API delay
-    await delay(400);
-    
+  const apiCall = async () => {
+    await del(`/api/v1/ideas/${id}`);
+    return true;
+  };
+  
+  // Fallback: delete idea from mock data
+  const fallbackAction = async () => {
     const ideas = mockIdeasData[language];
     const ideaIndex = ideas.findIndex(idea => idea.id === id);
     
@@ -293,98 +404,118 @@ export const deleteIdea = async (id: string, language: 'en' | 'zh' = 'en'): Prom
     }
     
     ideas.splice(ideaIndex, 1);
-    
     return true;
-  } catch (error) {
-    console.error('Error deleting idea:', error);
-    throw new Error(language === 'en' ? 'Failed to delete idea' : '删除想法失败');
-  }
+  };
+  
+  return withFallback(apiCall, await fallbackAction());
 };
 
-// Filter and search functions
+/**
+ * Search ideas with filters
+ */
 export const searchIdeas = async (
-  query: string, 
-  filters: {
-    category?: string;
-    status?: string;
-    tags?: string[];
-  } = {},
+  params: IdeaSearchRequest,
   language: 'en' | 'zh' = 'en'
 ): Promise<IdeaData[]> => {
-  try {
-    // Simulate API delay
-    await delay(300);
+  const apiCall = async () => {
+    const response = await get<IdeaListResponse>('/api/v1/ideas/search', {
+      ...params,
+      lang: formatLanguage(language)
+    });
     
-    let ideas = mockIdeasData[language];
-    
-    // Apply search query
-    if (query) {
-      const searchLower = query.toLowerCase();
-      ideas = ideas.filter(idea => 
-        idea.title.toLowerCase().includes(searchLower) ||
-        idea.description.toLowerCase().includes(searchLower) ||
-        idea.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
-        (idea.abstract && idea.abstract.toLowerCase().includes(searchLower)) ||
-        (idea.abstractZh && idea.abstractZh.toLowerCase().includes(searchLower))
-      );
-    }
-    
-    // Apply category filter
-    if (filters.category && filters.category !== 'All' && filters.category !== '全部') {
-      ideas = ideas.filter(idea => idea.category === filters.category);
-    }
-    
-    // Apply status filter
-    if (filters.status && filters.status !== 'All' && filters.status !== '全部') {
-      // Map Chinese status labels back to English status values
-      let statusToMatch = filters.status;
-      if (language === 'zh') {
-        const statusMap: Record<string, string> = {
-          '草案': 'draft',
-          '假设': 'hypothesis',
-          '实验中': 'experimenting',
-          '验证中': 'validating',
-          '已发表': 'published',
-          '已结论': 'concluded'
-        };
-        statusToMatch = statusMap[filters.status] || filters.status;
-      }
-      ideas = ideas.filter(idea => idea.status === statusToMatch);
-    }
-    
-    // Apply tags filter
-    if (filters.tags && filters.tags.length > 0) {
-      ideas = ideas.filter(idea => 
-        filters.tags!.some(tag => idea.tags.includes(tag))
-      );
-    }
+    // Ensure consistent data structure
+    const ideas = (response.ideas || []).map(idea => ({
+      ...idea,
+      tags: idea.tags || []
+    }));
     
     return ideas;
-  } catch (error) {
-    console.error('Error searching ideas:', error);
-    throw new Error(language === 'en' ? 'Failed to search ideas' : '搜索想法失败');
+  };
+  
+  // Fallback with client-side filtering
+  let ideas = mockIdeasData[language].map(idea => ({
+    ...idea,
+    tags: idea.tags || []
+  }));
+  
+  // Apply search query
+  if (params.query) {
+    const searchLower = params.query.toLowerCase();
+    ideas = ideas.filter(idea => 
+      idea.title.toLowerCase().includes(searchLower) ||
+      idea.description.toLowerCase().includes(searchLower) ||
+              idea.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+      (idea.abstract && idea.abstract.toLowerCase().includes(searchLower)) ||
+      (idea.abstractZh && idea.abstractZh.toLowerCase().includes(searchLower))
+    );
   }
+  
+  // Apply category filter
+  if (params.category && params.category !== 'All' && params.category !== '全部') {
+    ideas = ideas.filter(idea => idea.category === params.category);
+  }
+  
+  // Apply status filter
+  if (params.status && params.status !== 'All' && params.status !== '全部') {
+    // Map Chinese status labels back to English status values
+    let statusToMatch = params.status;
+    if (language === 'zh') {
+      const statusMap: Record<string, string> = {
+        '草案': 'draft',
+        '假设': 'hypothesis',
+        '实验中': 'experimenting',
+        '验证中': 'validating',
+        '已发表': 'published',
+        '已结论': 'concluded'
+      };
+      statusToMatch = statusMap[params.status] || params.status;
+    }
+    ideas = ideas.filter(idea => idea.status === statusToMatch);
+  }
+  
+  // Apply tags filter
+  if (params.tags) {
+    const tagsArray = params.tags.split(',').map(tag => tag.trim());
+          ideas = ideas.filter(idea => 
+        tagsArray.some(tag => idea.tags.includes(tag))
+      );
+  }
+  
+  return withFallback(apiCall, ideas);
 };
 
-// Get unique categories and tags for filtering
+/**
+ * Get idea categories
+ */
 export const getIdeaCategories = async (language: 'en' | 'zh' = 'en'): Promise<string[]> => {
-  try {
-    const ideas = mockIdeasData[language];
-    const categories = Array.from(new Set(ideas.map(idea => idea.category)));
-    return [language === 'en' ? 'All' : '全部', ...categories];
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [language === 'en' ? 'All' : '全部'];
-  }
+  const apiCall = async () => {
+    const response = await get<string[]>('/api/v1/ideas/categories', {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  const ideas = mockIdeasData[language];
+  const categories = Array.from(new Set(ideas.map(idea => idea.category)));
+  const fallbackData = [language === 'en' ? 'All' : '全部', ...categories];
+  
+  return withFallback(apiCall, fallbackData);
 };
 
+/**
+ * Get idea tags
+ */
 export const getIdeaTags = async (language: 'en' | 'zh' = 'en'): Promise<string[]> => {
-  try {
-    const ideas = mockIdeasData[language];
-    const allTags = ideas.flatMap(idea => idea.tags);
-    return Array.from(new Set(allTags));
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-    return [];
-  }
-}; 
+  const apiCall = async () => {
+    const response = await get<string[]>('/api/v1/ideas/tags', {
+      lang: formatLanguage(language)
+    });
+    return response;
+  };
+  
+  const ideas = mockIdeasData[language];
+  const allTags = ideas.flatMap(idea => idea.tags);
+  const fallbackData = Array.from(new Set(allTags));
+  
+  return withFallback(apiCall, fallbackData);
+};

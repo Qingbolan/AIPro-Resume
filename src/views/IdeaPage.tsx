@@ -15,6 +15,11 @@ interface IdeaCardProps {
 
 const IdeaCard: React.FC<IdeaCardProps> = ({ idea, index, onView }) => {
   const { language } = useLanguage();
+  
+  // Guard against null/undefined idea
+  if (!idea) {
+    return null;
+  }
 
   const getStatusText = useCallback((status: string) => {
     if (language === 'en') {
@@ -128,18 +133,20 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, index, onView }) => {
       </p>
 
       {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {idea.tags.map((tag, tagIndex) => (
-          <motion.span
-            key={tagIndex}
-            className="px-2 py-1 text-xs rounded-lg font-medium tag-default whitespace-nowrap"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
-          >
-            {tag}
-          </motion.span>
-        ))}
-      </div>
+      {idea.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {idea.tags.map((tag, tagIndex) => (
+            <motion.span
+              key={tagIndex}
+              className="px-2 py-1 text-xs rounded-lg font-medium tag-default whitespace-nowrap"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              {tag}
+            </motion.span>
+          ))}
+        </div>
+      )}
 
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
@@ -222,7 +229,7 @@ const IdeaPage: React.FC = () => {
         setError(null);
         
         // Fetch ideas from API with language support
-        const fetchedIdeas = await fetchIdeas(language as 'en' | 'zh');
+        const fetchedIdeas = await fetchIdeas({}, language as 'en' | 'zh');
         
         if (isMounted) {
           setIdeas(fetchedIdeas);

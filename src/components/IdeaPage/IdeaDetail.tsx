@@ -577,13 +577,15 @@ const IdeaDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {idea.tags.map((tag, index) => (
-                  <span key={index} className="px-3 py-1 bg-theme-surface text-theme-primary rounded-lg text-sm font-medium">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {idea.tags && idea.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {idea.tags.map((tag, index) => (
+                    <span key={index} className="px-3 py-1 bg-theme-surface text-theme-primary rounded-lg text-sm font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

@@ -88,34 +88,37 @@ const ResumeWebsite: React.FC = () => {
 
   // Generate table of contents from resume data
   const tocSections = useMemo(() => {
-    if (!resumeData) return [];
+    if (!resumeData || !resumeData.sections) return [];
     
     const sections = [
       { id: 'hero-section', title: resumeData.name, level: 1 },
     ];
     
-    if (resumeData.sections.recent) {
+    if (resumeData.sections?.recent) {
       sections.push({ id: 'recent-section', title: resumeData.sections.recent.title, level: 2 });
     }
     
-    sections.push(
-      { id: 'experience-section', title: resumeData.sections.experience.title, level: 2 },
-      { id: 'education-section', title: resumeData.sections.education.title, level: 2 }
-    );
+    if (resumeData.sections?.experience) {
+      sections.push({ id: 'experience-section', title: resumeData.sections.experience.title, level: 2 });
+    }
     
-    if (resumeData.sections.research) {
+    if (resumeData.sections?.education) {
+      sections.push({ id: 'education-section', title: resumeData.sections.education.title, level: 2 });
+    }
+    
+    if (resumeData.sections?.research) {
       sections.push({ id: 'research-section', title: resumeData.sections.research.title, level: 2 });
     }
     
-    if (resumeData.sections.publications) {
+    if (resumeData.sections?.publications) {
       sections.push({ id: 'publications-section', title: resumeData.sections.publications.title, level: 2 });
     }
     
-    if (resumeData.sections.awards) {
+    if (resumeData.sections?.awards) {
       sections.push({ id: 'awards-section', title: resumeData.sections.awards.title, level: 2 });
     }
     
-    if (resumeData.sections.skills) {
+    if (resumeData.sections?.skills) {
       sections.push({ id: 'skills-section', title: resumeData.sections.skills.title, level: 2 });
     }
     
@@ -144,12 +147,15 @@ const ResumeWebsite: React.FC = () => {
         
         const data = await fetchResumeData(language);
         
+        console.log('✅ Resume data loaded successfully');
+        
         if (isMounted) {
           setResumeData(data);
           setLoading(false);
         }
       } catch (err) {
         if (isMounted) {
+          console.error('❌ Failed to load resume data:', err);
           setError(t('resume.failed_to_load'));
           setLoading(false);
         }
@@ -210,18 +216,18 @@ const ResumeWebsite: React.FC = () => {
       {/* Project Section */}
       <div id="hero-section">
         <ProjectSection 
-          name={resumeData.name}
-          title={resumeData.title}
-          current={resumeData.current}
-          contacts={resumeData.contacts}
-          socialLinks={resumeData.socialLinks}
+          name={resumeData.name || ''}
+          title={resumeData.title || ''}
+          current={resumeData.current || ''}
+          contacts={resumeData.contacts || []}
+          socialLinks={resumeData.socialLinks || []}
         />
       </div>
 
       {/* Content Sections */}
       <div className="max-w-6xl mx-auto px-3 xs:px-4 pb-12 xs:pb-16 sm:pb-20 space-y-6 xs:space-y-8 sm:space-y-12">
         {/* Recent Section - At the top for prominence */}
-        {resumeData.sections.recent && (
+        {resumeData.sections?.recent && resumeData.sections.recent.content && (
           <div id="recent-section">
             <RecentSection 
               data={resumeData.sections.recent.content} 
@@ -232,49 +238,53 @@ const ResumeWebsite: React.FC = () => {
         )}
 
         {/* Experience Section */}
-        <div id="experience-section">
-          <SectionCard 
-            title={resumeData.sections.experience.title} 
-            delay={0.2}
-          >
-            <Timeline 
-              items={resumeData.sections.experience.content.map(exp => ({
-                title: exp.role,
-                subtitle: exp.company,
-                date: exp.date,
-                details: exp.details,
-                logo: exp.logo,
-                website: exp.website,
-                location: exp.location
-              }))}
-              variant="primary"
-            />
-          </SectionCard>
-        </div>
+        {resumeData.sections?.experience && resumeData.sections.experience.content && (
+          <div id="experience-section">
+            <SectionCard 
+              title={resumeData.sections.experience.title} 
+              delay={0.2}
+            >
+              <Timeline 
+                items={resumeData.sections.experience.content.map(exp => ({
+                  title: exp.role,
+                  subtitle: exp.company,
+                  date: exp.date,
+                  details: exp.details,
+                  logo: exp.logo,
+                  website: exp.website,
+                  location: exp.location
+                }))}
+                variant="primary"
+              />
+            </SectionCard>
+          </div>
+        )}
 
         {/* Education Section */}
-        <div id="education-section">
-          <SectionCard 
-            title={resumeData.sections.education.title} 
-            delay={0.3}
-          >
-            <Timeline 
-              items={resumeData.sections.education.content.map(edu => ({
-                title: edu.degree,
-                subtitle: edu.school,
-                date: edu.date,
-                details: edu.details,
-                logo: edu.logo,
-                website: edu.website,
-                location: edu.location
-              }))}
-              variant="secondary"
-            />
-          </SectionCard>
-        </div>
+        {resumeData.sections?.education && resumeData.sections.education.content && (
+          <div id="education-section">
+            <SectionCard 
+              title={resumeData.sections.education.title} 
+              delay={0.3}
+            >
+              <Timeline 
+                items={resumeData.sections.education.content.map(edu => ({
+                  title: edu.degree,
+                  subtitle: edu.school,
+                  date: edu.date,
+                  details: edu.details,
+                  logo: edu.logo,
+                  website: edu.website,
+                  location: edu.location
+                }))}
+                variant="secondary"
+              />
+            </SectionCard>
+          </div>
+        )}
 
         {/* Research Section */}
-        {resumeData.sections.research && (
+        {resumeData.sections?.research && resumeData.sections.research.content && (
           <div id="research-section">
             <SectionCard 
               title={resumeData.sections.research.title} 
@@ -294,7 +304,7 @@ const ResumeWebsite: React.FC = () => {
         )}
 
         {/* Publications Section */}
-        {resumeData.sections.publications && (
+        {resumeData.sections?.publications && resumeData.sections.publications.content && (
           <div id="publications-section">
             <SectionCard 
               title={resumeData.sections.publications.title} 
@@ -320,7 +330,7 @@ const ResumeWebsite: React.FC = () => {
         )}
 
         {/* Awards Section */}
-        {resumeData.sections.awards && (
+        {resumeData.sections?.awards && resumeData.sections.awards.content && (
           <div id="awards-section">
             <SectionCard 
               title={resumeData.sections.awards.title} 
@@ -345,7 +355,7 @@ const ResumeWebsite: React.FC = () => {
         )}
 
         {/* Skills Section */}
-        {resumeData.sections.skills && (
+        {resumeData.sections?.skills && resumeData.sections.skills.content && (
           <div id="skills-section">
             <SectionCard 
               title={resumeData.sections.skills.title} 

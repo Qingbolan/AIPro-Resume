@@ -1,4 +1,3 @@
-import i18n from '../../i18n/index';
 import type { 
   ResumeData, 
   PersonalInfo, 
@@ -7,14 +6,11 @@ import type {
   ResearchItem,
   ExperienceItem,
   RecentUpdate,
-  ResumeSection
 } from '../../types/api';
+import { get, put, withFallback, formatLanguage } from '../utils';
 
-// Simulate API delay
-const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
-
-// Mock resume data with multi-language support
-const resumeData: Record<Language, ResumeData> = {
+// Mock data for fallback (keeping original structure)
+const mockResumeData: Record<Language, ResumeData> = {
   en: {
     name: "Silan Hu",
     title: "AI Researcher & Full Stack Developer",
@@ -429,67 +425,163 @@ const resumeData: Record<Language, ResumeData> = {
   }
 };
 
-// Mock API call functions
+
+// API Functions
+
+/**
+ * Get complete resume data
+ */
 export const fetchResumeData = async (language: Language = 'en'): Promise<ResumeData> => {
-  try {
-    return resumeData[language];
-  } catch (error) {
-    console.error('Error fetching resume data:', error);
-    throw error;
-  }
-};
-
-// Update resume section
-export const updateResumeSection = async (
-  sectionKey: string, 
-  newData: any, 
-  language: Language = 'en'
-): Promise<{ success: boolean; message: string }> => {
-  try {
-    // Simulate network delay
-    await delay(500);
-
-    // Simulate update operation
-    if (resumeData[language].sections[sectionKey as keyof typeof resumeData[Language]['sections']]) {
-      (resumeData[language].sections[sectionKey as keyof typeof resumeData[Language]['sections']] as ResumeSection).content = newData;
-      return { 
-        success: true, 
-        message: i18n.t('update_section_success', { section: sectionKey }) || `Successfully updated ${sectionKey} section` 
-      };
-    } else {
-      throw new Error(i18n.t('section_not_found', { section: sectionKey }) || `Section ${sectionKey} not found`);
-    }
-  } catch (error) {
-    console.error(`Error updating ${sectionKey} section:`, error);
-    throw error;
-  }
-};
-
-// Extract personal information from resume data
-export const fetchPersonalInfo = async (language: Language = 'en'): Promise<PersonalInfo> => {
-  try {
-    const data = await fetchResumeData(language);
+  const apiCall = async () => {
+    const response = await get<ResumeData>('/api/v1/resume', { lang: formatLanguage(language) });
     
-    // Extract personal info from resume data
-    const personalInfo: PersonalInfo = {
-      name: data.name,
-      title: data.title,
-      current: data.current,
-      contacts: data.contacts.map(contact => ({
-        icon: null, // Icon will be set in the component
-        value: contact.value,
-        type: contact.type
-      })),
-      socialLinks: data.socialLinks.map(link => ({
-        icon: null, // Icon will be set in the component
-        url: link.url,
-        type: link.type
-      }))
+    // Ensure essential fields have default values
+    const sanitizedResponse: ResumeData = {
+      name: response.name || mockResumeData[language].name,
+      title: response.title || mockResumeData[language].title,
+      current: response.current || mockResumeData[language].current,
+      contacts: response.contacts || mockResumeData[language].contacts,
+      socialLinks: response.socialLinks || mockResumeData[language].socialLinks,
+      sections: {
+        education: response.sections?.education || mockResumeData[language].sections.education,
+        publications: response.sections?.publications || mockResumeData[language].sections.publications,
+        research: response.sections?.research || mockResumeData[language].sections.research,
+        experience: response.sections?.experience || mockResumeData[language].sections.experience,
+        awards: response.sections?.awards || mockResumeData[language].sections.awards,
+        skills: response.sections?.skills || mockResumeData[language].sections.skills,
+        recent: response.sections?.recent || mockResumeData[language].sections.recent,
+      }
     };
     
-    return personalInfo;
-  } catch (error) {
-    console.error('Error fetching personal info:', error);
-    throw error;
-  }
-}; 
+    return sanitizedResponse;
+  };
+  
+  const fallbackData = mockResumeData[language];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get personal information
+ */
+export const fetchPersonalInfo = async (language: Language = 'en'): Promise<PersonalInfo> => {
+  const apiCall = async () => {
+    const response = await get<PersonalInfo>('/api/v1/resume/personal', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData: PersonalInfo = {
+    name: mockResumeData[language].name,
+    title: mockResumeData[language].title,
+    current: mockResumeData[language].current,
+    contacts: mockResumeData[language].contacts.map(contact => ({
+      icon: null,
+      value: contact.value,
+      type: contact.type
+    })),
+    socialLinks: mockResumeData[language].socialLinks.map(link => ({
+      icon: null,
+      url: link.url,
+      type: link.type
+    }))
+  };
+  
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get education list
+ */
+export const fetchEducation = async (language: Language = 'en'): Promise<EducationItem[]> => {
+  const apiCall = async () => {
+    const response = await get<EducationItem[]>('/api/v1/resume/education', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.education.content as EducationItem[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get work experience list
+ */
+export const fetchWorkExperience = async (language: Language = 'en'): Promise<ExperienceItem[]> => {
+  const apiCall = async () => {
+    const response = await get<ExperienceItem[]>('/api/v1/resume/experience', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.experience.content as ExperienceItem[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get research projects list
+ */
+export const fetchResearchProjects = async (language: Language = 'en'): Promise<ResearchItem[]> => {
+  const apiCall = async () => {
+    const response = await get<ResearchItem[]>('/api/v1/resume/research', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.research.content as ResearchItem[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get publications list
+ */
+export const fetchPublications = async (language: Language = 'en'): Promise<string[]> => {
+  const apiCall = async () => {
+    const response = await get<string[]>('/api/v1/resume/publications', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.publications.content as string[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get awards list
+ */
+export const fetchAwards = async (language: Language = 'en'): Promise<string[]> => {
+  const apiCall = async () => {
+    const response = await get<string[]>('/api/v1/resume/awards', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.awards.content as string[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Get recent updates
+ */
+export const fetchRecentUpdates = async (language: Language = 'en'): Promise<RecentUpdate[]> => {
+  const apiCall = async () => {
+    const response = await get<RecentUpdate[]>('/api/v1/resume/recent', { lang: formatLanguage(language) });
+    return response;
+  };
+  
+  const fallbackData = mockResumeData[language].sections.recent.content as RecentUpdate[];
+  return withFallback(apiCall, fallbackData);
+};
+
+/**
+ * Update personal information
+ */
+export const updatePersonalInfo = async (
+  updates: Partial<PersonalInfo>, 
+  language: Language = 'en'
+): Promise<PersonalInfo> => {
+  const apiCall = async () => {
+    const response = await put<PersonalInfo>('/api/v1/resume/personal', { 
+      ...updates, 
+      lang: formatLanguage(language) 
+    });
+    return response;
+  };
+  
+  // For fallback, we'll just return the current data (no actual update)
+  const fallbackData = await fetchPersonalInfo(language);
+  return withFallback(apiCall, fallbackData);
+};

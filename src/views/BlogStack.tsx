@@ -22,6 +22,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
 }) => {
   const { language } = useLanguage();
   const [imageLoadError, setImageLoadError] = useState(false);
+  
+  // Guard against null/undefined post
+  if (!post) {
+    return null;
+  }
 
   const handleClick = useCallback(() => {
     onClick?.(post);
@@ -247,18 +252,20 @@ const BlogCard: React.FC<BlogCardProps> = ({
         </p>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {post.tags.map((tag, tagIndex) => (
-            <motion.span
-              key={tagIndex}
-              className="px-3 py-1 text-xs rounded-full font-medium tag-default"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-              {tag}
-            </motion.span>
-          ))}
-        </div>
+        {post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {post.tags.map((tag, tagIndex) => (
+              <motion.span
+                key={tagIndex}
+                className="px-3 py-1 text-xs rounded-full font-medium tag-default"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                {tag}
+              </motion.span>
+            ))}
+          </div>
+        )}
 
         {/* Read more / Watch / Continue series */}
         <motion.div
@@ -356,7 +363,7 @@ const BlogStack: React.FC = () => {
         setError(null);
 
         // Fetch blog posts from API with language support
-        const fetchedPosts = await fetchBlogPosts(language as 'en' | 'zh');
+        const fetchedPosts = await fetchBlogPosts({}, language as 'en' | 'zh');
 
         if (isMounted) {
           setPosts(fetchedPosts);

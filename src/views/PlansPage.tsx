@@ -486,8 +486,8 @@ const PlansPage: React.FC = () => {
         const [plansData, projectsData, ideasData, blogsData] = await Promise.all([
           fetchAnnualPlans(language),
           fetchProjectsWithAnnualPlans(language),
-          fetchIdeas(language),
-          fetchBlogPosts(language)
+          fetchIdeas({}, language),
+          fetchBlogPosts({}, language)
         ]);
         
         if (isMounted) {
