@@ -75,20 +75,6 @@ func (bptc *BlogPostTranslationCreate) SetNillableCreatedAt(t *time.Time) *BlogP
 	return bptc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bptc *BlogPostTranslationCreate) SetUpdatedAt(t time.Time) *BlogPostTranslationCreate {
-	bptc.mutation.SetUpdatedAt(t)
-	return bptc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (bptc *BlogPostTranslationCreate) SetNillableUpdatedAt(t *time.Time) *BlogPostTranslationCreate {
-	if t != nil {
-		bptc.SetUpdatedAt(*t)
-	}
-	return bptc
-}
-
 // SetID sets the "id" field.
 func (bptc *BlogPostTranslationCreate) SetID(u uuid.UUID) *BlogPostTranslationCreate {
 	bptc.mutation.SetID(u)
@@ -158,10 +144,6 @@ func (bptc *BlogPostTranslationCreate) defaults() {
 		v := blogposttranslation.DefaultCreatedAt()
 		bptc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := bptc.mutation.UpdatedAt(); !ok {
-		v := blogposttranslation.DefaultUpdatedAt()
-		bptc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := bptc.mutation.ID(); !ok {
 		v := blogposttranslation.DefaultID()
 		bptc.mutation.SetID(v)
@@ -199,9 +181,6 @@ func (bptc *BlogPostTranslationCreate) check() error {
 	}
 	if _, ok := bptc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BlogPostTranslation.created_at"`)}
-	}
-	if _, ok := bptc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "BlogPostTranslation.updated_at"`)}
 	}
 	if len(bptc.mutation.BlogPostIDs()) == 0 {
 		return &ValidationError{Name: "blog_post", err: errors.New(`ent: missing required edge "BlogPostTranslation.blog_post"`)}
@@ -259,10 +238,6 @@ func (bptc *BlogPostTranslationCreate) createSpec() (*BlogPostTranslation, *sqlg
 	if value, ok := bptc.mutation.CreatedAt(); ok {
 		_spec.SetField(blogposttranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := bptc.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogposttranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := bptc.mutation.BlogPostIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

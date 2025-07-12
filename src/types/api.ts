@@ -6,39 +6,67 @@ export interface Contact {
 }
 
 export interface SocialLink {
-  type: string;
+  id: string;
+  platform: string;
   url: string;
+  display_name?: string;
+  is_active: boolean;
+  sort_order: number;
 }
 
 export interface EducationItem {
-  school: string;
+  id: string;
+  user_id: string;
+  institution: string;
   degree: string;
-  date: string;
-  details: string[];
-  logo?: string;
-  website?: string;
+  field_of_study?: string;
+  start_date?: string;
+  end_date?: string;
+  is_current: boolean;
+  gpa?: string;
   location?: string;
+  institution_website?: string;
+  institution_logo_url?: string;
+  details: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ResearchItem {
+  id: string;
+  user_id: string;
   title: string;
-  location: string;
-  date: string;
+  institution?: string;
+  location?: string;
+  start_date?: string;
+  end_date?: string;
   details: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ExperienceItem {
+  id: string;
+  user_id: string;
   company: string;
-  role: string;
-  date: string;
-  details: string[];
-  logo?: string;
-  website?: string;
+  position: string;
+  start_date?: string;
+  end_date?: string;
+  is_current: boolean;
   location?: string;
+  company_website?: string;
+  company_logo_url?: string;
+  details: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RecentUpdate {
   id: string;
+  user_id: string;
   type: string;
   title: string;
   description: string;
@@ -46,44 +74,67 @@ export interface RecentUpdate {
   tags: string[];
   status: string;
   priority: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface ResumeSection {
-  title: string;
-  content: any;
-}
 
 export interface ResumeData {
-  name: string;
-  title: string;
-  current: string;
-  contacts: Contact[];
-  socialLinks: SocialLink[];
-  sections: {
-    education: ResumeSection;
-    publications: ResumeSection;
-    research: ResumeSection;
-    experience: ResumeSection;
-    awards: ResumeSection;
-    skills: ResumeSection;
-    recent: ResumeSection;
-  };
+  personal_info: PersonalInfo;
+  education: EducationItem[];
+  experience: ExperienceItem[];
+  research: ResearchItem[];
+  publications: Publication[];
+  awards: Award[];
+  recent_updates: RecentUpdate[];
+  skills: string[];
 }
 
 export interface PersonalInfo {
-  name: string;
+  id: string;
+  user_id: string;
+  full_name: string;
   title: string;
-  current: string;
-  contacts: Array<{
-    icon: any;
-    value: string;
-    type: string;
-  }>;
-  socialLinks: Array<{
-    icon: any;
-    url: string;
-    type: string;
-  }>;
+  current_status?: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+  website?: string;
+  avatar_url?: string;
+  is_primary: boolean;
+  contacts: Contact[];
+  social_links: SocialLink[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Publication {
+  id: string;
+  user_id: string;
+  title: string;
+  authors: string;
+  journal?: string;
+  conference?: string;
+  publisher?: string;
+  published_at?: string;
+  doi?: string;
+  url?: string;
+  citation_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Award {
+  id: string;
+  user_id: string;
+  title: string;
+  organization: string;
+  description?: string;
+  award_date?: string;
+  category?: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Message {
@@ -138,7 +189,7 @@ export interface ProjectWithPlan {
 }
 
 export interface Project {
-  id: number;
+  id: string;
   name: string;
   description: string;
   tags: string[];

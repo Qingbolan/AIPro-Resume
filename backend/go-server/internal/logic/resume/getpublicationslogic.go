@@ -2,6 +2,7 @@ package resume
 
 import (
 	"context"
+	"strings"
 
 	"silan-backend/internal/ent"
 	"silan-backend/internal/ent/publication"
@@ -29,6 +30,7 @@ func NewGetPublicationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GetPublicationsLogic) GetPublications(req *types.ResumeRequest) (resp []types.Publication, err error) {
 	publications, err := l.svcCtx.DB.Publication.Query().
 		WithUser().
+		// WithAuthors(). // 暂时注释掉，因为数据库中缺少updated_at字段
 		Order(ent.Asc(publication.FieldSortOrder)).
 		All(l.ctx)
 	if err != nil {
@@ -48,11 +50,23 @@ func (l *GetPublicationsLogic) GetPublications(req *types.ResumeRequest) (resp [
 			userID = pub.Edges.User.ID.String()
 		}
 
+		// Get authors from edge relationship - 暂时使用空字符串
+		var authors []string
+		// if pub.Edges.Authors != nil {
+		// 	for _, author := range pub.Edges.Authors {
+		// 		authors = append(authors, author.AuthorName)
+		// 	}
+		// }
+		authorsStr := ""
+		if len(authors) > 0 {
+			authorsStr = strings.Join(authors, ", ")
+		}
+
 		result = append(result, types.Publication{
 			ID:            pub.ID.String(),
 			UserID:        userID,
 			Title:         pub.Title,
-			Authors:       "", // Authors field will need to be handled separately
+			Authors:       authorsStr,
 			Journal:       pub.JournalName,
 			Conference:    pub.ConferenceName,
 			Publisher:     "", // Publisher field not in schema

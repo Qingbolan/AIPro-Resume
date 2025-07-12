@@ -39,6 +39,7 @@ from .resume_parser import ResumeParser
 from .project_parser import ProjectParser
 from .blog_parser import BlogParser
 from .idea_parser import IdeaParser
+from .update_parser import UpdateParser
 from .parser_factory import ParserFactory, ParsedContentCollection
 
 __all__ = [
@@ -51,6 +52,7 @@ __all__ = [
     'ProjectParser', 
     'BlogParser',
     'IdeaParser',
+    'UpdateParser',
     
     # Factory and utilities
     'ParserFactory',
@@ -73,3 +75,6 @@ ParserFactory.register_parser('article', BlogParser)
 ParserFactory.register_parser('idea', IdeaParser)
 ParserFactory.register_parser('ideas', IdeaParser)
 ParserFactory.register_parser('concept', IdeaParser)
+ParserFactory.register_parser('update', UpdateParser)
+ParserFactory.register_parser('updates', UpdateParser)
+ParserFactory.register_parser('recent_update', UpdateParser)

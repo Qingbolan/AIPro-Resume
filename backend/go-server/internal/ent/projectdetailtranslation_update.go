@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/projectdetail"
 	"silan-backend/internal/ent/projectdetailtranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -179,12 +178,6 @@ func (pdtu *ProjectDetailTranslationUpdate) ClearFutureEnhancements() *ProjectDe
 	return pdtu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pdtu *ProjectDetailTranslationUpdate) SetUpdatedAt(t time.Time) *ProjectDetailTranslationUpdate {
-	pdtu.mutation.SetUpdatedAt(t)
-	return pdtu
-}
-
 // SetProjectDetail sets the "project_detail" edge to the ProjectDetail entity.
 func (pdtu *ProjectDetailTranslationUpdate) SetProjectDetail(p *ProjectDetail) *ProjectDetailTranslationUpdate {
 	return pdtu.SetProjectDetailID(p.ID)
@@ -220,7 +213,6 @@ func (pdtu *ProjectDetailTranslationUpdate) ClearLanguage() *ProjectDetailTransl
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pdtu *ProjectDetailTranslationUpdate) Save(ctx context.Context) (int, error) {
-	pdtu.defaults()
 	return withHooks(ctx, pdtu.sqlSave, pdtu.mutation, pdtu.hooks)
 }
 
@@ -243,14 +235,6 @@ func (pdtu *ProjectDetailTranslationUpdate) Exec(ctx context.Context) error {
 func (pdtu *ProjectDetailTranslationUpdate) ExecX(ctx context.Context) {
 	if err := pdtu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pdtu *ProjectDetailTranslationUpdate) defaults() {
-	if _, ok := pdtu.mutation.UpdatedAt(); !ok {
-		v := projectdetailtranslation.UpdateDefaultUpdatedAt()
-		pdtu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -317,9 +301,6 @@ func (pdtu *ProjectDetailTranslationUpdate) sqlSave(ctx context.Context) (n int,
 	}
 	if pdtu.mutation.FutureEnhancementsCleared() {
 		_spec.ClearField(projectdetailtranslation.FieldFutureEnhancements, field.TypeString)
-	}
-	if value, ok := pdtu.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pdtu.mutation.ProjectDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -547,12 +528,6 @@ func (pdtuo *ProjectDetailTranslationUpdateOne) ClearFutureEnhancements() *Proje
 	return pdtuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pdtuo *ProjectDetailTranslationUpdateOne) SetUpdatedAt(t time.Time) *ProjectDetailTranslationUpdateOne {
-	pdtuo.mutation.SetUpdatedAt(t)
-	return pdtuo
-}
-
 // SetProjectDetail sets the "project_detail" edge to the ProjectDetail entity.
 func (pdtuo *ProjectDetailTranslationUpdateOne) SetProjectDetail(p *ProjectDetail) *ProjectDetailTranslationUpdateOne {
 	return pdtuo.SetProjectDetailID(p.ID)
@@ -601,7 +576,6 @@ func (pdtuo *ProjectDetailTranslationUpdateOne) Select(field string, fields ...s
 
 // Save executes the query and returns the updated ProjectDetailTranslation entity.
 func (pdtuo *ProjectDetailTranslationUpdateOne) Save(ctx context.Context) (*ProjectDetailTranslation, error) {
-	pdtuo.defaults()
 	return withHooks(ctx, pdtuo.sqlSave, pdtuo.mutation, pdtuo.hooks)
 }
 
@@ -624,14 +598,6 @@ func (pdtuo *ProjectDetailTranslationUpdateOne) Exec(ctx context.Context) error 
 func (pdtuo *ProjectDetailTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := pdtuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pdtuo *ProjectDetailTranslationUpdateOne) defaults() {
-	if _, ok := pdtuo.mutation.UpdatedAt(); !ok {
-		v := projectdetailtranslation.UpdateDefaultUpdatedAt()
-		pdtuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -715,9 +681,6 @@ func (pdtuo *ProjectDetailTranslationUpdateOne) sqlSave(ctx context.Context) (_n
 	}
 	if pdtuo.mutation.FutureEnhancementsCleared() {
 		_spec.ClearField(projectdetailtranslation.FieldFutureEnhancements, field.TypeString)
-	}
-	if value, ok := pdtuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pdtuo.mutation.ProjectDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{

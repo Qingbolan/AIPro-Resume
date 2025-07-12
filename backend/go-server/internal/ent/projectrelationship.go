@@ -27,8 +27,6 @@ type ProjectRelationship struct {
 	RelationshipType string `json:"relationship_type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProjectRelationshipQuery when eager-loading is set.
 	Edges        ProjectRelationshipEdges `json:"edges"`
@@ -75,7 +73,7 @@ func (*ProjectRelationship) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case projectrelationship.FieldRelationshipType:
 			values[i] = new(sql.NullString)
-		case projectrelationship.FieldCreatedAt, projectrelationship.FieldUpdatedAt:
+		case projectrelationship.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case projectrelationship.FieldID, projectrelationship.FieldSourceProjectID, projectrelationship.FieldTargetProjectID:
 			values[i] = new(uuid.UUID)
@@ -123,12 +121,6 @@ func (pr *ProjectRelationship) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				pr.CreatedAt = value.Time
-			}
-		case projectrelationship.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pr.UpdatedAt = value.Time
 			}
 		default:
 			pr.selectValues.Set(columns[i], values[i])
@@ -187,9 +179,6 @@ func (pr *ProjectRelationship) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

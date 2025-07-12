@@ -106,6 +106,7 @@ func (l *GetBlogPostsLogic) GetBlogPosts(req *types.BlogListRequest) (resp *type
 		result = append(result, types.BlogData{
 			ID:          post.ID.String(),
 			Title:       post.Title,
+			Slug:        post.Slug,
 			Author:      author,
 			PublishDate: publishDate,
 			ReadTime:    readTime,

@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/educationdetailtranslation"
 	"silan-backend/internal/ent/language"
 	"silan-backend/internal/ent/predicate"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -73,12 +72,6 @@ func (edtu *EducationDetailTranslationUpdate) SetNillableDetailText(s *string) *
 	return edtu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (edtu *EducationDetailTranslationUpdate) SetUpdatedAt(t time.Time) *EducationDetailTranslationUpdate {
-	edtu.mutation.SetUpdatedAt(t)
-	return edtu
-}
-
 // SetEducationDetail sets the "education_detail" edge to the EducationDetail entity.
 func (edtu *EducationDetailTranslationUpdate) SetEducationDetail(e *EducationDetail) *EducationDetailTranslationUpdate {
 	return edtu.SetEducationDetailID(e.ID)
@@ -114,7 +107,6 @@ func (edtu *EducationDetailTranslationUpdate) ClearLanguage() *EducationDetailTr
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (edtu *EducationDetailTranslationUpdate) Save(ctx context.Context) (int, error) {
-	edtu.defaults()
 	return withHooks(ctx, edtu.sqlSave, edtu.mutation, edtu.hooks)
 }
 
@@ -137,14 +129,6 @@ func (edtu *EducationDetailTranslationUpdate) Exec(ctx context.Context) error {
 func (edtu *EducationDetailTranslationUpdate) ExecX(ctx context.Context) {
 	if err := edtu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (edtu *EducationDetailTranslationUpdate) defaults() {
-	if _, ok := edtu.mutation.UpdatedAt(); !ok {
-		v := educationdetailtranslation.UpdateDefaultUpdatedAt()
-		edtu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -183,9 +167,6 @@ func (edtu *EducationDetailTranslationUpdate) sqlSave(ctx context.Context) (n in
 	}
 	if value, ok := edtu.mutation.DetailText(); ok {
 		_spec.SetField(educationdetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := edtu.mutation.UpdatedAt(); ok {
-		_spec.SetField(educationdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if edtu.mutation.EducationDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -307,12 +288,6 @@ func (edtuo *EducationDetailTranslationUpdateOne) SetNillableDetailText(s *strin
 	return edtuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (edtuo *EducationDetailTranslationUpdateOne) SetUpdatedAt(t time.Time) *EducationDetailTranslationUpdateOne {
-	edtuo.mutation.SetUpdatedAt(t)
-	return edtuo
-}
-
 // SetEducationDetail sets the "education_detail" edge to the EducationDetail entity.
 func (edtuo *EducationDetailTranslationUpdateOne) SetEducationDetail(e *EducationDetail) *EducationDetailTranslationUpdateOne {
 	return edtuo.SetEducationDetailID(e.ID)
@@ -361,7 +336,6 @@ func (edtuo *EducationDetailTranslationUpdateOne) Select(field string, fields ..
 
 // Save executes the query and returns the updated EducationDetailTranslation entity.
 func (edtuo *EducationDetailTranslationUpdateOne) Save(ctx context.Context) (*EducationDetailTranslation, error) {
-	edtuo.defaults()
 	return withHooks(ctx, edtuo.sqlSave, edtuo.mutation, edtuo.hooks)
 }
 
@@ -384,14 +358,6 @@ func (edtuo *EducationDetailTranslationUpdateOne) Exec(ctx context.Context) erro
 func (edtuo *EducationDetailTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := edtuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (edtuo *EducationDetailTranslationUpdateOne) defaults() {
-	if _, ok := edtuo.mutation.UpdatedAt(); !ok {
-		v := educationdetailtranslation.UpdateDefaultUpdatedAt()
-		edtuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -447,9 +413,6 @@ func (edtuo *EducationDetailTranslationUpdateOne) sqlSave(ctx context.Context) (
 	}
 	if value, ok := edtuo.mutation.DetailText(); ok {
 		_spec.SetField(educationdetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := edtuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(educationdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if edtuo.mutation.EducationDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{

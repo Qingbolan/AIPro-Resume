@@ -12,6 +12,7 @@ import (
 	projects "silan-backend/internal/handler/projects"
 	resume "silan-backend/internal/handler/resume"
 	"silan-backend/internal/svc"
+
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -33,10 +34,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: blog.GetBlogPostsHandler(serverCtx),
 				},
 				{
+					// Update blog post like count
+					Method:  http.MethodPost,
+					Path:    "/posts/:id/likes",
+					Handler: blog.UpdateBlogLikesHandler(serverCtx),
+				},
+				{
+					// Update blog post view count
+					Method:  http.MethodPost,
+					Path:    "/posts/:id/views",
+					Handler: blog.UpdateBlogViewsHandler(serverCtx),
+				},
+				{
 					// Get single blog post by slug
 					Method:  http.MethodGet,
 					Path:    "/posts/:slug",
 					Handler: blog.GetBlogPostHandler(serverCtx),
+				},
+				{
+					// Get single blog post by ID
+					Method:  http.MethodGet,
+					Path:    "/posts/id/:id",
+					Handler: blog.GetBlogPostByIdHandler(serverCtx),
 				},
 				{
 					// Search blog posts with filters

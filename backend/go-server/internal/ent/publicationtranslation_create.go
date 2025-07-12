@@ -83,20 +83,6 @@ func (ptc *PublicationTranslationCreate) SetNillableCreatedAt(t *time.Time) *Pub
 	return ptc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (ptc *PublicationTranslationCreate) SetUpdatedAt(t time.Time) *PublicationTranslationCreate {
-	ptc.mutation.SetUpdatedAt(t)
-	return ptc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ptc *PublicationTranslationCreate) SetNillableUpdatedAt(t *time.Time) *PublicationTranslationCreate {
-	if t != nil {
-		ptc.SetUpdatedAt(*t)
-	}
-	return ptc
-}
-
 // SetID sets the "id" field.
 func (ptc *PublicationTranslationCreate) SetID(u uuid.UUID) *PublicationTranslationCreate {
 	ptc.mutation.SetID(u)
@@ -166,10 +152,6 @@ func (ptc *PublicationTranslationCreate) defaults() {
 		v := publicationtranslation.DefaultCreatedAt()
 		ptc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := ptc.mutation.UpdatedAt(); !ok {
-		v := publicationtranslation.DefaultUpdatedAt()
-		ptc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := ptc.mutation.ID(); !ok {
 		v := publicationtranslation.DefaultID()
 		ptc.mutation.SetID(v)
@@ -209,9 +191,6 @@ func (ptc *PublicationTranslationCreate) check() error {
 	}
 	if _, ok := ptc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "PublicationTranslation.created_at"`)}
-	}
-	if _, ok := ptc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "PublicationTranslation.updated_at"`)}
 	}
 	if len(ptc.mutation.PublicationIDs()) == 0 {
 		return &ValidationError{Name: "publication", err: errors.New(`ent: missing required edge "PublicationTranslation.publication"`)}
@@ -269,10 +248,6 @@ func (ptc *PublicationTranslationCreate) createSpec() (*PublicationTranslation, 
 	if value, ok := ptc.mutation.CreatedAt(); ok {
 		_spec.SetField(publicationtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := ptc.mutation.UpdatedAt(); ok {
-		_spec.SetField(publicationtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := ptc.mutation.PublicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

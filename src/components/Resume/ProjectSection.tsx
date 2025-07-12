@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, MapPin, Phone, Globe } from 'lucide-react';
-import { useLanguage } from '../LanguageContext';
 
 interface ContactInfo {
   type: string;
@@ -28,18 +27,18 @@ const ProjectSection: React.FC<ProjectSectionProps> = ({
   contacts = [], 
   socialLinks = [] 
 }) => {
-  const { language } = useLanguage();
-  
-
   const socialIcons = useMemo(() => {
     if (!socialLinks || !Array.isArray(socialLinks)) return [];
-    return socialLinks.map(link => ({
-      icon: link.type === 'github' ? <Github size={20} /> : 
-            link.type === 'linkedin' ? <Linkedin size={20} /> : 
-            <Globe size={20} />,
-      url: link.url,
-      label: link.type.charAt(0).toUpperCase() + link.type.slice(1)
-    }));
+    return socialLinks.map(link => {
+      const linkType = link.type || 'unknown';
+      return {
+        icon: linkType === 'github' ? <Github size={20} /> : 
+              linkType === 'linkedin' ? <Linkedin size={20} /> : 
+              <Globe size={20} />,
+        url: link.url || '#',
+        label: linkType.charAt(0).toUpperCase() + linkType.slice(1)
+      };
+    });
   }, [socialLinks]);
 
   const contactIcons = useMemo(() => {

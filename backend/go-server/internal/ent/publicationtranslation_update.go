@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/publication"
 	"silan-backend/internal/ent/publicationtranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -113,12 +112,6 @@ func (ptu *PublicationTranslationUpdate) ClearConferenceName() *PublicationTrans
 	return ptu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (ptu *PublicationTranslationUpdate) SetUpdatedAt(t time.Time) *PublicationTranslationUpdate {
-	ptu.mutation.SetUpdatedAt(t)
-	return ptu
-}
-
 // SetPublication sets the "publication" edge to the Publication entity.
 func (ptu *PublicationTranslationUpdate) SetPublication(p *Publication) *PublicationTranslationUpdate {
 	return ptu.SetPublicationID(p.ID)
@@ -154,7 +147,6 @@ func (ptu *PublicationTranslationUpdate) ClearLanguage() *PublicationTranslation
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ptu *PublicationTranslationUpdate) Save(ctx context.Context) (int, error) {
-	ptu.defaults()
 	return withHooks(ctx, ptu.sqlSave, ptu.mutation, ptu.hooks)
 }
 
@@ -177,14 +169,6 @@ func (ptu *PublicationTranslationUpdate) Exec(ctx context.Context) error {
 func (ptu *PublicationTranslationUpdate) ExecX(ctx context.Context) {
 	if err := ptu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (ptu *PublicationTranslationUpdate) defaults() {
-	if _, ok := ptu.mutation.UpdatedAt(); !ok {
-		v := publicationtranslation.UpdateDefaultUpdatedAt()
-		ptu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -245,9 +229,6 @@ func (ptu *PublicationTranslationUpdate) sqlSave(ctx context.Context) (n int, er
 	}
 	if ptu.mutation.ConferenceNameCleared() {
 		_spec.ClearField(publicationtranslation.FieldConferenceName, field.TypeString)
-	}
-	if value, ok := ptu.mutation.UpdatedAt(); ok {
-		_spec.SetField(publicationtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if ptu.mutation.PublicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -409,12 +390,6 @@ func (ptuo *PublicationTranslationUpdateOne) ClearConferenceName() *PublicationT
 	return ptuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (ptuo *PublicationTranslationUpdateOne) SetUpdatedAt(t time.Time) *PublicationTranslationUpdateOne {
-	ptuo.mutation.SetUpdatedAt(t)
-	return ptuo
-}
-
 // SetPublication sets the "publication" edge to the Publication entity.
 func (ptuo *PublicationTranslationUpdateOne) SetPublication(p *Publication) *PublicationTranslationUpdateOne {
 	return ptuo.SetPublicationID(p.ID)
@@ -463,7 +438,6 @@ func (ptuo *PublicationTranslationUpdateOne) Select(field string, fields ...stri
 
 // Save executes the query and returns the updated PublicationTranslation entity.
 func (ptuo *PublicationTranslationUpdateOne) Save(ctx context.Context) (*PublicationTranslation, error) {
-	ptuo.defaults()
 	return withHooks(ctx, ptuo.sqlSave, ptuo.mutation, ptuo.hooks)
 }
 
@@ -486,14 +460,6 @@ func (ptuo *PublicationTranslationUpdateOne) Exec(ctx context.Context) error {
 func (ptuo *PublicationTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := ptuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (ptuo *PublicationTranslationUpdateOne) defaults() {
-	if _, ok := ptuo.mutation.UpdatedAt(); !ok {
-		v := publicationtranslation.UpdateDefaultUpdatedAt()
-		ptuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -571,9 +537,6 @@ func (ptuo *PublicationTranslationUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if ptuo.mutation.ConferenceNameCleared() {
 		_spec.ClearField(publicationtranslation.FieldConferenceName, field.TypeString)
-	}
-	if value, ok := ptuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(publicationtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if ptuo.mutation.PublicationCleared() {
 		edge := &sqlgraph.EdgeSpec{

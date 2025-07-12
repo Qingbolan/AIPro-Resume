@@ -13,6 +13,7 @@ import (
 	"silan-backend/internal/ent/personalinfo"
 	"silan-backend/internal/ent/project"
 	"silan-backend/internal/ent/publication"
+	"silan-backend/internal/ent/recentupdate"
 	"silan-backend/internal/ent/researchproject"
 	"silan-backend/internal/ent/user"
 	"silan-backend/internal/ent/workexperience"
@@ -172,14 +173,14 @@ func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
 	return uc
 }
 
-// AddPersonalInfoIDs adds the "personal_info" edge to the PersonalInfo entity by IDs.
+// AddPersonalInfoIDs adds the "personal_infos" edge to the PersonalInfo entity by IDs.
 func (uc *UserCreate) AddPersonalInfoIDs(ids ...uuid.UUID) *UserCreate {
 	uc.mutation.AddPersonalInfoIDs(ids...)
 	return uc
 }
 
-// AddPersonalInfo adds the "personal_info" edges to the PersonalInfo entity.
-func (uc *UserCreate) AddPersonalInfo(p ...*PersonalInfo) *UserCreate {
+// AddPersonalInfos adds the "personal_infos" edges to the PersonalInfo entity.
+func (uc *UserCreate) AddPersonalInfos(p ...*PersonalInfo) *UserCreate {
 	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -187,14 +188,14 @@ func (uc *UserCreate) AddPersonalInfo(p ...*PersonalInfo) *UserCreate {
 	return uc.AddPersonalInfoIDs(ids...)
 }
 
-// AddEducationIDs adds the "education" edge to the Education entity by IDs.
+// AddEducationIDs adds the "educations" edge to the Education entity by IDs.
 func (uc *UserCreate) AddEducationIDs(ids ...uuid.UUID) *UserCreate {
 	uc.mutation.AddEducationIDs(ids...)
 	return uc
 }
 
-// AddEducation adds the "education" edges to the Education entity.
-func (uc *UserCreate) AddEducation(e ...*Education) *UserCreate {
+// AddEducations adds the "educations" edges to the Education entity.
+func (uc *UserCreate) AddEducations(e ...*Education) *UserCreate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -202,14 +203,14 @@ func (uc *UserCreate) AddEducation(e ...*Education) *UserCreate {
 	return uc.AddEducationIDs(ids...)
 }
 
-// AddWorkExperienceIDs adds the "work_experience" edge to the WorkExperience entity by IDs.
+// AddWorkExperienceIDs adds the "work_experiences" edge to the WorkExperience entity by IDs.
 func (uc *UserCreate) AddWorkExperienceIDs(ids ...uuid.UUID) *UserCreate {
 	uc.mutation.AddWorkExperienceIDs(ids...)
 	return uc
 }
 
-// AddWorkExperience adds the "work_experience" edges to the WorkExperience entity.
-func (uc *UserCreate) AddWorkExperience(w ...*WorkExperience) *UserCreate {
+// AddWorkExperiences adds the "work_experiences" edges to the WorkExperience entity.
+func (uc *UserCreate) AddWorkExperiences(w ...*WorkExperience) *UserCreate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -305,6 +306,21 @@ func (uc *UserCreate) AddAwards(a ...*Award) *UserCreate {
 		ids[i] = a[i].ID
 	}
 	return uc.AddAwardIDs(ids...)
+}
+
+// AddRecentUpdateIDs adds the "recent_updates" edge to the RecentUpdate entity by IDs.
+func (uc *UserCreate) AddRecentUpdateIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRecentUpdateIDs(ids...)
+	return uc
+}
+
+// AddRecentUpdates adds the "recent_updates" edges to the RecentUpdate entity.
+func (uc *UserCreate) AddRecentUpdates(r ...*RecentUpdate) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRecentUpdateIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -506,12 +522,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := uc.mutation.PersonalInfoIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.PersonalInfosIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -522,12 +538,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.EducationIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.EducationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -538,12 +554,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.WorkExperienceIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.WorkExperiencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -643,6 +659,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(award.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RecentUpdatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

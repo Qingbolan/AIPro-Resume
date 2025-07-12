@@ -73,7 +73,7 @@ func (WorkExperience) Fields() []ent.Field {
 func (WorkExperience) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("work_experience").
+			Ref("work_experiences").
 			Field("user_id").
 			Required().
 			Unique(),

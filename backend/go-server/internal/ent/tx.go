@@ -74,6 +74,10 @@ type Tx struct {
 	PublicationAuthor *PublicationAuthorClient
 	// PublicationTranslation is the client for interacting with the PublicationTranslation builders.
 	PublicationTranslation *PublicationTranslationClient
+	// RecentUpdate is the client for interacting with the RecentUpdate builders.
+	RecentUpdate *RecentUpdateClient
+	// RecentUpdateTranslation is the client for interacting with the RecentUpdateTranslation builders.
+	RecentUpdateTranslation *RecentUpdateTranslationClient
 	// ResearchProject is the client for interacting with the ResearchProject builders.
 	ResearchProject *ResearchProjectClient
 	// ResearchProjectDetail is the client for interacting with the ResearchProjectDetail builders.
@@ -256,6 +260,8 @@ func (tx *Tx) init() {
 	tx.Publication = NewPublicationClient(tx.config)
 	tx.PublicationAuthor = NewPublicationAuthorClient(tx.config)
 	tx.PublicationTranslation = NewPublicationTranslationClient(tx.config)
+	tx.RecentUpdate = NewRecentUpdateClient(tx.config)
+	tx.RecentUpdateTranslation = NewRecentUpdateTranslationClient(tx.config)
 	tx.ResearchProject = NewResearchProjectClient(tx.config)
 	tx.ResearchProjectDetail = NewResearchProjectDetailClient(tx.config)
 	tx.ResearchProjectDetailTranslation = NewResearchProjectDetailTranslationClient(tx.config)

@@ -99,6 +99,12 @@ type PublicationAuthor func(*sql.Selector)
 // PublicationTranslation is the predicate function for publicationtranslation builders.
 type PublicationTranslation func(*sql.Selector)
 
+// RecentUpdate is the predicate function for recentupdate builders.
+type RecentUpdate func(*sql.Selector)
+
+// RecentUpdateTranslation is the predicate function for recentupdatetranslation builders.
+type RecentUpdateTranslation func(*sql.Selector)
+
 // ResearchProject is the predicate function for researchproject builders.
 type ResearchProject func(*sql.Selector)
 

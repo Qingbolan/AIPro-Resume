@@ -380,6 +380,30 @@ func (f PublicationTranslationFunc) Mutate(ctx context.Context, m ent.Mutation) 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PublicationTranslationMutation", m)
 }
 
+// The RecentUpdateFunc type is an adapter to allow the use of ordinary
+// function as RecentUpdate mutator.
+type RecentUpdateFunc func(context.Context, *ent.RecentUpdateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RecentUpdateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RecentUpdateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RecentUpdateMutation", m)
+}
+
+// The RecentUpdateTranslationFunc type is an adapter to allow the use of ordinary
+// function as RecentUpdateTranslation mutator.
+type RecentUpdateTranslationFunc func(context.Context, *ent.RecentUpdateTranslationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RecentUpdateTranslationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RecentUpdateTranslationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RecentUpdateTranslationMutation", m)
+}
+
 // The ResearchProjectFunc type is an adapter to allow the use of ordinary
 // function as ResearchProject mutator.
 type ResearchProjectFunc func(context.Context, *ent.ResearchProjectMutation) (ent.Value, error)

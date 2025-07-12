@@ -1,11 +1,16 @@
 """
 Idea parser for extracting structured idea information including
 feasibility analysis, implementation details, and collaboration requirements.
+
+Supports both individual markdown files and folder-based idea structure
+with research materials, notes, experiments, and references.
 """
 
 import re
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date
+from pathlib import Path
+import yaml
 from .base_parser import BaseParser, ExtractedContent
 
 
@@ -19,6 +24,410 @@ class IdeaParser(BaseParser):
     
     def _get_content_type(self) -> str:
         return 'idea'
+    
+    def debug_motivation_extraction(self, file_path: Path) -> str:
+        """Debug method to test motivation extraction"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Extract motivation section
+            import re
+            for level in ['##', '###', '####']:
+                pattern = rf'\n{level}\s+Motivation\s*\n(.*?)(?=\n{level}\s+|\Z)'
+                match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+                if match:
+                    return match.group(1).strip()
+            return ''
+        except Exception as e:
+            return f"Error: {e}"
+
+    def parse_folder(self, folder_path: Path) -> Optional[ExtractedContent]:
+        """
+        Parse an idea folder structure with enhanced debugging.
+        """
+        try:
+            # Look for main content file
+            main_files = ['README.md', 'index.md', 'idea.md']
+            main_file = None
+            
+            for filename in main_files:
+                file_path = folder_path / filename
+                if file_path.exists():
+                    main_file = file_path
+                    break
+            
+            if not main_file:
+                console.print(f"[red]❌ No main content file found in {folder_path}[/red]")
+                return None
+            
+            # Debug motivation extraction
+            debug_motivation = self.debug_motivation_extraction(main_file)
+            
+            # Parse main content file
+            extracted = self.parse_file(main_file)
+            if not extracted:
+                return None
+            
+            # Force set motivation if it was lost
+            if not extracted.main_entity.get('motivation') and debug_motivation:
+                extracted.main_entity['motivation'] = debug_motivation
+            
+            # Load idea configuration if exists
+            config_file = folder_path / 'config.yaml'
+            config_data = {}
+            if config_file.exists():
+                try:
+                    with open(config_file, 'r', encoding='utf-8') as f:
+                        config_data = yaml.safe_load(f) or {}
+                except Exception as e:
+                    console.print(f"[yellow]⚠️ Error reading config.yaml: {e}[/yellow]")
+            
+            # Enhance extracted data with folder structure
+            self._enhance_with_folder_data(extracted, folder_path, config_data)
+            
+            # Final check - if motivation is still empty, force set it
+            if not extracted.main_entity.get('motivation') and debug_motivation:
+                extracted.main_entity['motivation'] = debug_motivation
+            
+            return extracted
+            
+        except Exception as e:
+            console.print(f"[red]❌ Error parsing idea folder {folder_path}: {e}[/red]")
+            return None
+    
+    def _enhance_with_folder_data(self, extracted: ExtractedContent, folder_path: Path, config_data: Dict):
+        """Enhance extracted data with folder structure information"""
+        
+        # Update idea data with config
+        if config_data:
+            idea_data = extracted.main_entity
+            
+            # Handle nested config structure (config.yaml may have 'idea' key)
+            if 'idea' in config_data:
+                config_idea_data = config_data['idea']
+            else:
+                config_idea_data = config_data
+            
+            # Override with config data if available, but preserve motivation if already extracted
+            for key, value in config_idea_data.items():
+                if key in idea_data and value is not None:
+                    # Don't override motivation if it was already extracted from content
+                    if key == 'motivation' and idea_data.get('motivation'):
+                        continue
+                    idea_data[key] = value
+            
+            # Add folder-specific data to metadata (not main entity)
+            extracted.metadata['folder_path'] = str(folder_path)
+            extracted.metadata['config_data'] = config_data
+        
+        # Scan research folder
+        research_data = self._scan_research_folder(folder_path / 'research')
+        extracted.metadata['research_materials'] = research_data
+        
+        # Scan notes folder
+        notes_data = self._scan_notes_folder(folder_path / 'notes')
+        extracted.metadata['development_notes'] = notes_data
+        
+        # Scan experiments folder
+        experiments_data = self._scan_experiments_folder(folder_path / 'experiments')
+        extracted.metadata['experiments'] = experiments_data
+        
+        # Scan references folder
+        references_data = self._scan_references_folder(folder_path / 'references')
+        extracted.metadata['references'] = references_data
+        
+        # Scan prototypes folder
+        prototypes_data = self._scan_prototypes_folder(folder_path / 'prototypes')
+        extracted.metadata['prototypes'] = prototypes_data
+        
+        # Scan assets folder
+        assets_data = self._scan_assets_folder(folder_path / 'assets')
+        extracted.metadata['assets'] = assets_data
+        if assets_data.get('images'):
+            extracted.images.extend(assets_data['images'])
+    
+    def _scan_research_folder(self, research_folder: Path) -> Dict[str, Any]:
+        """Scan research folder for research materials"""
+        research_data = {
+            'papers': [],
+            'market_analysis': [],
+            'competitive_analysis': [],
+            'technical_research': []
+        }
+        
+        if not research_folder.exists():
+            return research_data
+        
+        for research_file in research_folder.rglob('*'):
+            if research_file.is_file() and research_file.suffix.lower() in {'.md', '.txt', '.pdf', '.doc', '.docx'}:
+                filename_lower = research_file.name.lower()
+                
+                file_data = {
+                    'filename': research_file.name,
+                    'path': str(research_file.relative_to(research_folder)),
+                    'size': research_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(research_file.stat().st_mtime)
+                }
+                
+                # Categorize research file
+                if any(keyword in filename_lower for keyword in ['paper', 'article', 'journal']):
+                    research_data['papers'].append(file_data)
+                elif any(keyword in filename_lower for keyword in ['market', 'user', 'survey']):
+                    research_data['market_analysis'].append(file_data)
+                elif any(keyword in filename_lower for keyword in ['competitor', 'competitive', 'analysis']):
+                    research_data['competitive_analysis'].append(file_data)
+                else:
+                    research_data['technical_research'].append(file_data)
+        
+        return research_data
+    
+    def _scan_notes_folder(self, notes_folder: Path) -> List[Dict[str, Any]]:
+        """Scan notes folder for development notes"""
+        notes = []
+        
+        if not notes_folder.exists():
+            return notes
+        
+        for note_file in notes_folder.rglob('*.md'):
+            if note_file.is_file():
+                try:
+                    # Read content for analysis
+                    with open(note_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        summary = content[:200] + ('...' if len(content) > 200 else '')
+                    
+                    # Categorize note type
+                    note_type = self._categorize_note_type(note_file.name, content)
+                    
+                    notes.append({
+                        'filename': note_file.name,
+                        'path': str(note_file.relative_to(notes_folder)),
+                        'type': note_type,
+                        'summary': summary,
+                        'size': note_file.stat().st_size,
+                        'modified': datetime.fromtimestamp(note_file.stat().st_mtime)
+                    })
+                except Exception:
+                    continue
+        
+        return notes
+    
+    def _scan_experiments_folder(self, experiments_folder: Path) -> List[Dict[str, Any]]:
+        """Scan experiments folder for experiment records"""
+        experiments = []
+        
+        if not experiments_folder.exists():
+            return experiments
+        
+        for exp_file in experiments_folder.rglob('*'):
+            if exp_file.is_file():
+                experiment_data = {
+                    'filename': exp_file.name,
+                    'path': str(exp_file.relative_to(experiments_folder)),
+                    'type': self._classify_experiment_type(exp_file.name),
+                    'size': exp_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(exp_file.stat().st_mtime)
+                }
+                
+                # Try to extract experiment metadata from markdown files
+                if exp_file.suffix.lower() == '.md':
+                    try:
+                        with open(exp_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            experiment_data['summary'] = content[:200] + ('...' if len(content) > 200 else '')
+                    except Exception:
+                        pass
+                
+                experiments.append(experiment_data)
+        
+        return experiments
+    
+    def _scan_references_folder(self, references_folder: Path) -> List[Dict[str, Any]]:
+        """Scan references folder for reference materials"""
+        references = []
+        
+        if not references_folder.exists():
+            return references
+        
+        reference_exts = {'.md', '.txt', '.pdf', '.url', '.webloc'}
+        
+        for ref_file in references_folder.rglob('*'):
+            if ref_file.is_file() and ref_file.suffix.lower() in reference_exts:
+                ref_data = {
+                    'filename': ref_file.name,
+                    'path': str(ref_file.relative_to(references_folder)),
+                    'type': self._classify_reference_type(ref_file.name),
+                    'size': ref_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(ref_file.stat().st_mtime)
+                }
+                
+                # Extract URL from .url files
+                if ref_file.suffix.lower() == '.url':
+                    try:
+                        with open(ref_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            url_match = re.search(r'URL=(.+)', content)
+                            if url_match:
+                                ref_data['url'] = url_match.group(1).strip()
+                    except Exception:
+                        pass
+                
+                references.append(ref_data)
+        
+        return references
+    
+    def _scan_prototypes_folder(self, prototypes_folder: Path) -> List[Dict[str, Any]]:
+        """Scan prototypes folder for prototype files"""
+        prototypes = []
+        
+        if not prototypes_folder.exists():
+            return prototypes
+        
+        for proto_file in prototypes_folder.rglob('*'):
+            if proto_file.is_file():
+                prototype_data = {
+                    'filename': proto_file.name,
+                    'path': str(proto_file.relative_to(prototypes_folder)),
+                    'type': self._classify_prototype_type(proto_file.name),
+                    'size': proto_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(proto_file.stat().st_mtime)
+                }
+                
+                prototypes.append(prototype_data)
+        
+        return prototypes
+    
+    def _scan_assets_folder(self, assets_folder: Path) -> Dict[str, Any]:
+        """Scan assets folder for images and media"""
+        assets_data = {
+            'images': [],
+            'videos': [],
+            'documents': []
+        }
+        
+        if not assets_folder.exists():
+            return assets_data
+        
+        # Image extensions
+        image_exts = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'}
+        video_exts = {'.mp4', '.avi', '.mov', '.mkv', '.webm'}
+        doc_exts = {'.pdf', '.doc', '.docx', '.ppt', '.pptx'}
+        
+        for asset_file in assets_folder.rglob('*'):
+            if not asset_file.is_file():
+                continue
+            
+            ext = asset_file.suffix.lower()
+            
+            if ext in image_exts:
+                assets_data['images'].append({
+                    'image_url': str(asset_file.relative_to(assets_folder)),
+                    'alt_text': asset_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                    'caption': asset_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                    'image_type': self._classify_idea_image_type(asset_file.name),
+                    'sort_order': len(assets_data['images']),
+                    'file_size': asset_file.stat().st_size
+                })
+            elif ext in video_exts:
+                assets_data['videos'].append({
+                    'filename': asset_file.name,
+                    'path': str(asset_file.relative_to(assets_folder)),
+                    'size': asset_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(asset_file.stat().st_mtime)
+                })
+            elif ext in doc_exts:
+                assets_data['documents'].append({
+                    'filename': asset_file.name,
+                    'path': str(asset_file.relative_to(assets_folder)),
+                    'size': asset_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(asset_file.stat().st_mtime)
+                })
+        
+        return assets_data
+    
+    def _categorize_note_type(self, filename: str, content: str) -> str:
+        """Categorize development note type"""
+        filename_lower = filename.lower()
+        content_lower = content.lower()
+        
+        if any(keyword in filename_lower for keyword in ['meeting', 'discussion']):
+            return 'meeting_notes'
+        elif any(keyword in filename_lower for keyword in ['brainstorm', 'idea']):
+            return 'brainstorming'
+        elif any(keyword in filename_lower for keyword in ['tech', 'technical']):
+            return 'technical_notes'
+        elif any(keyword in filename_lower for keyword in ['design', 'ui', 'ux']):
+            return 'design_notes'
+        elif any(keyword in content_lower for keyword in ['todo', 'task', 'action']):
+            return 'action_items'
+        else:
+            return 'general_notes'
+    
+    def _classify_experiment_type(self, filename: str) -> str:
+        """Classify experiment type"""
+        filename_lower = filename.lower()
+        
+        if any(keyword in filename_lower for keyword in ['prototype', 'proof', 'poc']):
+            return 'proof_of_concept'
+        elif any(keyword in filename_lower for keyword in ['user', 'usability', 'test']):
+            return 'user_testing'
+        elif any(keyword in filename_lower for keyword in ['performance', 'benchmark']):
+            return 'performance_testing'
+        elif any(keyword in filename_lower for keyword in ['a/b', 'ab', 'variant']):
+            return 'ab_testing'
+        else:
+            return 'general_experiment'
+    
+    def _classify_reference_type(self, filename: str) -> str:
+        """Classify reference type"""
+        filename_lower = filename.lower()
+        
+        if any(keyword in filename_lower for keyword in ['paper', 'research', 'academic']):
+            return 'academic_paper'
+        elif any(keyword in filename_lower for keyword in ['tutorial', 'guide', 'howto']):
+            return 'tutorial'
+        elif any(keyword in filename_lower for keyword in ['blog', 'article']):
+            return 'blog_article'
+        elif any(keyword in filename_lower for keyword in ['video', 'youtube', 'vimeo']):
+            return 'video_content'
+        elif any(keyword in filename_lower for keyword in ['tool', 'software', 'library']):
+            return 'tool_reference'
+        else:
+            return 'general_reference'
+    
+    def _classify_prototype_type(self, filename: str) -> str:
+        """Classify prototype type"""
+        ext = Path(filename).suffix.lower()
+        filename_lower = filename.lower()
+        
+        if ext in ['.html', '.css', '.js']:
+            return 'web_prototype'
+        elif ext in ['.py', '.java', '.cpp', '.go']:
+            return 'code_prototype'
+        elif ext in ['.fig', '.sketch', '.psd', '.ai']:
+            return 'design_prototype'
+        elif ext in ['.blend', '.fbx', '.obj']:
+            return '3d_prototype'
+        elif any(keyword in filename_lower for keyword in ['wireframe', 'mockup']):
+            return 'wireframe'
+        else:
+            return 'general_prototype'
+    
+    def _classify_idea_image_type(self, filename: str) -> str:
+        """Classify idea image type"""
+        filename_lower = filename.lower()
+        
+        if any(keyword in filename_lower for keyword in ['mockup', 'wireframe']):
+            return 'mockup'
+        elif any(keyword in filename_lower for keyword in ['diagram', 'flow', 'architecture']):
+            return 'diagram'
+        elif any(keyword in filename_lower for keyword in ['sketch', 'concept']):
+            return 'concept_sketch'
+        elif any(keyword in filename_lower for keyword in ['inspiration', 'reference']):
+            return 'inspiration'
+        else:
+            return 'general_image'
     
     def _parse_content(self, post, extracted: ExtractedContent):
         """Parse idea content and extract structured data"""
@@ -60,8 +469,44 @@ class IdeaParser(BaseParser):
     
     def _extract_idea_data(self, metadata: Dict, content: str) -> Dict[str, Any]:
         """Extract main idea information"""
+        # Extract title from metadata or content
         title = metadata.get('title', '')
+        if not title:
+            # Extract title from first heading
+            lines = content.split('\n')
+            for line in lines:
+                line = line.strip()
+                if line.startswith('# '):
+                    title = line[2:].strip()
+                    break
+        
         slug = metadata.get('slug', self._generate_slug(title))
+        
+        # Extract abstract from metadata or content
+        abstract = metadata.get('abstract', metadata.get('description', ''))
+        if not abstract:
+            # Look for Abstract section in content
+            abstract_section = self._extract_section(content, 'Abstract')
+            if abstract_section:
+                # Take first paragraph of abstract section
+                abstract = abstract_section.split('\n\n')[0].strip()
+            elif title:
+                # Fallback to a generated abstract
+                abstract = f"An innovative idea focusing on {title.lower()}"
+        
+        # Extract motivation from content first, then fallback to metadata
+        motivation = ''
+        motivation_section = self._extract_section(content, 'Motivation')
+        if motivation_section:
+            motivation = motivation_section
+        else:
+            # Look for Problem section as alternative
+            problem_section = self._extract_section(content, 'Problem')
+            if problem_section:
+                motivation = problem_section
+            else:
+                # Fallback to metadata
+                motivation = metadata.get('motivation', '')
         
         # Extract problem statement
         problem_statement = self._extract_problem_statement(content)
@@ -81,24 +526,24 @@ class IdeaParser(BaseParser):
         development_stage = self._determine_development_stage(content)
         
         # Map collaboration and funding status properly
-        collaboration_needed = metadata.get('collaborationOpen', False)
+        collaboration_needed = metadata.get('collaboration_needed', metadata.get('collaborationOpen', False))
         if isinstance(collaboration_needed, str):
             collaboration_needed = collaboration_needed.lower() in ['true', 'yes', '1']
         
-        funding_required = metadata.get('fundingStatus', 'none') != 'none'
+        funding_required = metadata.get('funding_required', False)
         if metadata.get('fundingStatus') == 'seeking':
             funding_required = True
         elif metadata.get('fundingStatus') == 'funded':
             funding_required = False
         
         # Parse duration from string like "6-8 months"
-        duration_months = self._extract_duration_months(metadata.get('estimatedDuration', ''))
+        duration_months = self._extract_duration_months(metadata.get('estimated_duration', ''))
         
         idea_data = {
             'title': title,
             'slug': slug,
-            'abstract': metadata.get('abstract', metadata.get('description', '')),
-            'motivation': metadata.get('motivation', ''),
+            'abstract': abstract,
+            'motivation': motivation, # Ensure motivation is preserved
             'methodology': solution_overview or self._extract_methodology(content),
             'expected_outcome': self._extract_expected_outcome(content),
             'status': self._map_idea_status(metadata.get('status', 'draft')),
@@ -107,7 +552,7 @@ class IdeaParser(BaseParser):
             'funding_required': funding_required,
             'estimated_budget': financial_estimates.get('budget'),
             'required_resources': self._extract_required_resources_string(content),
-            'is_public': metadata.get('is_public', False),
+            'is_public': metadata.get('is_public', True),  # Default to public for content-extracted ideas
             'view_count': 0,
             'like_count': 0,
             'priority': self._map_priority_level(feasibility_score, impact_score)
@@ -171,30 +616,34 @@ class IdeaParser(BaseParser):
                 return section_content[:500]  # Limit length
         return ''
     
-    def _map_priority_level(self, feasibility_score: float, impact_score: float) -> str:
+    def _map_priority_level(self, feasibility_score: float, impact_score: float):
         """Map scores to priority levels matching enum"""
+        from silan.models.ideas import IdeaPriority
+        
         avg_score = (feasibility_score + impact_score) / 2
         if avg_score >= 8.0:
-            return 'high'
+            return IdeaPriority.HIGH
         elif avg_score >= 6.0:
-            return 'medium'
+            return IdeaPriority.MEDIUM
         else:
-            return 'low'
+            return IdeaPriority.LOW
     
-    def _map_idea_status(self, status: str) -> str:
+    def _map_idea_status(self, status: str):
         """Map status to IdeaStatus enum values"""
+        from silan.models.ideas import IdeaStatus
+        
         status_lower = status.lower()
         
         status_mapping = {
-            'draft': 'draft',
-            'hypothesis': 'hypothesis', 
-            'experimenting': 'experimenting',
-            'validating': 'validating',
-            'published': 'published',
-            'concluded': 'concluded'
+            'draft': IdeaStatus.DRAFT,
+            'hypothesis': IdeaStatus.HYPOTHESIS, 
+            'experimenting': IdeaStatus.EXPERIMENTING,
+            'validating': IdeaStatus.VALIDATING,
+            'published': IdeaStatus.PUBLISHED,
+            'concluded': IdeaStatus.CONCLUDED
         }
         
-        return status_mapping.get(status_lower, 'draft')
+        return status_mapping.get(status_lower, IdeaStatus.DRAFT)
     
     def _extract_idea_technologies(self, metadata: Dict, content: str) -> List[Dict[str, Any]]:
         """Extract technologies required for the idea"""

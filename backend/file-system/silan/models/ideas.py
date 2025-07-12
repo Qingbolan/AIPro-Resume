@@ -2,14 +2,18 @@
 
 from sqlalchemy import String, Text, Boolean, DateTime, ForeignKey, Integer, Enum, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime
 import enum
 
 from .base import Base, TimestampMixin, UUID, generate_uuid
 
+if TYPE_CHECKING:
+    from .user import User, Language
+
 
 class IdeaStatus(enum.Enum):
+    """Idea status enumeration - matching Go schema"""
     DRAFT = "draft"
     HYPOTHESIS = "hypothesis"
     EXPERIMENTING = "experimenting"
@@ -19,6 +23,7 @@ class IdeaStatus(enum.Enum):
 
 
 class IdeaPriority(enum.Enum):
+    """Idea priority enumeration - matching Go schema"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -42,12 +47,12 @@ class Idea(Base, TimestampMixin):
     required_resources: Mapped[Optional[str]] = mapped_column(Text)
     collaboration_needed: Mapped[bool] = mapped_column(Boolean, default=False)
     funding_required: Mapped[bool] = mapped_column(Boolean, default=False)
-    estimated_budget: Mapped[Optional[float]] = mapped_column(Numeric(12, 2))
+    estimated_budget: Mapped[Optional[float]] = mapped_column(Numeric(12, 2))  # Go uses float
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
     view_count: Mapped[int] = mapped_column(Integer, default=0)
     like_count: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Relationships
+    # Relationships - matching Go schema edges
     user: Mapped["User"] = relationship(back_populates="ideas")
     translations: Mapped[List["IdeaTranslation"]] = relationship(back_populates="idea", cascade="all, delete-orphan")
 
@@ -64,8 +69,8 @@ class IdeaTranslation(Base):
     methodology: Mapped[Optional[str]] = mapped_column(Text)
     expected_outcome: Mapped[Optional[str]] = mapped_column(Text)
     required_resources: Mapped[Optional[str]] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     idea: Mapped["Idea"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="idea_translations")

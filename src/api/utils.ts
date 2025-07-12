@@ -144,29 +144,6 @@ export const formatLanguage = (language: Language): string => {
   return language === 'zh' ? 'zh' : 'en';
 };
 
-// Helper function to handle API response with fallback
-export const withFallback = <T>(
-  apiCall: () => Promise<T>,
-  fallbackData: T,
-  enableFallback: boolean = true
-): Promise<T> => {
-  if (!enableFallback) {
-    return apiCall();
-  }
-  
-  return apiCall().catch((error) => {
-    console.error('API call failed, using fallback data:', error);
-    console.error('Error details:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      status: error.status,
-      data: error.data
-    });
-    return fallbackData;
-  });
-};
-
 // Helper function to simulate delay (for development/testing)
 export const delay = (ms: number): Promise<void> => 
   new Promise(resolve => setTimeout(resolve, ms));

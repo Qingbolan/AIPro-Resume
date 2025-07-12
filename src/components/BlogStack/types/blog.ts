@@ -11,6 +11,7 @@ export interface BlogData {
   id: string;
   title: string;
   titleZh?: string;
+  slug?: string;
   author: string;
   publishDate: string;
   readTime: string;

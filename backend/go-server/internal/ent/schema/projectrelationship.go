@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // ProjectRelationship holds the schema definition for the ProjectRelationship entity.
 type ProjectRelationship struct {
 	ent.Schema
+}
+
+// Annotations for the ProjectRelationship schema.
+func (ProjectRelationship) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "project_relationships"},
+	}
 }
 
 // Fields of the ProjectRelationship.
@@ -30,9 +39,6 @@ func (ProjectRelationship) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 

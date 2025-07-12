@@ -73,18 +73,35 @@ func (l *GetBlogPostLogic) GetBlogPost(req *types.BlogRequest) (resp *types.Blog
 		},
 	}
 
+	// Add series information if this is part of a series
+	var seriesID, seriesTitle, seriesDescription string
+	var episodeNumber, totalEpisodes int
+	if post.Edges.Series != nil {
+		seriesID = post.Edges.Series.ID.String()
+		seriesTitle = post.Edges.Series.Title
+		seriesDescription = post.Edges.Series.Description
+		episodeNumber = post.SeriesOrder
+		totalEpisodes = post.Edges.Series.EpisodeCount
+	}
+
 	return &types.BlogData{
-		ID:          post.ID.String(),
-		Title:       post.Title,
-		Author:      author,
-		PublishDate: publishDate,
-		ReadTime:    readTime,
-		Category:    category,
-		Tags:        tags,
-		Content:     content,
-		Likes:       int64(post.LikeCount),
-		Views:       int64(post.ViewCount),
-		Summary:     post.Excerpt,
-		Type:        string(post.ContentType),
+		ID:                post.ID.String(),
+		Title:             post.Title,
+		Slug:              post.Slug,
+		Author:            author,
+		PublishDate:       publishDate,
+		ReadTime:          readTime,
+		Category:          category,
+		Tags:              tags,
+		Content:           content,
+		Likes:             int64(post.LikeCount),
+		Views:             int64(post.ViewCount),
+		Summary:           post.Excerpt,
+		Type:              string(post.ContentType),
+		SeriesID:          seriesID,
+		SeriesTitle:       seriesTitle,
+		SeriesDescription: seriesDescription,
+		EpisodeNumber:     episodeNumber,
+		TotalEpisodes:     totalEpisodes,
 	}, nil
 }

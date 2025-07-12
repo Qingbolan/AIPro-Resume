@@ -633,6 +633,29 @@ func HasAwardTranslationsWith(preds ...predicate.AwardTranslation) predicate.Lan
 	})
 }
 
+// HasRecentUpdateTranslations applies the HasEdge predicate on the "recent_update_translations" edge.
+func HasRecentUpdateTranslations() predicate.Language {
+	return predicate.Language(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RecentUpdateTranslationsTable, RecentUpdateTranslationsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRecentUpdateTranslationsWith applies the HasEdge predicate on the "recent_update_translations" edge with a given conditions (other predicates).
+func HasRecentUpdateTranslationsWith(preds ...predicate.RecentUpdateTranslation) predicate.Language {
+	return predicate.Language(func(s *sql.Selector) {
+		step := newRecentUpdateTranslationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Language) predicate.Language {
 	return predicate.Language(sql.AndPredicates(predicates...))

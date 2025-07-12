@@ -32,8 +32,6 @@ type PublicationTranslation struct {
 	ConferenceName string `json:"conference_name,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PublicationTranslationQuery when eager-loading is set.
 	Edges        PublicationTranslationEdges `json:"edges"`
@@ -80,7 +78,7 @@ func (*PublicationTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case publicationtranslation.FieldLanguageCode, publicationtranslation.FieldTitle, publicationtranslation.FieldJournalName, publicationtranslation.FieldConferenceName:
 			values[i] = new(sql.NullString)
-		case publicationtranslation.FieldCreatedAt, publicationtranslation.FieldUpdatedAt:
+		case publicationtranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case publicationtranslation.FieldID, publicationtranslation.FieldPublicationID:
 			values[i] = new(uuid.UUID)
@@ -140,12 +138,6 @@ func (pt *PublicationTranslation) assignValues(columns []string, values []any) e
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				pt.CreatedAt = value.Time
-			}
-		case publicationtranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pt.UpdatedAt = value.Time
 			}
 		default:
 			pt.selectValues.Set(columns[i], values[i])
@@ -210,9 +202,6 @@ func (pt *PublicationTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pt.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(pt.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

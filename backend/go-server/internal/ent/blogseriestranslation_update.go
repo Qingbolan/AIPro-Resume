@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/blogseriestranslation"
 	"silan-backend/internal/ent/language"
 	"silan-backend/internal/ent/predicate"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -93,12 +92,6 @@ func (bstu *BlogSeriesTranslationUpdate) ClearDescription() *BlogSeriesTranslati
 	return bstu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bstu *BlogSeriesTranslationUpdate) SetUpdatedAt(t time.Time) *BlogSeriesTranslationUpdate {
-	bstu.mutation.SetUpdatedAt(t)
-	return bstu
-}
-
 // SetBlogSeries sets the "blog_series" edge to the BlogSeries entity.
 func (bstu *BlogSeriesTranslationUpdate) SetBlogSeries(b *BlogSeries) *BlogSeriesTranslationUpdate {
 	return bstu.SetBlogSeriesID(b.ID)
@@ -134,7 +127,6 @@ func (bstu *BlogSeriesTranslationUpdate) ClearLanguage() *BlogSeriesTranslationU
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bstu *BlogSeriesTranslationUpdate) Save(ctx context.Context) (int, error) {
-	bstu.defaults()
 	return withHooks(ctx, bstu.sqlSave, bstu.mutation, bstu.hooks)
 }
 
@@ -157,14 +149,6 @@ func (bstu *BlogSeriesTranslationUpdate) Exec(ctx context.Context) error {
 func (bstu *BlogSeriesTranslationUpdate) ExecX(ctx context.Context) {
 	if err := bstu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bstu *BlogSeriesTranslationUpdate) defaults() {
-	if _, ok := bstu.mutation.UpdatedAt(); !ok {
-		v := blogseriestranslation.UpdateDefaultUpdatedAt()
-		bstu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -209,9 +193,6 @@ func (bstu *BlogSeriesTranslationUpdate) sqlSave(ctx context.Context) (n int, er
 	}
 	if bstu.mutation.DescriptionCleared() {
 		_spec.ClearField(blogseriestranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := bstu.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogseriestranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bstu.mutation.BlogSeriesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -353,12 +334,6 @@ func (bstuo *BlogSeriesTranslationUpdateOne) ClearDescription() *BlogSeriesTrans
 	return bstuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bstuo *BlogSeriesTranslationUpdateOne) SetUpdatedAt(t time.Time) *BlogSeriesTranslationUpdateOne {
-	bstuo.mutation.SetUpdatedAt(t)
-	return bstuo
-}
-
 // SetBlogSeries sets the "blog_series" edge to the BlogSeries entity.
 func (bstuo *BlogSeriesTranslationUpdateOne) SetBlogSeries(b *BlogSeries) *BlogSeriesTranslationUpdateOne {
 	return bstuo.SetBlogSeriesID(b.ID)
@@ -407,7 +382,6 @@ func (bstuo *BlogSeriesTranslationUpdateOne) Select(field string, fields ...stri
 
 // Save executes the query and returns the updated BlogSeriesTranslation entity.
 func (bstuo *BlogSeriesTranslationUpdateOne) Save(ctx context.Context) (*BlogSeriesTranslation, error) {
-	bstuo.defaults()
 	return withHooks(ctx, bstuo.sqlSave, bstuo.mutation, bstuo.hooks)
 }
 
@@ -430,14 +404,6 @@ func (bstuo *BlogSeriesTranslationUpdateOne) Exec(ctx context.Context) error {
 func (bstuo *BlogSeriesTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := bstuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bstuo *BlogSeriesTranslationUpdateOne) defaults() {
-	if _, ok := bstuo.mutation.UpdatedAt(); !ok {
-		v := blogseriestranslation.UpdateDefaultUpdatedAt()
-		bstuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -499,9 +465,6 @@ func (bstuo *BlogSeriesTranslationUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if bstuo.mutation.DescriptionCleared() {
 		_spec.ClearField(blogseriestranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := bstuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogseriestranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bstuo.mutation.BlogSeriesCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -9,7 +9,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/project"
 	"silan-backend/internal/ent/projectrelationship"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -72,12 +71,6 @@ func (pru *ProjectRelationshipUpdate) SetNillableRelationshipType(s *string) *Pr
 	return pru
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pru *ProjectRelationshipUpdate) SetUpdatedAt(t time.Time) *ProjectRelationshipUpdate {
-	pru.mutation.SetUpdatedAt(t)
-	return pru
-}
-
 // SetSourceProject sets the "source_project" edge to the Project entity.
 func (pru *ProjectRelationshipUpdate) SetSourceProject(p *Project) *ProjectRelationshipUpdate {
 	return pru.SetSourceProjectID(p.ID)
@@ -107,7 +100,6 @@ func (pru *ProjectRelationshipUpdate) ClearTargetProject() *ProjectRelationshipU
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pru *ProjectRelationshipUpdate) Save(ctx context.Context) (int, error) {
-	pru.defaults()
 	return withHooks(ctx, pru.sqlSave, pru.mutation, pru.hooks)
 }
 
@@ -130,14 +122,6 @@ func (pru *ProjectRelationshipUpdate) Exec(ctx context.Context) error {
 func (pru *ProjectRelationshipUpdate) ExecX(ctx context.Context) {
 	if err := pru.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pru *ProjectRelationshipUpdate) defaults() {
-	if _, ok := pru.mutation.UpdatedAt(); !ok {
-		v := projectrelationship.UpdateDefaultUpdatedAt()
-		pru.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -171,9 +155,6 @@ func (pru *ProjectRelationshipUpdate) sqlSave(ctx context.Context) (n int, err e
 	}
 	if value, ok := pru.mutation.RelationshipType(); ok {
 		_spec.SetField(projectrelationship.FieldRelationshipType, field.TypeString, value)
-	}
-	if value, ok := pru.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectrelationship.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pru.mutation.SourceProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -295,12 +276,6 @@ func (pruo *ProjectRelationshipUpdateOne) SetNillableRelationshipType(s *string)
 	return pruo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pruo *ProjectRelationshipUpdateOne) SetUpdatedAt(t time.Time) *ProjectRelationshipUpdateOne {
-	pruo.mutation.SetUpdatedAt(t)
-	return pruo
-}
-
 // SetSourceProject sets the "source_project" edge to the Project entity.
 func (pruo *ProjectRelationshipUpdateOne) SetSourceProject(p *Project) *ProjectRelationshipUpdateOne {
 	return pruo.SetSourceProjectID(p.ID)
@@ -343,7 +318,6 @@ func (pruo *ProjectRelationshipUpdateOne) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated ProjectRelationship entity.
 func (pruo *ProjectRelationshipUpdateOne) Save(ctx context.Context) (*ProjectRelationship, error) {
-	pruo.defaults()
 	return withHooks(ctx, pruo.sqlSave, pruo.mutation, pruo.hooks)
 }
 
@@ -366,14 +340,6 @@ func (pruo *ProjectRelationshipUpdateOne) Exec(ctx context.Context) error {
 func (pruo *ProjectRelationshipUpdateOne) ExecX(ctx context.Context) {
 	if err := pruo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pruo *ProjectRelationshipUpdateOne) defaults() {
-	if _, ok := pruo.mutation.UpdatedAt(); !ok {
-		v := projectrelationship.UpdateDefaultUpdatedAt()
-		pruo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -424,9 +390,6 @@ func (pruo *ProjectRelationshipUpdateOne) sqlSave(ctx context.Context) (_node *P
 	}
 	if value, ok := pruo.mutation.RelationshipType(); ok {
 		_spec.SetField(projectrelationship.FieldRelationshipType, field.TypeString, value)
-	}
-	if value, ok := pruo.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectrelationship.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pruo.mutation.SourceProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{

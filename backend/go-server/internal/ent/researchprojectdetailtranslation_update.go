@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/researchprojectdetail"
 	"silan-backend/internal/ent/researchprojectdetailtranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -73,12 +72,6 @@ func (rpdtu *ResearchProjectDetailTranslationUpdate) SetNillableDetailText(s *st
 	return rpdtu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rpdtu *ResearchProjectDetailTranslationUpdate) SetUpdatedAt(t time.Time) *ResearchProjectDetailTranslationUpdate {
-	rpdtu.mutation.SetUpdatedAt(t)
-	return rpdtu
-}
-
 // SetResearchProjectDetail sets the "research_project_detail" edge to the ResearchProjectDetail entity.
 func (rpdtu *ResearchProjectDetailTranslationUpdate) SetResearchProjectDetail(r *ResearchProjectDetail) *ResearchProjectDetailTranslationUpdate {
 	return rpdtu.SetResearchProjectDetailID(r.ID)
@@ -114,7 +107,6 @@ func (rpdtu *ResearchProjectDetailTranslationUpdate) ClearLanguage() *ResearchPr
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rpdtu *ResearchProjectDetailTranslationUpdate) Save(ctx context.Context) (int, error) {
-	rpdtu.defaults()
 	return withHooks(ctx, rpdtu.sqlSave, rpdtu.mutation, rpdtu.hooks)
 }
 
@@ -137,14 +129,6 @@ func (rpdtu *ResearchProjectDetailTranslationUpdate) Exec(ctx context.Context) e
 func (rpdtu *ResearchProjectDetailTranslationUpdate) ExecX(ctx context.Context) {
 	if err := rpdtu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (rpdtu *ResearchProjectDetailTranslationUpdate) defaults() {
-	if _, ok := rpdtu.mutation.UpdatedAt(); !ok {
-		v := researchprojectdetailtranslation.UpdateDefaultUpdatedAt()
-		rpdtu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -183,9 +167,6 @@ func (rpdtu *ResearchProjectDetailTranslationUpdate) sqlSave(ctx context.Context
 	}
 	if value, ok := rpdtu.mutation.DetailText(); ok {
 		_spec.SetField(researchprojectdetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := rpdtu.mutation.UpdatedAt(); ok {
-		_spec.SetField(researchprojectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if rpdtu.mutation.ResearchProjectDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -307,12 +288,6 @@ func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) SetNillableDetailText(s
 	return rpdtuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) SetUpdatedAt(t time.Time) *ResearchProjectDetailTranslationUpdateOne {
-	rpdtuo.mutation.SetUpdatedAt(t)
-	return rpdtuo
-}
-
 // SetResearchProjectDetail sets the "research_project_detail" edge to the ResearchProjectDetail entity.
 func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) SetResearchProjectDetail(r *ResearchProjectDetail) *ResearchProjectDetailTranslationUpdateOne {
 	return rpdtuo.SetResearchProjectDetailID(r.ID)
@@ -361,7 +336,6 @@ func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) Select(field string, fi
 
 // Save executes the query and returns the updated ResearchProjectDetailTranslation entity.
 func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) Save(ctx context.Context) (*ResearchProjectDetailTranslation, error) {
-	rpdtuo.defaults()
 	return withHooks(ctx, rpdtuo.sqlSave, rpdtuo.mutation, rpdtuo.hooks)
 }
 
@@ -384,14 +358,6 @@ func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) Exec(ctx context.Contex
 func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := rpdtuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) defaults() {
-	if _, ok := rpdtuo.mutation.UpdatedAt(); !ok {
-		v := researchprojectdetailtranslation.UpdateDefaultUpdatedAt()
-		rpdtuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -447,9 +413,6 @@ func (rpdtuo *ResearchProjectDetailTranslationUpdateOne) sqlSave(ctx context.Con
 	}
 	if value, ok := rpdtuo.mutation.DetailText(); ok {
 		_spec.SetField(researchprojectdetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := rpdtuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(researchprojectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if rpdtuo.mutation.ResearchProjectDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{

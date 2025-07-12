@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/blogcategorytranslation"
 	"silan-backend/internal/ent/language"
 	"silan-backend/internal/ent/predicate"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -93,12 +92,6 @@ func (bctu *BlogCategoryTranslationUpdate) ClearDescription() *BlogCategoryTrans
 	return bctu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bctu *BlogCategoryTranslationUpdate) SetUpdatedAt(t time.Time) *BlogCategoryTranslationUpdate {
-	bctu.mutation.SetUpdatedAt(t)
-	return bctu
-}
-
 // SetBlogCategory sets the "blog_category" edge to the BlogCategory entity.
 func (bctu *BlogCategoryTranslationUpdate) SetBlogCategory(b *BlogCategory) *BlogCategoryTranslationUpdate {
 	return bctu.SetBlogCategoryID(b.ID)
@@ -134,7 +127,6 @@ func (bctu *BlogCategoryTranslationUpdate) ClearLanguage() *BlogCategoryTranslat
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bctu *BlogCategoryTranslationUpdate) Save(ctx context.Context) (int, error) {
-	bctu.defaults()
 	return withHooks(ctx, bctu.sqlSave, bctu.mutation, bctu.hooks)
 }
 
@@ -157,14 +149,6 @@ func (bctu *BlogCategoryTranslationUpdate) Exec(ctx context.Context) error {
 func (bctu *BlogCategoryTranslationUpdate) ExecX(ctx context.Context) {
 	if err := bctu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bctu *BlogCategoryTranslationUpdate) defaults() {
-	if _, ok := bctu.mutation.UpdatedAt(); !ok {
-		v := blogcategorytranslation.UpdateDefaultUpdatedAt()
-		bctu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -209,9 +193,6 @@ func (bctu *BlogCategoryTranslationUpdate) sqlSave(ctx context.Context) (n int, 
 	}
 	if bctu.mutation.DescriptionCleared() {
 		_spec.ClearField(blogcategorytranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := bctu.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogcategorytranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bctu.mutation.BlogCategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -353,12 +334,6 @@ func (bctuo *BlogCategoryTranslationUpdateOne) ClearDescription() *BlogCategoryT
 	return bctuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bctuo *BlogCategoryTranslationUpdateOne) SetUpdatedAt(t time.Time) *BlogCategoryTranslationUpdateOne {
-	bctuo.mutation.SetUpdatedAt(t)
-	return bctuo
-}
-
 // SetBlogCategory sets the "blog_category" edge to the BlogCategory entity.
 func (bctuo *BlogCategoryTranslationUpdateOne) SetBlogCategory(b *BlogCategory) *BlogCategoryTranslationUpdateOne {
 	return bctuo.SetBlogCategoryID(b.ID)
@@ -407,7 +382,6 @@ func (bctuo *BlogCategoryTranslationUpdateOne) Select(field string, fields ...st
 
 // Save executes the query and returns the updated BlogCategoryTranslation entity.
 func (bctuo *BlogCategoryTranslationUpdateOne) Save(ctx context.Context) (*BlogCategoryTranslation, error) {
-	bctuo.defaults()
 	return withHooks(ctx, bctuo.sqlSave, bctuo.mutation, bctuo.hooks)
 }
 
@@ -430,14 +404,6 @@ func (bctuo *BlogCategoryTranslationUpdateOne) Exec(ctx context.Context) error {
 func (bctuo *BlogCategoryTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := bctuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bctuo *BlogCategoryTranslationUpdateOne) defaults() {
-	if _, ok := bctuo.mutation.UpdatedAt(); !ok {
-		v := blogcategorytranslation.UpdateDefaultUpdatedAt()
-		bctuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -499,9 +465,6 @@ func (bctuo *BlogCategoryTranslationUpdateOne) sqlSave(ctx context.Context) (_no
 	}
 	if bctuo.mutation.DescriptionCleared() {
 		_spec.ClearField(blogcategorytranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := bctuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogcategorytranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bctuo.mutation.BlogCategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{

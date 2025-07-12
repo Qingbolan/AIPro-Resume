@@ -1,0 +1,4 @@
+[console_scripts]
+silan = silan.cli:cli
+silan-build-backend = build_backend:main
+silan-db-tools = silan.cli:cli

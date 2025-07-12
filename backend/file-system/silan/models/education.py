@@ -2,10 +2,13 @@
 
 from sqlalchemy import String, Text, Boolean, DateTime, ForeignKey, Integer, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime, date
 
 from .base import Base, TimestampMixin, UUID, generate_uuid
+
+if TYPE_CHECKING:
+    from .user import User, Language
 
 
 class Education(Base, TimestampMixin):
@@ -25,8 +28,8 @@ class Education(Base, TimestampMixin):
     institution_logo_url: Mapped[Optional[str]] = mapped_column(String(500))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Relationships
-    user: Mapped["User"] = relationship(back_populates="education")
+    # Relationships - matching Go schema edges
+    user: Mapped["User"] = relationship(back_populates="educations")
     translations: Mapped[List["EducationTranslation"]] = relationship(back_populates="education", cascade="all, delete-orphan")
     details: Mapped[List["EducationDetail"]] = relationship(back_populates="education", cascade="all, delete-orphan")
 
@@ -41,11 +44,11 @@ class EducationTranslation(Base):
     degree: Mapped[Optional[str]] = mapped_column(String(200))
     field_of_study: Mapped[Optional[str]] = mapped_column(String(200))
     location: Mapped[Optional[str]] = mapped_column(String(200))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     education: Mapped["Education"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="education_translations")
 
 
 class EducationDetail(Base, TimestampMixin):
@@ -56,19 +59,20 @@ class EducationDetail(Base, TimestampMixin):
     detail_text: Mapped[str] = mapped_column(Text, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Relationships
+    # Relationships - matching Go schema edges
     education: Mapped["Education"] = relationship(back_populates="details")
     translations: Mapped[List["EducationDetailTranslation"]] = relationship(back_populates="education_detail", cascade="all, delete-orphan")
 
 
-class EducationDetailTranslation(Base, TimestampMixin):
+class EducationDetailTranslation(Base):
     __tablename__ = "education_detail_translations"
     
     id: Mapped[str] = mapped_column(UUID, primary_key=True, default=generate_uuid)
     education_detail_id: Mapped[str] = mapped_column(UUID, ForeignKey("education_details.id"), nullable=False)
     language_code: Mapped[str] = mapped_column(String(5), ForeignKey("languages.code"), nullable=False)
     detail_text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     education_detail: Mapped["EducationDetail"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="education_detail_translations")

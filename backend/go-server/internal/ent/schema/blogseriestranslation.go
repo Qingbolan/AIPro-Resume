@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // BlogSeriesTranslation holds the schema definition for the BlogSeriesTranslation entity.
 type BlogSeriesTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the BlogSeriesTranslation schema.
+func (BlogSeriesTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "blog_series_translations"},
+	}
 }
 
 // Fields of the BlogSeriesTranslation.
@@ -33,9 +42,6 @@ func (BlogSeriesTranslation) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 

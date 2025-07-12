@@ -39,6 +39,11 @@ type Award struct {
 	UpdatedAt    string `json:"updated_at"`
 }
 
+type BlogByIdRequest struct {
+	ID       string `path:"id"`
+	Language string `form:"lang,default=en"`
+}
+
 type BlogCategoriesRequest struct {
 	Language string `form:"lang,default=en"`
 }
@@ -65,6 +70,7 @@ type BlogData struct {
 	ID                  string        `json:"id"`
 	Title               string        `json:"title"`
 	TitleZh             string        `json:"title_zh,omitempty"`
+	Slug                string        `json:"slug,omitempty"`
 	Author              string        `json:"author"`
 	PublishDate         string        `json:"publish_date"`
 	ReadTime            string        `json:"read_time"`

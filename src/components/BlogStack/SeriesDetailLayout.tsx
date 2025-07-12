@@ -217,14 +217,22 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
   // Load series data
   useEffect(() => {
     const loadSeriesData = async () => {
-      if (!post.seriesId) return;
+      console.log('🔍 SeriesDetailLayout - post object:', post);
+      console.log('🔍 SeriesDetailLayout - post.seriesId:', post.seriesId);
+      
+      if (!post.seriesId) {
+        console.log('❌ No seriesId found, skipping series data load');
+        return;
+      }
 
       try {
+        console.log('🚀 Loading series data for seriesId:', post.seriesId);
         setLoading(true);
         const data = await fetchSeriesData(post.seriesId, language as 'en' | 'zh');
+        console.log('✅ Series data loaded:', data);
         setSeriesData(data);
       } catch (error) {
-        console.error('Failed to load series data:', error);
+        console.error('❌ Failed to load series data:', error);
       } finally {
         setLoading(false);
       }

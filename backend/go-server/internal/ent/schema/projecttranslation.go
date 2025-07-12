@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // ProjectTranslation holds the schema definition for the ProjectTranslation entity.
 type ProjectTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the ProjectTranslation schema.
+func (ProjectTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "project_translations"},
+	}
 }
 
 // Fields of the ProjectTranslation.

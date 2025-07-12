@@ -301,6 +301,286 @@ def status():
         console.print("[yellow]🚀 Backend: Not running[/yellow]")
 
 
+@cli.group()
+def workspace():
+    """Manage workspace and content organization"""
+    pass
+
+
+@workspace.command('init')
+@click.argument('name', required=False)
+@click.option('--author', help='Workspace author name')
+@click.option('--description', help='Workspace description')
+def workspace_init(name: str, author: str, description: str):
+    """Initialize a new modern workspace"""
+    from .commands.workspace_manager import WorkspaceManager
+    
+    workspace_name = name or Path.cwd().name
+    manager = WorkspaceManager()
+    success = manager.initialize_workspace(workspace_name, author, description)
+    
+    if success:
+        console.print(f"[green]✅ Workspace '{workspace_name}' initialized[/green]")
+
+
+@workspace.command('status')
+def workspace_status():
+    """Show workspace status and content summary"""
+    from .commands.workspace_manager import WorkspaceManager
+    
+    manager = WorkspaceManager()
+    manager.show_status()
+
+
+@cli.group()
+def project():
+    """Manage projects with folder-based organization"""
+    pass
+
+
+@project.command('create')
+@click.argument('project_name')
+@click.option('--template', '-t', help='Project template to use')
+@click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
+def project_create(project_name: str, template: str, no_interactive: bool):
+    """Create a new project"""
+    from .commands.project_manager import ProjectManager
+    
+    manager = ProjectManager(Path.cwd())
+    success = manager.create_project(project_name, template, not no_interactive)
+    
+    if success:
+        console.print(f"[blue]💡 Use 'silan project open {project_name}' to open the project folder[/blue]")
+
+
+@project.command('list')
+def project_list():
+    """List all projects"""
+    from .commands.project_manager import ProjectManager
+    
+    manager = ProjectManager(Path.cwd())
+    manager.show_projects()
+
+
+@project.command('show')
+@click.argument('project_name')
+def project_show(project_name: str):
+    """Show detailed project information"""
+    from .commands.project_manager import ProjectManager
+    
+    manager = ProjectManager(Path.cwd())
+    manager.show_project_details(project_name)
+
+
+@project.command('open')
+@click.argument('project_name')
+def project_open(project_name: str):
+    """Open project folder in file manager"""
+    from .commands.project_manager import ProjectManager
+    
+    manager = ProjectManager(Path.cwd())
+    manager.open_project_folder(project_name)
+
+
+@cli.group()
+def idea():
+    """Manage research ideas with folder-based organization"""
+    pass
+
+
+@idea.command('create')
+@click.argument('idea_name')
+@click.option('--template', '-t', help='Idea template to use')
+@click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
+def idea_create(idea_name: str, template: str, no_interactive: bool):
+    """Create a new research idea"""
+    from .commands.idea_manager import IdeaManager
+    
+    manager = IdeaManager(Path.cwd())
+    success = manager.create_idea(idea_name, template, not no_interactive)
+    
+    if success:
+        console.print(f"[blue]💡 Use 'silan idea open {idea_name}' to open the idea folder[/blue]")
+
+
+@idea.command('list')
+def idea_list():
+    """List all ideas"""
+    from .commands.idea_manager import IdeaManager
+    
+    manager = IdeaManager(Path.cwd())
+    manager.show_ideas()
+
+
+@idea.command('show')
+@click.argument('idea_name')
+def idea_show(idea_name: str):
+    """Show detailed idea information"""
+    from .commands.idea_manager import IdeaManager
+    
+    manager = IdeaManager(Path.cwd())
+    manager.show_idea_details(idea_name)
+
+
+@idea.command('open')
+@click.argument('idea_name')
+def idea_open(idea_name: str):
+    """Open idea folder in file manager"""
+    from .commands.idea_manager import IdeaManager
+    
+    manager = IdeaManager(Path.cwd())
+    manager.open_idea_folder(idea_name)
+
+
+@idea.command('stats')
+def idea_stats():
+    """Show idea statistics"""
+    from .commands.idea_manager import IdeaManager
+    
+    manager = IdeaManager(Path.cwd())
+    manager.show_statistics()
+
+
+@cli.group()
+def update():
+    """Manage updates with individual markdown files"""
+    pass
+
+
+@update.command('create')
+@click.option('--title', '-t', help='Update title')
+@click.option('--type', help='Update type (project, work, education, research, publication)')
+@click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
+def update_create(title: str, type: str, no_interactive: bool):
+    """Create a new update entry"""
+    from .commands.update_manager import UpdateManager
+    
+    manager = UpdateManager(Path.cwd())
+    success = manager.create_update(title, type, not no_interactive)
+    
+    if success:
+        console.print(f"[blue]💡 Use 'silan update list' to see all updates[/blue]")
+
+
+@update.command('list')
+@click.option('--year', type=int, help='Filter by year')
+@click.option('--month', type=int, help='Filter by month (1-12)')
+@click.option('--limit', type=int, default=20, help='Limit number of results')
+def update_list(year: int, month: int, limit: int):
+    """List recent updates"""
+    from .commands.update_manager import UpdateManager
+    
+    manager = UpdateManager(Path.cwd())
+    manager.show_updates(year, month, limit)
+
+
+@update.command('show')
+@click.argument('update_file')
+def update_show(update_file: str):
+    """Show detailed update information"""
+    from .commands.update_manager import UpdateManager
+    
+    manager = UpdateManager(Path.cwd())
+    manager.show_update_details(update_file)
+
+
+@update.command('open')
+@click.argument('update_file')
+def update_open(update_file: str):
+    """Open update file in editor"""
+    from .commands.update_manager import UpdateManager
+    
+    manager = UpdateManager(Path.cwd())
+    manager.open_update_file(update_file)
+
+
+@update.command('stats')
+def update_stats():
+    """Show update statistics"""
+    from .commands.update_manager import UpdateManager
+    
+    manager = UpdateManager(Path.cwd())
+    manager.show_statistics()
+
+
+@cli.group()
+def template():
+    """Manage content templates"""
+    pass
+
+
+@template.command('list')
+@click.option('--type', help='Template type (projects, ideas, updates, blog)')
+def template_list(type: str):
+    """List available templates"""
+    from .commands.template_manager import TemplateManager
+    
+    manager = TemplateManager(Path.cwd())
+    if type:
+        templates = manager.list_templates(type)
+        if templates:
+            console.print(f"[bold blue]{type.title()} Templates:[/bold blue]")
+            for template in templates:
+                console.print(f"  • {template}")
+        else:
+            console.print(f"[yellow]No {type} templates found[/yellow]")
+    else:
+        manager.show_templates()
+
+
+@template.command('create')
+@click.argument('template_type')
+@click.argument('template_name')
+@click.option('--from-path', type=click.Path(exists=True), help='Create template from existing content')
+def template_create(template_type: str, template_name: str, from_path: str):
+    """Create a new template"""
+    from .commands.template_manager import TemplateManager
+    
+    manager = TemplateManager(Path.cwd())
+    source_path = Path(from_path) if from_path else None
+    success = manager.create_template(template_type, template_name, source_path)
+    
+    if success:
+        console.print(f"[blue]💡 Use 'silan template show {template_type} {template_name}' to view template details[/blue]")
+
+
+@template.command('show')
+@click.argument('template_type')
+@click.argument('template_name')
+def template_show(template_type: str, template_name: str):
+    """Show template details"""
+    from .commands.template_manager import TemplateManager
+    
+    manager = TemplateManager(Path.cwd())
+    manager.show_template_details(template_type, template_name)
+
+
+@template.command('delete')
+@click.argument('template_type')
+@click.argument('template_name')
+def template_delete(template_type: str, template_name: str):
+    """Delete a template"""
+    from .commands.template_manager import TemplateManager
+    
+    manager = TemplateManager(Path.cwd())
+    manager.delete_template(template_type, template_name)
+
+
+@cli.command('quick')
+@click.argument('content_type', type=click.Choice(['project', 'idea', 'update']))
+@click.argument('name')
+@click.option('--template', '-t', help='Template to use')
+def quick_create(content_type: str, name: str, template: str):
+    """Quick create content from templates"""
+    from .commands.template_manager import TemplateManager
+    
+    manager = TemplateManager(Path.cwd())
+    success = manager.quick_create(content_type, name, template)
+    
+    if success:
+        console.print(f"[blue]💡 Content created successfully![/blue]")
+
+
 @cli.command()
 def clean():
     """Clean temporary files"""

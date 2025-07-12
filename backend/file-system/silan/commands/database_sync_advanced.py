@@ -28,7 +28,8 @@ from ..models import (
     Idea, IdeaTranslation,
     ResearchProject, ResearchProjectTranslation, ResearchProjectDetail,
     ResearchProjectDetailTranslation, Publication, PublicationTranslation,
-    PublicationAuthor, Award, AwardTranslation
+    PublicationAuthor, Award, AwardTranslation,
+    RecentUpdate, RecentUpdateTranslation
 )
 from ..parsers import ParserFactory, ParsedContentCollection
 from ..utils.config import ConfigManager
@@ -74,7 +75,8 @@ class AdvancedDatabaseSyncCommand:
             'experience': 0,
             'research': 0,
             'publications': 0,
-            'awards': 0
+            'awards': 0,
+            'recent_updates': 0
         }
     
     def execute(self) -> bool:
@@ -111,7 +113,7 @@ class AdvancedDatabaseSyncCommand:
         try:
             analysis_results = {}
             
-            content_types = ['resume', 'projects', 'blog', 'ideas', 'education', 'experience', 'research']
+            content_types = ['resume', 'projects', 'blog', 'ideas', 'education', 'experience', 'research', 'recent_updates']
             
             for content_type in content_types:
                 content_path = self.content_dir / content_type
@@ -161,17 +163,17 @@ class AdvancedDatabaseSyncCommand:
                     console=console,
                 ) as progress:
                     
-                    # Sync different content types
+                    # Sync different content types with proper structure detection
                     content_types = {
                         'resume': self._sync_resume_content,
-                        'projects': self._sync_projects_content,
                         'blog': self._sync_blog_content,
-                        'ideas': self._sync_ideas_content,
                         'education': self._sync_education_content,
                         'experience': self._sync_experience_content,
-                        'research': self._sync_research_content
+                        'research': self._sync_research_content,
+                        'recent_updates': self._sync_recent_updates_content
                     }
                     
+                    # Handle file-based content types
                     for content_type, sync_method in content_types.items():
                         content_path = self.content_dir / content_type
                         if content_path.exists():
@@ -189,6 +191,31 @@ class AdvancedDatabaseSyncCommand:
                                 traceback.print_exc()
                             
                             progress.update(task, completed=len(files))
+                    
+                    # Handle folder-based content types (projects and ideas)
+                    folder_content_types = {
+                        'projects': self._sync_projects_folders,
+                        'ideas': self._sync_ideas_folders
+                    }
+                    
+                    for content_type, sync_method in folder_content_types.items():
+                        content_path = self.content_dir / content_type
+                        if content_path.exists():
+                            task = progress.add_task(f"Syncing {content_type}...", total=None)
+                            
+                            # Find project/idea folders (directories with README.md or config.yaml)
+                            folders = self._find_content_folders(content_path)
+                            progress.update(task, total=len(folders))
+                            
+                            try:
+                                result = sync_method(session, user, folders, progress, task)
+                                console.print(f"[green]✅ {content_type.title()}: {result['created']} created, {result['updated']} updated[/green]")
+                            except Exception as e:
+                                console.print(f"[red]❌ Error syncing {content_type}: {e}[/red]")
+                                import traceback
+                                traceback.print_exc()
+                            
+                            progress.update(task, completed=len(folders))
                 
                 # Display final summary
                 self._display_sync_summary()
@@ -254,6 +281,10 @@ class AdvancedDatabaseSyncCommand:
                 # Sync research experience
                 if 'research' in extracted.metadata:
                     self._sync_research_projects(session, user, extracted.metadata['research'])
+                
+                # Sync recent updates
+                if 'recent_updates' in extracted.metadata:
+                    self._sync_recent_updates_from_resume(session, user, extracted.metadata['recent_updates'])
                 
                 session.commit()
                 progress.advance(task_id)
@@ -538,6 +569,271 @@ class AdvancedDatabaseSyncCommand:
         self.created_entities['research'] += results['created']
         return results
     
+    def _sync_recent_updates_content(self, session: Session, user: User, files: List[Path], progress: Progress, task_id) -> Dict[str, int]:
+        """Sync recent updates content"""
+        results = {'created': 0, 'updated': 0, 'errors': 0}
+        
+        for file_path in files:
+            try:
+                extracted = self.parser_factory.parse_file_with_auto_detection(file_path, self.content_dir)
+                if not extracted or extracted.content_type != 'recent_update':
+                    continue
+                
+                update_data = extracted.main_entity
+                
+                # Check if recent update exists
+                existing_update = session.execute(
+                    select(RecentUpdate).where(
+                        RecentUpdate.title == update_data['title'],
+                        RecentUpdate.user_id == user.id
+                    )
+                ).scalar_one_or_none()
+                
+                if existing_update:
+                    # Update existing
+                    for key, value in update_data.items():
+                        if hasattr(existing_update, key) and value is not None:
+                            setattr(existing_update, key, value)
+                    results['updated'] += 1
+                else:
+                    # Create new
+                    recent_update = RecentUpdate.from_parsed_data(update_data, user.id)
+                    session.add(recent_update)
+                    results['created'] += 1
+                
+                session.commit()
+                progress.advance(task_id)
+                
+            except Exception as e:
+                console.print(f"[red]❌ Error processing recent update {file_path}: {e}[/red]")
+                results['errors'] += 1
+                session.rollback()
+                progress.advance(task_id)
+        
+        self.created_entities['recent_updates'] += results['created']
+        return results
+    
+    def _find_content_folders(self, content_path: Path) -> List[Path]:
+        """Find content folders that contain README.md or config.yaml"""
+        folders = []
+        
+        for item in content_path.iterdir():
+            if item.is_dir():
+                # Check if this folder has content files
+                has_readme = (item / "README.md").exists()
+                has_config = (item / "config.yaml").exists()
+                
+                if has_readme or has_config:
+                    folders.append(item)
+        
+        return folders
+    
+    def _sync_projects_folders(self, session: Session, user: User, folders: List[Path], progress: Progress, task_id) -> Dict[str, int]:
+        """Sync project folders with proper project details and technologies"""
+        results = {'created': 0, 'updated': 0, 'errors': 0}
+        
+        # Create project parser
+        project_parser = self.parser_factory.create_parser(self.content_dir, 'project')
+        
+        for folder_path in folders:
+            try:
+                # Parse project folder
+                extracted = project_parser.parse_folder(folder_path)
+                if not extracted or extracted.content_type != 'project':
+                    continue
+                
+                project_data = extracted.main_entity
+                
+                # Ensure required fields have values
+                if not project_data.get('title'):
+                    project_data['title'] = folder_path.name.replace('-', ' ').title()
+                
+                if not project_data.get('slug') or project_data.get('slug') == 'untitled':
+                    project_data['slug'] = folder_path.name
+                
+                if not project_data.get('description'):
+                    project_data['description'] = f"Project: {project_data['title']}"
+                
+                # Map status to uppercase for database enum
+                if 'status' in project_data and project_data['status']:
+                    project_data['status'] = self._map_project_status(project_data['status'])
+                
+                # Convert date strings to date objects
+                from datetime import datetime, date
+                for date_field in ['start_date', 'end_date']:
+                    if date_field in project_data and isinstance(project_data[date_field], str):
+                        try:
+                            project_data[date_field] = datetime.strptime(project_data[date_field], '%Y-%m-%d').date()
+                        except (ValueError, TypeError):
+                            project_data[date_field] = None
+                
+                # Check if project exists
+                existing_project = session.execute(
+                    select(Project).where(Project.slug == project_data['slug'], Project.user_id == user.id)
+                ).scalar_one_or_none()
+                
+                if existing_project:
+                    # Update existing
+                    for key, value in project_data.items():
+                        if hasattr(existing_project, key) and value is not None:
+                            setattr(existing_project, key, value)
+                    project = existing_project
+                    results['updated'] += 1
+                else:
+                    # Create new
+                    project = Project(user_id=user.id, **project_data)
+                    session.add(project)
+                    results['created'] += 1
+                
+                session.flush()  # Get project.id
+                
+                # Sync project details
+                if 'details' in extracted.metadata:
+                    self._sync_project_details(session, project, extracted.metadata['details'])
+                
+                # Sync technologies
+                if extracted.technologies:
+                    self._sync_project_technologies(session, project, extracted.technologies)
+                
+                session.commit()
+                progress.advance(task_id)
+                
+            except Exception as e:
+                console.print(f"[red]❌ Error processing project folder {folder_path}: {e}[/red]")
+                results['errors'] += 1
+                session.rollback()
+                progress.advance(task_id)
+        
+        self.created_entities['projects'] += results['created']
+        return results
+    
+    def _sync_ideas_folders(self, session: Session, user: User, folders: List[Path], progress: Progress, task_id) -> Dict[str, int]:
+        """Sync idea folders"""
+        results = {'created': 0, 'updated': 0, 'errors': 0}
+        
+        # Create idea parser
+        idea_parser = self.parser_factory.create_parser(self.content_dir, 'idea')
+        
+        for folder_path in folders:
+            try:
+                # Parse idea folder
+                extracted = idea_parser.parse_folder(folder_path)
+                if not extracted or extracted.content_type != 'idea':
+                    continue
+                
+                idea_data = extracted.main_entity
+                
+                # Ensure required fields have values
+                if not idea_data.get('title'):
+                    idea_data['title'] = folder_path.name.replace('-', ' ').title()
+                
+                # Generate unique slug from folder name (not title)
+                if not idea_data.get('slug') or idea_data.get('slug') == 'untitled':
+                    idea_data['slug'] = folder_path.name
+                
+                if not idea_data.get('abstract'):
+                    idea_data['abstract'] = idea_data.get('description', f"Idea: {idea_data['title']}")
+                
+                # Map status and priority to uppercase for database enum
+                if 'status' in idea_data and idea_data['status']:
+                    idea_data['status'] = self._map_idea_status(idea_data['status'])
+                
+                if 'priority' in idea_data and idea_data['priority']:
+                    idea_data['priority'] = self._map_idea_priority(idea_data['priority'])
+                
+                # Convert complex types to strings
+                for field in ['methodology', 'expected_outcome', 'required_resources']:
+                    if field in idea_data and isinstance(idea_data[field], (dict, list)):
+                        if isinstance(idea_data[field], dict):
+                            # Convert dict to a readable string format
+                            idea_data[field] = '\n'.join([f"{k}: {v}" for k, v in idea_data[field].items()])
+                        else:
+                            # Convert list to comma-separated string
+                            idea_data[field] = ', '.join(str(item) for item in idea_data[field])
+                
+                # Set default values for required fields ONLY if they are missing or empty
+                defaults = {
+                    'methodology': '',
+                    'expected_outcome': '',
+                    'required_resources': '',
+                    'motivation': '',  # ADD MOTIVATION DEFAULT
+                    'status': 'DRAFT',
+                    'priority': 'MEDIUM',
+                    'collaboration_needed': False,
+                    'funding_required': False,
+                    'is_public': True,
+                    'estimated_duration_months': 0
+                }
+                
+                for key, default_value in defaults.items():
+                    if key not in idea_data or idea_data[key] is None or idea_data[key] == '':
+                        # Special handling for motivation - don't override if it has content
+                        if key == 'motivation' and idea_data.get('motivation'):
+                            continue
+                        idea_data[key] = default_value
+                
+                # Check if idea exists (by slug not title)
+                existing_idea = session.execute(
+                    select(Idea).where(Idea.slug == idea_data['slug'], Idea.user_id == user.id)
+                ).scalar_one_or_none()
+                
+                if existing_idea:
+                    # Update existing
+                    for key, value in idea_data.items():
+                        if hasattr(existing_idea, key) and value is not None:
+                            setattr(existing_idea, key, value)
+                    results['updated'] += 1
+                else:
+                    # Create new
+                    idea = Idea(user_id=user.id, **idea_data)
+                    session.add(idea)
+                    results['created'] += 1
+                
+                session.commit()
+                progress.advance(task_id)
+                
+            except Exception as e:
+                console.print(f"[red]❌ Error processing idea folder {folder_path}: {e}[/red]")
+                results['errors'] += 1
+                session.rollback()
+                progress.advance(task_id)
+        
+        self.created_entities['ideas'] += results['created']
+        return results
+    
+    def _map_project_status(self, status: str) -> str:
+        """Map project status to database enum values"""
+        status_mapping = {
+            'active': 'ACTIVE',
+            'completed': 'COMPLETED', 
+            'paused': 'PAUSED',
+            'cancelled': 'CANCELLED',
+            'planning': 'ACTIVE'  # Map planning to active
+        }
+        return status_mapping.get(status.lower(), 'ACTIVE')
+    
+    def _map_idea_status(self, status: str) -> str:
+        """Map idea status to database enum values"""
+        status_mapping = {
+            'draft': 'DRAFT',
+            'hypothesis': 'HYPOTHESIS',
+            'experimenting': 'EXPERIMENTING',
+            'validating': 'VALIDATING',
+            'published': 'PUBLISHED',
+            'concluded': 'CONCLUDED'
+        }
+        return status_mapping.get(status.lower(), 'DRAFT')
+    
+    def _map_idea_priority(self, priority: str) -> str:
+        """Map idea priority to database enum values"""
+        priority_mapping = {
+            'low': 'LOW',
+            'medium': 'MEDIUM',
+            'high': 'HIGH',
+            'urgent': 'URGENT'
+        }
+        return priority_mapping.get(priority.lower(), 'MEDIUM')
+
     # Helper methods for syncing related data
     
     def _sync_social_links(self, session: Session, personal_info: PersonalInfo, social_links_data: List[Dict[str, Any]]):
@@ -631,6 +927,9 @@ class AdvancedDatabaseSyncCommand:
     def _sync_publications(self, session: Session, user: User, publications_data: List[Dict[str, Any]]):
         """Sync publications from resume"""
         for pub_data in publications_data:
+            # Extract authors separately - they go in a different table
+            authors_data = pub_data.pop('authors', []) if isinstance(pub_data.get('authors'), list) else []
+            
             existing = session.execute(
                 select(Publication).where(
                     Publication.title == pub_data['title'],
@@ -642,6 +941,18 @@ class AdvancedDatabaseSyncCommand:
                 publication = Publication(user_id=user.id, **pub_data)
                 session.add(publication)
                 session.flush()  # Force immediate ID generation
+                
+                # Add authors to the PublicationAuthor table
+                for i, author_name in enumerate(authors_data):
+                    if author_name.strip():
+                        author = PublicationAuthor(
+                            publication_id=publication.id,
+                            author_name=author_name.strip(),
+                            author_order=i + 1,
+                            is_corresponding=False
+                        )
+                        session.add(author)
+                
                 self.created_entities['publications'] += 1
     
     def _sync_awards(self, session: Session, user: User, awards_data: List[Dict[str, Any]]):
@@ -698,6 +1009,22 @@ class AdvancedDatabaseSyncCommand:
                 )
                 session.add(detail)
                 session.flush()
+    
+    def _sync_recent_updates_from_resume(self, session: Session, user: User, recent_updates_data: List[Dict[str, Any]]):
+        """Sync recent updates from resume content"""
+        for update_data in recent_updates_data:
+            existing = session.execute(
+                select(RecentUpdate).where(
+                    RecentUpdate.title == update_data['title'],
+                    RecentUpdate.user_id == user.id
+                )
+            ).scalar_one_or_none()
+            
+            if not existing:
+                recent_update = RecentUpdate.from_parsed_data(update_data, user.id)
+                session.add(recent_update)
+                session.flush()
+                self.created_entities['recent_updates'] += 1
     
     def _sync_project_details(self, session: Session, project: Project, details_data: List[Dict[str, Any]]):
         """Sync project details"""
@@ -765,13 +1092,13 @@ class AdvancedDatabaseSyncCommand:
         languages = []
         
         default_languages = [
-            {'code': 'en', 'name': 'English', 'native_name': 'English'},
-            {'code': 'zh', 'name': 'Chinese', 'native_name': '中文'}
+            {'id': 'en', 'name': 'English', 'native_name': 'English'},
+            {'id': 'zh', 'name': 'Chinese', 'native_name': '中文'}
         ]
         
         for lang_data in default_languages:
             existing = session.execute(
-                select(Language).where(Language.code == lang_data['code'])
+                select(Language).where(Language.id == lang_data['id'])
             ).scalar_one_or_none()
             
             if not existing:

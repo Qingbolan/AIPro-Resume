@@ -77,20 +77,6 @@ func (pitc *ProjectImageTranslationCreate) SetNillableCreatedAt(t *time.Time) *P
 	return pitc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pitc *ProjectImageTranslationCreate) SetUpdatedAt(t time.Time) *ProjectImageTranslationCreate {
-	pitc.mutation.SetUpdatedAt(t)
-	return pitc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pitc *ProjectImageTranslationCreate) SetNillableUpdatedAt(t *time.Time) *ProjectImageTranslationCreate {
-	if t != nil {
-		pitc.SetUpdatedAt(*t)
-	}
-	return pitc
-}
-
 // SetID sets the "id" field.
 func (pitc *ProjectImageTranslationCreate) SetID(u uuid.UUID) *ProjectImageTranslationCreate {
 	pitc.mutation.SetID(u)
@@ -160,10 +146,6 @@ func (pitc *ProjectImageTranslationCreate) defaults() {
 		v := projectimagetranslation.DefaultCreatedAt()
 		pitc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := pitc.mutation.UpdatedAt(); !ok {
-		v := projectimagetranslation.DefaultUpdatedAt()
-		pitc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := pitc.mutation.ID(); !ok {
 		v := projectimagetranslation.DefaultID()
 		pitc.mutation.SetID(v)
@@ -190,9 +172,6 @@ func (pitc *ProjectImageTranslationCreate) check() error {
 	}
 	if _, ok := pitc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ProjectImageTranslation.created_at"`)}
-	}
-	if _, ok := pitc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ProjectImageTranslation.updated_at"`)}
 	}
 	if len(pitc.mutation.ProjectImageIDs()) == 0 {
 		return &ValidationError{Name: "project_image", err: errors.New(`ent: missing required edge "ProjectImageTranslation.project_image"`)}
@@ -246,10 +225,6 @@ func (pitc *ProjectImageTranslationCreate) createSpec() (*ProjectImageTranslatio
 	if value, ok := pitc.mutation.CreatedAt(); ok {
 		_spec.SetField(projectimagetranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := pitc.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectimagetranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := pitc.mutation.ProjectImageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

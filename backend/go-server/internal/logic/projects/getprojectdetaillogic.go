@@ -2,7 +2,6 @@ package projects
 
 import (
 	"context"
-	"fmt"
 
 	"silan-backend/internal/ent/project"
 	"silan-backend/internal/svc"
@@ -33,47 +32,90 @@ func (l *GetProjectDetailLogic) GetProjectDetail(req *types.ProjectDetailRequest
 		return nil, err
 	}
 
+	// Fetch project with all related data including details
 	proj, err := l.svcCtx.DB.Project.Query().
 		Where(project.ID(projectUUID)).
+		Where(project.IsPublic(true)).
+		WithUser().
+		WithTechnologies().
 		WithDetails().
+		WithImages().
 		First(l.ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if proj.Edges.Details == nil {
-		return nil, fmt.Errorf("project detail not found")
+	// Get basic project information
+	var startDate, endDate string
+	if !proj.StartDate.IsZero() {
+		startDate = proj.StartDate.Format("2006-01-02")
 	}
-
-	detail := proj.Edges.Details
+	if !proj.EndDate.IsZero() {
+		endDate = proj.EndDate.Format("2006-01-02")
+	}
 
 	// Parse timeline
 	var timeline types.ProjectTimeline
-	if !proj.StartDate.IsZero() {
-		timeline.Start = proj.StartDate.Format("2006-01-02")
+	timeline.Start = startDate
+	timeline.End = endDate
+	if startDate != "" && endDate != "" {
+		timeline.Duration = "Completed"
+	} else if startDate != "" {
+		timeline.Duration = "In Progress"
+	} else {
+		timeline.Duration = ""
 	}
-	if !proj.EndDate.IsZero() {
-		timeline.End = proj.EndDate.Format("2006-01-02")
-	}
-	// Set duration based on start and end dates
-	timeline.Duration = ""
 
-	// Parse metrics - these would need to be calculated or stored separately
+	// Parse metrics
 	var metrics types.ProjectMetrics
-	// Initialize with default values since these fields don't exist in the schema
-	metrics.LinesOfCode = 0
+	metrics.LinesOfCode = 0 // These could be calculated from git repos
 	metrics.Commits = 0
-	metrics.Stars = 0
+	metrics.Stars = proj.StarCount
 	metrics.Downloads = 0
 
+	// Create detail information
+	var detailID string
+	var detailedDescription, goals, challenges, solutions, lessonsLearned, futureEnhancements, license, version string
+	var createdAt, updatedAt string
+
+	if proj.Edges.Details != nil {
+		detail := proj.Edges.Details
+		detailID = detail.ID.String()
+		detailedDescription = detail.DetailedDescription
+		goals = detail.Goals
+		challenges = detail.Challenges
+		solutions = detail.Solutions
+		lessonsLearned = detail.LessonsLearned
+		futureEnhancements = detail.FutureEnhancements
+		license = detail.License
+		version = detail.Version
+		createdAt = detail.CreatedAt.Format("2006-01-02 15:04:05")
+		updatedAt = detail.UpdatedAt.Format("2006-01-02 15:04:05")
+	} else {
+		// Use project info as fallback
+		detailID = proj.ID.String()
+		detailedDescription = proj.Description
+		license = "MIT"
+		version = "1.0.0"
+		createdAt = proj.CreatedAt.Format("2006-01-02 15:04:05")
+		updatedAt = proj.UpdatedAt.Format("2006-01-02 15:04:05")
+	}
+
 	return &types.ProjectDetail{
-		ID:                  detail.ID.String(),
-		ProjectID:           proj.ID.String(), // Use project ID from parent
-		DetailedDescription: detail.DetailedDescription,
+		ID:                  detailID,
+		ProjectID:           proj.ID.String(),
+		DetailedDescription: detailedDescription,
+		Goals:               goals,
+		Challenges:          challenges,
+		Solutions:           solutions,
+		LessonsLearned:      lessonsLearned,
+		FutureEnhancements:  futureEnhancements,
+		License:             license,
+		Version:             version,
 		Timeline:            timeline,
 		Metrics:             metrics,
 		RelatedBlogs:        []types.ProjectBlogRef{}, // This would need to be implemented
-		CreatedAt:           detail.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:           detail.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:           createdAt,
+		UpdatedAt:           updatedAt,
 	}, nil
 }

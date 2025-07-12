@@ -90,9 +90,9 @@ export const OptimizedResumeComponent: React.FC<OptimizedResumeProps> = ({ langu
           <div>Loading...</div>
         ) : personalInfo ? (
           <div>
-            <h3 className="text-xl">{personalInfo.name}</h3>
+            <h3 className="text-xl">{personalInfo.full_name}</h3>
             <p className="text-lg text-gray-600">{personalInfo.title}</p>
-            <p className="text-sm text-gray-500">{personalInfo.current}</p>
+            <p className="text-sm text-gray-500">{personalInfo.current_status || personalInfo.location}</p>
           </div>
         ) : null}
       </section>
@@ -113,9 +113,14 @@ export const OptimizedResumeComponent: React.FC<OptimizedResumeProps> = ({ langu
         </div>
         {education.map((edu, index) => (
           <div key={index} className="education-item mb-4 p-4 border rounded">
-            <h3 className="font-semibold">{edu.school}</h3>
+            <h3 className="font-semibold">{edu.institution}</h3>
             <p className="text-gray-600">{edu.degree}</p>
-            <p className="text-sm text-gray-500">{edu.date}</p>
+            <p className="text-sm text-gray-500">
+              {edu.is_current 
+                ? `${edu.start_date} - Present`
+                : `${edu.start_date} - ${edu.end_date || ''}`}
+            </p>
+            {edu.location && <p className="text-sm text-gray-500">{edu.location}</p>}
           </div>
         ))}
       </section>
@@ -137,9 +142,13 @@ export const OptimizedResumeComponent: React.FC<OptimizedResumeProps> = ({ langu
         {experience.map((exp, index) => (
           <div key={index} className="experience-item mb-4 p-4 border rounded">
             <h3 className="font-semibold">{exp.company}</h3>
-            <p className="text-gray-600">{exp.role}</p>
-            <p className="text-sm text-gray-500">{exp.date}</p>
-            <p className="text-sm text-gray-500">{exp.location}</p>
+            <p className="text-gray-600">{exp.position}</p>
+            <p className="text-sm text-gray-500">
+              {exp.is_current 
+                ? `${exp.start_date} - Present`
+                : `${exp.start_date} - ${exp.end_date || ''}`}
+            </p>
+            {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
           </div>
         ))}
       </section>
@@ -158,7 +167,7 @@ export const OptimizedResumeComponent: React.FC<OptimizedResumeProps> = ({ langu
             </button>
           )}
         </div>
-        {recentUpdates.map((update, index) => (
+        {recentUpdates.map((update) => (
           <div key={update.id} className="update-item mb-4 p-4 border rounded">
             <h3 className="font-semibold">{update.title}</h3>
             <p className="text-gray-600">{update.description}</p>

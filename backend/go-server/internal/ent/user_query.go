@@ -15,6 +15,7 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/project"
 	"silan-backend/internal/ent/publication"
+	"silan-backend/internal/ent/recentupdate"
 	"silan-backend/internal/ent/researchproject"
 	"silan-backend/internal/ent/user"
 	"silan-backend/internal/ent/workexperience"
@@ -33,15 +34,16 @@ type UserQuery struct {
 	order                []user.OrderOption
 	inters               []Interceptor
 	predicates           []predicate.User
-	withPersonalInfo     *PersonalInfoQuery
-	withEducation        *EducationQuery
-	withWorkExperience   *WorkExperienceQuery
+	withPersonalInfos    *PersonalInfoQuery
+	withEducations       *EducationQuery
+	withWorkExperiences  *WorkExperienceQuery
 	withProjects         *ProjectQuery
 	withBlogPosts        *BlogPostQuery
 	withIdeas            *IdeaQuery
 	withResearchProjects *ResearchProjectQuery
 	withPublications     *PublicationQuery
 	withAwards           *AwardQuery
+	withRecentUpdates    *RecentUpdateQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,8 +80,8 @@ func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	return uq
 }
 
-// QueryPersonalInfo chains the current query on the "personal_info" edge.
-func (uq *UserQuery) QueryPersonalInfo() *PersonalInfoQuery {
+// QueryPersonalInfos chains the current query on the "personal_infos" edge.
+func (uq *UserQuery) QueryPersonalInfos() *PersonalInfoQuery {
 	query := (&PersonalInfoClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -92,7 +94,7 @@ func (uq *UserQuery) QueryPersonalInfo() *PersonalInfoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(personalinfo.Table, personalinfo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.PersonalInfoTable, user.PersonalInfoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PersonalInfosTable, user.PersonalInfosColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -100,8 +102,8 @@ func (uq *UserQuery) QueryPersonalInfo() *PersonalInfoQuery {
 	return query
 }
 
-// QueryEducation chains the current query on the "education" edge.
-func (uq *UserQuery) QueryEducation() *EducationQuery {
+// QueryEducations chains the current query on the "educations" edge.
+func (uq *UserQuery) QueryEducations() *EducationQuery {
 	query := (&EducationClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -114,7 +116,7 @@ func (uq *UserQuery) QueryEducation() *EducationQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(education.Table, education.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.EducationTable, user.EducationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.EducationsTable, user.EducationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -122,8 +124,8 @@ func (uq *UserQuery) QueryEducation() *EducationQuery {
 	return query
 }
 
-// QueryWorkExperience chains the current query on the "work_experience" edge.
-func (uq *UserQuery) QueryWorkExperience() *WorkExperienceQuery {
+// QueryWorkExperiences chains the current query on the "work_experiences" edge.
+func (uq *UserQuery) QueryWorkExperiences() *WorkExperienceQuery {
 	query := (&WorkExperienceClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -136,7 +138,7 @@ func (uq *UserQuery) QueryWorkExperience() *WorkExperienceQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(workexperience.Table, workexperience.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkExperienceTable, user.WorkExperienceColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkExperiencesTable, user.WorkExperiencesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,6 +271,28 @@ func (uq *UserQuery) QueryAwards() *AwardQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(award.Table, award.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.AwardsTable, user.AwardsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRecentUpdates chains the current query on the "recent_updates" edge.
+func (uq *UserQuery) QueryRecentUpdates() *RecentUpdateQuery {
+	query := (&RecentUpdateClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(recentupdate.Table, recentupdate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RecentUpdatesTable, user.RecentUpdatesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -468,51 +492,52 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:                append([]user.OrderOption{}, uq.order...),
 		inters:               append([]Interceptor{}, uq.inters...),
 		predicates:           append([]predicate.User{}, uq.predicates...),
-		withPersonalInfo:     uq.withPersonalInfo.Clone(),
-		withEducation:        uq.withEducation.Clone(),
-		withWorkExperience:   uq.withWorkExperience.Clone(),
+		withPersonalInfos:    uq.withPersonalInfos.Clone(),
+		withEducations:       uq.withEducations.Clone(),
+		withWorkExperiences:  uq.withWorkExperiences.Clone(),
 		withProjects:         uq.withProjects.Clone(),
 		withBlogPosts:        uq.withBlogPosts.Clone(),
 		withIdeas:            uq.withIdeas.Clone(),
 		withResearchProjects: uq.withResearchProjects.Clone(),
 		withPublications:     uq.withPublications.Clone(),
 		withAwards:           uq.withAwards.Clone(),
+		withRecentUpdates:    uq.withRecentUpdates.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
 }
 
-// WithPersonalInfo tells the query-builder to eager-load the nodes that are connected to
-// the "personal_info" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithPersonalInfo(opts ...func(*PersonalInfoQuery)) *UserQuery {
+// WithPersonalInfos tells the query-builder to eager-load the nodes that are connected to
+// the "personal_infos" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithPersonalInfos(opts ...func(*PersonalInfoQuery)) *UserQuery {
 	query := (&PersonalInfoClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withPersonalInfo = query
+	uq.withPersonalInfos = query
 	return uq
 }
 
-// WithEducation tells the query-builder to eager-load the nodes that are connected to
-// the "education" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithEducation(opts ...func(*EducationQuery)) *UserQuery {
+// WithEducations tells the query-builder to eager-load the nodes that are connected to
+// the "educations" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithEducations(opts ...func(*EducationQuery)) *UserQuery {
 	query := (&EducationClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withEducation = query
+	uq.withEducations = query
 	return uq
 }
 
-// WithWorkExperience tells the query-builder to eager-load the nodes that are connected to
-// the "work_experience" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithWorkExperience(opts ...func(*WorkExperienceQuery)) *UserQuery {
+// WithWorkExperiences tells the query-builder to eager-load the nodes that are connected to
+// the "work_experiences" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWorkExperiences(opts ...func(*WorkExperienceQuery)) *UserQuery {
 	query := (&WorkExperienceClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withWorkExperience = query
+	uq.withWorkExperiences = query
 	return uq
 }
 
@@ -579,6 +604,17 @@ func (uq *UserQuery) WithAwards(opts ...func(*AwardQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withAwards = query
+	return uq
+}
+
+// WithRecentUpdates tells the query-builder to eager-load the nodes that are connected to
+// the "recent_updates" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRecentUpdates(opts ...func(*RecentUpdateQuery)) *UserQuery {
+	query := (&RecentUpdateClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRecentUpdates = query
 	return uq
 }
 
@@ -660,16 +696,17 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [9]bool{
-			uq.withPersonalInfo != nil,
-			uq.withEducation != nil,
-			uq.withWorkExperience != nil,
+		loadedTypes = [10]bool{
+			uq.withPersonalInfos != nil,
+			uq.withEducations != nil,
+			uq.withWorkExperiences != nil,
 			uq.withProjects != nil,
 			uq.withBlogPosts != nil,
 			uq.withIdeas != nil,
 			uq.withResearchProjects != nil,
 			uq.withPublications != nil,
 			uq.withAwards != nil,
+			uq.withRecentUpdates != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -690,24 +727,24 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := uq.withPersonalInfo; query != nil {
-		if err := uq.loadPersonalInfo(ctx, query, nodes,
-			func(n *User) { n.Edges.PersonalInfo = []*PersonalInfo{} },
-			func(n *User, e *PersonalInfo) { n.Edges.PersonalInfo = append(n.Edges.PersonalInfo, e) }); err != nil {
+	if query := uq.withPersonalInfos; query != nil {
+		if err := uq.loadPersonalInfos(ctx, query, nodes,
+			func(n *User) { n.Edges.PersonalInfos = []*PersonalInfo{} },
+			func(n *User, e *PersonalInfo) { n.Edges.PersonalInfos = append(n.Edges.PersonalInfos, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withEducation; query != nil {
-		if err := uq.loadEducation(ctx, query, nodes,
-			func(n *User) { n.Edges.Education = []*Education{} },
-			func(n *User, e *Education) { n.Edges.Education = append(n.Edges.Education, e) }); err != nil {
+	if query := uq.withEducations; query != nil {
+		if err := uq.loadEducations(ctx, query, nodes,
+			func(n *User) { n.Edges.Educations = []*Education{} },
+			func(n *User, e *Education) { n.Edges.Educations = append(n.Edges.Educations, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withWorkExperience; query != nil {
-		if err := uq.loadWorkExperience(ctx, query, nodes,
-			func(n *User) { n.Edges.WorkExperience = []*WorkExperience{} },
-			func(n *User, e *WorkExperience) { n.Edges.WorkExperience = append(n.Edges.WorkExperience, e) }); err != nil {
+	if query := uq.withWorkExperiences; query != nil {
+		if err := uq.loadWorkExperiences(ctx, query, nodes,
+			func(n *User) { n.Edges.WorkExperiences = []*WorkExperience{} },
+			func(n *User, e *WorkExperience) { n.Edges.WorkExperiences = append(n.Edges.WorkExperiences, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -753,10 +790,17 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withRecentUpdates; query != nil {
+		if err := uq.loadRecentUpdates(ctx, query, nodes,
+			func(n *User) { n.Edges.RecentUpdates = []*RecentUpdate{} },
+			func(n *User, e *RecentUpdate) { n.Edges.RecentUpdates = append(n.Edges.RecentUpdates, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
-func (uq *UserQuery) loadPersonalInfo(ctx context.Context, query *PersonalInfoQuery, nodes []*User, init func(*User), assign func(*User, *PersonalInfo)) error {
+func (uq *UserQuery) loadPersonalInfos(ctx context.Context, query *PersonalInfoQuery, nodes []*User, init func(*User), assign func(*User, *PersonalInfo)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -770,7 +814,7 @@ func (uq *UserQuery) loadPersonalInfo(ctx context.Context, query *PersonalInfoQu
 		query.ctx.AppendFieldOnce(personalinfo.FieldUserID)
 	}
 	query.Where(predicate.PersonalInfo(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.PersonalInfoColumn), fks...))
+		s.Where(sql.InValues(s.C(user.PersonalInfosColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -786,7 +830,7 @@ func (uq *UserQuery) loadPersonalInfo(ctx context.Context, query *PersonalInfoQu
 	}
 	return nil
 }
-func (uq *UserQuery) loadEducation(ctx context.Context, query *EducationQuery, nodes []*User, init func(*User), assign func(*User, *Education)) error {
+func (uq *UserQuery) loadEducations(ctx context.Context, query *EducationQuery, nodes []*User, init func(*User), assign func(*User, *Education)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -800,7 +844,7 @@ func (uq *UserQuery) loadEducation(ctx context.Context, query *EducationQuery, n
 		query.ctx.AppendFieldOnce(education.FieldUserID)
 	}
 	query.Where(predicate.Education(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.EducationColumn), fks...))
+		s.Where(sql.InValues(s.C(user.EducationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -816,7 +860,7 @@ func (uq *UserQuery) loadEducation(ctx context.Context, query *EducationQuery, n
 	}
 	return nil
 }
-func (uq *UserQuery) loadWorkExperience(ctx context.Context, query *WorkExperienceQuery, nodes []*User, init func(*User), assign func(*User, *WorkExperience)) error {
+func (uq *UserQuery) loadWorkExperiences(ctx context.Context, query *WorkExperienceQuery, nodes []*User, init func(*User), assign func(*User, *WorkExperience)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -830,7 +874,7 @@ func (uq *UserQuery) loadWorkExperience(ctx context.Context, query *WorkExperien
 		query.ctx.AppendFieldOnce(workexperience.FieldUserID)
 	}
 	query.Where(predicate.WorkExperience(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.WorkExperienceColumn), fks...))
+		s.Where(sql.InValues(s.C(user.WorkExperiencesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1011,6 +1055,36 @@ func (uq *UserQuery) loadAwards(ctx context.Context, query *AwardQuery, nodes []
 	}
 	query.Where(predicate.Award(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AwardsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadRecentUpdates(ctx context.Context, query *RecentUpdateQuery, nodes []*User, init func(*User), assign func(*User, *RecentUpdate)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(recentupdate.FieldUserID)
+	}
+	query.Where(predicate.RecentUpdate(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RecentUpdatesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -65,9 +65,11 @@ type LanguageEdges struct {
 	PublicationTranslations []*PublicationTranslation `json:"publication_translations,omitempty"`
 	// AwardTranslations holds the value of the award_translations edge.
 	AwardTranslations []*AwardTranslation `json:"award_translations,omitempty"`
+	// RecentUpdateTranslations holds the value of the recent_update_translations edge.
+	RecentUpdateTranslations []*RecentUpdateTranslation `json:"recent_update_translations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [16]bool
+	loadedTypes [17]bool
 }
 
 // PersonalInfoTranslationsOrErr returns the PersonalInfoTranslations value or an error if the edge
@@ -212,6 +214,15 @@ func (e LanguageEdges) AwardTranslationsOrErr() ([]*AwardTranslation, error) {
 		return e.AwardTranslations, nil
 	}
 	return nil, &NotLoadedError{edge: "award_translations"}
+}
+
+// RecentUpdateTranslationsOrErr returns the RecentUpdateTranslations value or an error if the edge
+// was not loaded in eager-loading.
+func (e LanguageEdges) RecentUpdateTranslationsOrErr() ([]*RecentUpdateTranslation, error) {
+	if e.loadedTypes[16] {
+		return e.RecentUpdateTranslations, nil
+	}
+	return nil, &NotLoadedError{edge: "recent_update_translations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -361,6 +372,11 @@ func (l *Language) QueryPublicationTranslations() *PublicationTranslationQuery {
 // QueryAwardTranslations queries the "award_translations" edge of the Language entity.
 func (l *Language) QueryAwardTranslations() *AwardTranslationQuery {
 	return NewLanguageClient(l.config).QueryAwardTranslations(l)
+}
+
+// QueryRecentUpdateTranslations queries the "recent_update_translations" edge of the Language entity.
+func (l *Language) QueryRecentUpdateTranslations() *RecentUpdateTranslationQuery {
+	return NewLanguageClient(l.config).QueryRecentUpdateTranslations(l)
 }
 
 // Update returns a builder for updating this Language.

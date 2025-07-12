@@ -89,20 +89,6 @@ func (atc *AwardTranslationCreate) SetNillableCreatedAt(t *time.Time) *AwardTran
 	return atc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (atc *AwardTranslationCreate) SetUpdatedAt(t time.Time) *AwardTranslationCreate {
-	atc.mutation.SetUpdatedAt(t)
-	return atc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (atc *AwardTranslationCreate) SetNillableUpdatedAt(t *time.Time) *AwardTranslationCreate {
-	if t != nil {
-		atc.SetUpdatedAt(*t)
-	}
-	return atc
-}
-
 // SetID sets the "id" field.
 func (atc *AwardTranslationCreate) SetID(u uuid.UUID) *AwardTranslationCreate {
 	atc.mutation.SetID(u)
@@ -172,10 +158,6 @@ func (atc *AwardTranslationCreate) defaults() {
 		v := awardtranslation.DefaultCreatedAt()
 		atc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := atc.mutation.UpdatedAt(); !ok {
-		v := awardtranslation.DefaultUpdatedAt()
-		atc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := atc.mutation.ID(); !ok {
 		v := awardtranslation.DefaultID()
 		atc.mutation.SetID(v)
@@ -218,9 +200,6 @@ func (atc *AwardTranslationCreate) check() error {
 	}
 	if _, ok := atc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AwardTranslation.created_at"`)}
-	}
-	if _, ok := atc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AwardTranslation.updated_at"`)}
 	}
 	if len(atc.mutation.AwardIDs()) == 0 {
 		return &ValidationError{Name: "award", err: errors.New(`ent: missing required edge "AwardTranslation.award"`)}
@@ -282,10 +261,6 @@ func (atc *AwardTranslationCreate) createSpec() (*AwardTranslation, *sqlgraph.Cr
 	if value, ok := atc.mutation.CreatedAt(); ok {
 		_spec.SetField(awardtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := atc.mutation.UpdatedAt(); ok {
-		_spec.SetField(awardtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := atc.mutation.AwardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

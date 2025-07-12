@@ -2,14 +2,18 @@
 
 from sqlalchemy import String, Text, Boolean, DateTime, ForeignKey, Integer, Date, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime, date
 import enum
 
 from .base import Base, TimestampMixin, UUID, generate_uuid
 
+if TYPE_CHECKING:
+    from .user import User, Language
+
 
 class ProjectStatus(enum.Enum):
+    """Project status enumeration - matching Go schema"""
     ACTIVE = "active"
     COMPLETED = "completed"
     PAUSED = "paused"
@@ -38,7 +42,7 @@ class Project(Base, TimestampMixin):
     star_count: Mapped[int] = mapped_column(Integer, default=0)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Relationships
+    # Relationships - matching Go schema edges
     user: Mapped["User"] = relationship(back_populates="projects")
     translations: Mapped[List["ProjectTranslation"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     technologies: Mapped[List["ProjectTechnology"]] = relationship(back_populates="project", cascade="all, delete-orphan")
@@ -57,11 +61,11 @@ class ProjectTranslation(Base):
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
     project_type: Mapped[Optional[str]] = mapped_column(String(50))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     project: Mapped["Project"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="project_translations")
 
 
 class ProjectTechnology(Base):
@@ -72,7 +76,7 @@ class ProjectTechnology(Base):
     technology_name: Mapped[str] = mapped_column(String(100), nullable=False)
     technology_type: Mapped[Optional[str]] = mapped_column(String(50))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     project: Mapped["Project"] = relationship(back_populates="technologies")
@@ -92,12 +96,12 @@ class ProjectDetail(Base, TimestampMixin):
     license: Mapped[Optional[str]] = mapped_column(String(50))
     version: Mapped[Optional[str]] = mapped_column(String(20))
     
-    # Relationships
+    # Relationships - matching Go schema edges
     project: Mapped["Project"] = relationship(back_populates="details")
     translations: Mapped[List["ProjectDetailTranslation"]] = relationship(back_populates="project_detail", cascade="all, delete-orphan")
 
 
-class ProjectDetailTranslation(Base, TimestampMixin):
+class ProjectDetailTranslation(Base):
     __tablename__ = "project_detail_translations"
     
     id: Mapped[str] = mapped_column(UUID, primary_key=True, default=generate_uuid)
@@ -109,10 +113,11 @@ class ProjectDetailTranslation(Base, TimestampMixin):
     solutions: Mapped[Optional[str]] = mapped_column(Text)
     lessons_learned: Mapped[Optional[str]] = mapped_column(Text)
     future_enhancements: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     project_detail: Mapped["ProjectDetail"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="project_detail_translations")
 
 
 class ProjectImage(Base, TimestampMixin):
@@ -123,15 +128,15 @@ class ProjectImage(Base, TimestampMixin):
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
     alt_text: Mapped[Optional[str]] = mapped_column(String(200))
     caption: Mapped[Optional[str]] = mapped_column(Text)
-    image_type: Mapped[Optional[str]] = mapped_column(String(50))  # screenshot, diagram, logo, etc.
+    image_type: Mapped[Optional[str]] = mapped_column(String(50))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Relationships
+    # Relationships - matching Go schema edges
     project: Mapped["Project"] = relationship(back_populates="images")
     translations: Mapped[List["ProjectImageTranslation"]] = relationship(back_populates="project_image", cascade="all, delete-orphan")
 
 
-class ProjectImageTranslation(Base, TimestampMixin):
+class ProjectImageTranslation(Base):
     __tablename__ = "project_image_translations"
     
     id: Mapped[str] = mapped_column(UUID, primary_key=True, default=generate_uuid)
@@ -139,20 +144,22 @@ class ProjectImageTranslation(Base, TimestampMixin):
     language_code: Mapped[str] = mapped_column(String(5), ForeignKey("languages.code"), nullable=False)
     alt_text: Mapped[Optional[str]] = mapped_column(String(200))
     caption: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     project_image: Mapped["ProjectImage"] = relationship(back_populates="translations")
-    language: Mapped["Language"] = relationship()
+    language: Mapped["Language"] = relationship(back_populates="project_image_translations")
 
 
-class ProjectRelationship(Base, TimestampMixin):
+class ProjectRelationship(Base):
     __tablename__ = "project_relationships"
     
     id: Mapped[str] = mapped_column(UUID, primary_key=True, default=generate_uuid)
     source_project_id: Mapped[str] = mapped_column(UUID, ForeignKey("projects.id"), nullable=False)
     target_project_id: Mapped[str] = mapped_column(UUID, ForeignKey("projects.id"), nullable=False)
-    relationship_type: Mapped[str] = mapped_column(String(50), nullable=False)  # depends_on, related_to, fork_of, etc.
+    relationship_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
-    # Relationships
+    # Relationships - matching Go schema edges
     source_project: Mapped["Project"] = relationship(foreign_keys=[source_project_id], back_populates="source_relationships")
     target_project: Mapped["Project"] = relationship(foreign_keys=[target_project_id], back_populates="target_relationships")

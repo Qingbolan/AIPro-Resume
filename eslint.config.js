@@ -14,7 +14,17 @@ export default [
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      // Temporarily disable globals.browser to fix the ESLint error
+      // globals: globals.browser,
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        navigator: 'readonly'
+      },
       parser: tsparser,
       parserOptions: {
         ecmaVersion: 'latest',

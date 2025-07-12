@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/awardtranslation"
 	"silan-backend/internal/ent/language"
 	"silan-backend/internal/ent/predicate"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -127,12 +126,6 @@ func (atu *AwardTranslationUpdate) ClearDescription() *AwardTranslationUpdate {
 	return atu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (atu *AwardTranslationUpdate) SetUpdatedAt(t time.Time) *AwardTranslationUpdate {
-	atu.mutation.SetUpdatedAt(t)
-	return atu
-}
-
 // SetAward sets the "award" edge to the Award entity.
 func (atu *AwardTranslationUpdate) SetAward(a *Award) *AwardTranslationUpdate {
 	return atu.SetAwardID(a.ID)
@@ -168,7 +161,6 @@ func (atu *AwardTranslationUpdate) ClearLanguage() *AwardTranslationUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (atu *AwardTranslationUpdate) Save(ctx context.Context) (int, error) {
-	atu.defaults()
 	return withHooks(ctx, atu.sqlSave, atu.mutation, atu.hooks)
 }
 
@@ -191,14 +183,6 @@ func (atu *AwardTranslationUpdate) Exec(ctx context.Context) error {
 func (atu *AwardTranslationUpdate) ExecX(ctx context.Context) {
 	if err := atu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (atu *AwardTranslationUpdate) defaults() {
-	if _, ok := atu.mutation.UpdatedAt(); !ok {
-		v := awardtranslation.UpdateDefaultUpdatedAt()
-		atu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -262,9 +246,6 @@ func (atu *AwardTranslationUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if atu.mutation.DescriptionCleared() {
 		_spec.ClearField(awardtranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := atu.mutation.UpdatedAt(); ok {
-		_spec.SetField(awardtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if atu.mutation.AwardCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -440,12 +421,6 @@ func (atuo *AwardTranslationUpdateOne) ClearDescription() *AwardTranslationUpdat
 	return atuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (atuo *AwardTranslationUpdateOne) SetUpdatedAt(t time.Time) *AwardTranslationUpdateOne {
-	atuo.mutation.SetUpdatedAt(t)
-	return atuo
-}
-
 // SetAward sets the "award" edge to the Award entity.
 func (atuo *AwardTranslationUpdateOne) SetAward(a *Award) *AwardTranslationUpdateOne {
 	return atuo.SetAwardID(a.ID)
@@ -494,7 +469,6 @@ func (atuo *AwardTranslationUpdateOne) Select(field string, fields ...string) *A
 
 // Save executes the query and returns the updated AwardTranslation entity.
 func (atuo *AwardTranslationUpdateOne) Save(ctx context.Context) (*AwardTranslation, error) {
-	atuo.defaults()
 	return withHooks(ctx, atuo.sqlSave, atuo.mutation, atuo.hooks)
 }
 
@@ -517,14 +491,6 @@ func (atuo *AwardTranslationUpdateOne) Exec(ctx context.Context) error {
 func (atuo *AwardTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := atuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (atuo *AwardTranslationUpdateOne) defaults() {
-	if _, ok := atuo.mutation.UpdatedAt(); !ok {
-		v := awardtranslation.UpdateDefaultUpdatedAt()
-		atuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -605,9 +571,6 @@ func (atuo *AwardTranslationUpdateOne) sqlSave(ctx context.Context) (_node *Awar
 	}
 	if atuo.mutation.DescriptionCleared() {
 		_spec.ClearField(awardtranslation.FieldDescription, field.TypeString)
-	}
-	if value, ok := atuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(awardtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if atuo.mutation.AwardCleared() {
 		edge := &sqlgraph.EdgeSpec{

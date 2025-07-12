@@ -1,11 +1,16 @@
 """
 Project parser for extracting structured project information including
 technologies, features, architecture, and implementation details.
+
+Supports both individual markdown files and folder-based project structure
+with assets, documentation, and configuration files.
 """
 
 import re
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date
+from pathlib import Path
+import yaml
 from .base_parser import BaseParser, ExtractedContent
 
 
@@ -19,6 +24,241 @@ class ProjectParser(BaseParser):
     
     def _get_content_type(self) -> str:
         return 'project'
+    
+    def parse_folder(self, folder_path: Path) -> Optional[ExtractedContent]:
+        """
+        Parse a project folder structure.
+        
+        Expected structure:
+        project-name/
+        ├── README.md (main content)
+        ├── config.yaml (project configuration)
+        ├── assets/
+        │   ├── images/
+        │   ├── videos/
+        │   └── docs/
+        ├── notes/
+        └── research/
+        """
+        try:
+            # Look for main content file
+            main_files = ['README.md', 'index.md', 'project.md']
+            main_file = None
+            
+            for filename in main_files:
+                file_path = folder_path / filename
+                if file_path.exists():
+                    main_file = file_path
+                    break
+            
+            if not main_file:
+                console.print(f"[red]❌ No main content file found in {folder_path}[/red]")
+                return None
+            
+            # Parse main content file
+            extracted = self.parse_file(main_file)
+            if not extracted:
+                return None
+            
+            # Load project configuration if exists
+            config_file = folder_path / 'config.yaml'
+            config_data = {}
+            if config_file.exists():
+                try:
+                    with open(config_file, 'r', encoding='utf-8') as f:
+                        config_data = yaml.safe_load(f) or {}
+                except Exception as e:
+                    console.print(f"[yellow]⚠️ Error reading config.yaml: {e}[/yellow]")
+            
+            # Enhance extracted data with folder structure
+            self._enhance_with_folder_data(extracted, folder_path, config_data)
+            
+            return extracted
+            
+        except Exception as e:
+            console.print(f"[red]❌ Error parsing project folder {folder_path}: {e}[/red]")
+            return None
+    
+    def _enhance_with_folder_data(self, extracted: ExtractedContent, folder_path: Path, config_data: Dict):
+        """Enhance extracted data with folder structure information"""
+        
+        # Update project data with config
+        if config_data:
+            project_data = extracted.main_entity
+            
+            # Handle nested config structure (config.yaml may have 'project' key)
+            if 'project' in config_data:
+                config_project_data = config_data['project']
+            else:
+                config_project_data = config_data
+            
+            # Override with config data if available
+            for key, value in config_project_data.items():
+                if key in project_data and value is not None:
+                    project_data[key] = value
+            
+            # Add folder-specific data to metadata (not main entity)
+            extracted.metadata['folder_path'] = str(folder_path)
+            extracted.metadata['config_data'] = config_data
+        
+        # Scan assets folder for images and media
+        assets_folder = folder_path / 'assets'
+        if assets_folder.exists():
+            folder_images = self._scan_assets_folder(assets_folder)
+            extracted.images.extend(folder_images)
+        
+        # Scan for additional documentation
+        docs = self._scan_documentation_files(folder_path)
+        extracted.metadata['documentation_files'] = docs
+        
+        # Scan notes folder
+        notes = self._scan_notes_folder(folder_path / 'notes')
+        extracted.metadata['notes'] = notes
+        
+        # Scan research folder
+        research = self._scan_research_folder(folder_path / 'research')
+        extracted.metadata['research'] = research
+    
+    def _scan_assets_folder(self, assets_folder: Path) -> List[Dict[str, Any]]:
+        """Scan assets folder for images and media"""
+        images = []
+        
+        # Image extensions
+        image_exts = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'}
+        
+        # Scan images subfolder
+        images_folder = assets_folder / 'images'
+        if images_folder.exists():
+            for img_file in images_folder.rglob('*'):
+                if img_file.is_file() and img_file.suffix.lower() in image_exts:
+                    images.append({
+                        'image_url': str(img_file.relative_to(assets_folder)),
+                        'alt_text': img_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                        'caption': img_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                        'image_type': self._classify_project_image(str(img_file), img_file.stem),
+                        'sort_order': len(images),
+                        'file_size': img_file.stat().st_size if img_file.exists() else 0
+                    })
+        
+        # Scan videos subfolder
+        videos_folder = assets_folder / 'videos'
+        if videos_folder.exists():
+            video_exts = {'.mp4', '.avi', '.mov', '.mkv', '.webm'}
+            for video_file in videos_folder.rglob('*'):
+                if video_file.is_file() and video_file.suffix.lower() in video_exts:
+                    images.append({
+                        'image_url': str(video_file.relative_to(assets_folder)),
+                        'alt_text': video_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                        'caption': video_file.stem.replace('-', ' ').replace('_', ' ').title(),
+                        'image_type': 'video',
+                        'sort_order': len(images),
+                        'file_size': video_file.stat().st_size if video_file.exists() else 0
+                    })
+        
+        return images
+    
+    def _scan_documentation_files(self, folder_path: Path) -> List[Dict[str, Any]]:
+        """Scan for additional documentation files"""
+        docs = []
+        
+        # Documentation extensions
+        doc_exts = {'.md', '.txt', '.rst', '.adoc'}
+        
+        # Scan docs subfolder
+        docs_folder = folder_path / 'assets' / 'docs'
+        if docs_folder.exists():
+            for doc_file in docs_folder.rglob('*'):
+                if doc_file.is_file() and doc_file.suffix.lower() in doc_exts:
+                    docs.append({
+                        'filename': doc_file.name,
+                        'path': str(doc_file.relative_to(folder_path)),
+                        'type': self._classify_documentation_type(doc_file.name),
+                        'size': doc_file.stat().st_size,
+                        'modified': datetime.fromtimestamp(doc_file.stat().st_mtime)
+                    })
+        
+        return docs
+    
+    def _scan_notes_folder(self, notes_folder: Path) -> List[Dict[str, Any]]:
+        """Scan notes folder for development notes"""
+        notes = []
+        
+        if not notes_folder.exists():
+            return notes
+        
+        for note_file in notes_folder.rglob('*.md'):
+            if note_file.is_file():
+                try:
+                    # Read first few lines for summary
+                    with open(note_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        summary = content[:200] + ('...' if len(content) > 200 else '')
+                    
+                    notes.append({
+                        'filename': note_file.name,
+                        'path': str(note_file.relative_to(notes_folder)),
+                        'summary': summary,
+                        'size': note_file.stat().st_size,
+                        'modified': datetime.fromtimestamp(note_file.stat().st_mtime)
+                    })
+                except Exception:
+                    continue
+        
+        return notes
+    
+    def _scan_research_folder(self, research_folder: Path) -> List[Dict[str, Any]]:
+        """Scan research folder for research materials"""
+        research = []
+        
+        if not research_folder.exists():
+            return research
+        
+        # Research file extensions
+        research_exts = {'.md', '.txt', '.pdf', '.doc', '.docx', '.xlsx', '.csv'}
+        
+        for research_file in research_folder.rglob('*'):
+            if research_file.is_file() and research_file.suffix.lower() in research_exts:
+                research.append({
+                    'filename': research_file.name,
+                    'path': str(research_file.relative_to(research_folder)),
+                    'type': self._classify_research_type(research_file.name),
+                    'size': research_file.stat().st_size,
+                    'modified': datetime.fromtimestamp(research_file.stat().st_mtime)
+                })
+        
+        return research
+    
+    def _classify_documentation_type(self, filename: str) -> str:
+        """Classify documentation file type"""
+        filename_lower = filename.lower()
+        
+        if 'api' in filename_lower:
+            return 'api_documentation'
+        elif 'install' in filename_lower or 'setup' in filename_lower:
+            return 'installation_guide'
+        elif 'user' in filename_lower or 'manual' in filename_lower:
+            return 'user_manual'
+        elif 'dev' in filename_lower or 'development' in filename_lower:
+            return 'development_guide'
+        elif 'deploy' in filename_lower:
+            return 'deployment_guide'
+        else:
+            return 'general_documentation'
+    
+    def _classify_research_type(self, filename: str) -> str:
+        """Classify research file type"""
+        filename_lower = filename.lower()
+        
+        if any(keyword in filename_lower for keyword in ['reference', 'paper', 'article']):
+            return 'reference_material'
+        elif any(keyword in filename_lower for keyword in ['benchmark', 'performance', 'test']):
+            return 'benchmark_data'
+        elif any(keyword in filename_lower for keyword in ['survey', 'analysis', 'study']):
+            return 'research_analysis'
+        elif any(keyword in filename_lower for keyword in ['data', 'dataset', 'csv', 'xlsx']):
+            return 'research_data'
+        else:
+            return 'general_research'
     
     def _parse_content(self, post, extracted: ExtractedContent):
         """Parse project content and extract structured data"""

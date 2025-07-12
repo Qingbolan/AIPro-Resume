@@ -50,12 +50,12 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// PersonalInfo holds the value of the personal_info edge.
-	PersonalInfo []*PersonalInfo `json:"personal_info,omitempty"`
-	// Education holds the value of the education edge.
-	Education []*Education `json:"education,omitempty"`
-	// WorkExperience holds the value of the work_experience edge.
-	WorkExperience []*WorkExperience `json:"work_experience,omitempty"`
+	// PersonalInfos holds the value of the personal_infos edge.
+	PersonalInfos []*PersonalInfo `json:"personal_infos,omitempty"`
+	// Educations holds the value of the educations edge.
+	Educations []*Education `json:"educations,omitempty"`
+	// WorkExperiences holds the value of the work_experiences edge.
+	WorkExperiences []*WorkExperience `json:"work_experiences,omitempty"`
 	// Projects holds the value of the projects edge.
 	Projects []*Project `json:"projects,omitempty"`
 	// BlogPosts holds the value of the blog_posts edge.
@@ -68,36 +68,38 @@ type UserEdges struct {
 	Publications []*Publication `json:"publications,omitempty"`
 	// Awards holds the value of the awards edge.
 	Awards []*Award `json:"awards,omitempty"`
+	// RecentUpdates holds the value of the recent_updates edge.
+	RecentUpdates []*RecentUpdate `json:"recent_updates,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
-// PersonalInfoOrErr returns the PersonalInfo value or an error if the edge
+// PersonalInfosOrErr returns the PersonalInfos value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PersonalInfoOrErr() ([]*PersonalInfo, error) {
+func (e UserEdges) PersonalInfosOrErr() ([]*PersonalInfo, error) {
 	if e.loadedTypes[0] {
-		return e.PersonalInfo, nil
+		return e.PersonalInfos, nil
 	}
-	return nil, &NotLoadedError{edge: "personal_info"}
+	return nil, &NotLoadedError{edge: "personal_infos"}
 }
 
-// EducationOrErr returns the Education value or an error if the edge
+// EducationsOrErr returns the Educations value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) EducationOrErr() ([]*Education, error) {
+func (e UserEdges) EducationsOrErr() ([]*Education, error) {
 	if e.loadedTypes[1] {
-		return e.Education, nil
+		return e.Educations, nil
 	}
-	return nil, &NotLoadedError{edge: "education"}
+	return nil, &NotLoadedError{edge: "educations"}
 }
 
-// WorkExperienceOrErr returns the WorkExperience value or an error if the edge
+// WorkExperiencesOrErr returns the WorkExperiences value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) WorkExperienceOrErr() ([]*WorkExperience, error) {
+func (e UserEdges) WorkExperiencesOrErr() ([]*WorkExperience, error) {
 	if e.loadedTypes[2] {
-		return e.WorkExperience, nil
+		return e.WorkExperiences, nil
 	}
-	return nil, &NotLoadedError{edge: "work_experience"}
+	return nil, &NotLoadedError{edge: "work_experiences"}
 }
 
 // ProjectsOrErr returns the Projects value or an error if the edge
@@ -152,6 +154,15 @@ func (e UserEdges) AwardsOrErr() ([]*Award, error) {
 		return e.Awards, nil
 	}
 	return nil, &NotLoadedError{edge: "awards"}
+}
+
+// RecentUpdatesOrErr returns the RecentUpdates value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RecentUpdatesOrErr() ([]*RecentUpdate, error) {
+	if e.loadedTypes[9] {
+		return e.RecentUpdates, nil
+	}
+	return nil, &NotLoadedError{edge: "recent_updates"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -273,19 +284,19 @@ func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
 }
 
-// QueryPersonalInfo queries the "personal_info" edge of the User entity.
-func (u *User) QueryPersonalInfo() *PersonalInfoQuery {
-	return NewUserClient(u.config).QueryPersonalInfo(u)
+// QueryPersonalInfos queries the "personal_infos" edge of the User entity.
+func (u *User) QueryPersonalInfos() *PersonalInfoQuery {
+	return NewUserClient(u.config).QueryPersonalInfos(u)
 }
 
-// QueryEducation queries the "education" edge of the User entity.
-func (u *User) QueryEducation() *EducationQuery {
-	return NewUserClient(u.config).QueryEducation(u)
+// QueryEducations queries the "educations" edge of the User entity.
+func (u *User) QueryEducations() *EducationQuery {
+	return NewUserClient(u.config).QueryEducations(u)
 }
 
-// QueryWorkExperience queries the "work_experience" edge of the User entity.
-func (u *User) QueryWorkExperience() *WorkExperienceQuery {
-	return NewUserClient(u.config).QueryWorkExperience(u)
+// QueryWorkExperiences queries the "work_experiences" edge of the User entity.
+func (u *User) QueryWorkExperiences() *WorkExperienceQuery {
+	return NewUserClient(u.config).QueryWorkExperiences(u)
 }
 
 // QueryProjects queries the "projects" edge of the User entity.
@@ -316,6 +327,11 @@ func (u *User) QueryPublications() *PublicationQuery {
 // QueryAwards queries the "awards" edge of the User entity.
 func (u *User) QueryAwards() *AwardQuery {
 	return NewUserClient(u.config).QueryAwards(u)
+}
+
+// QueryRecentUpdates queries the "recent_updates" edge of the User entity.
+func (u *User) QueryRecentUpdates() *RecentUpdateQuery {
+	return NewUserClient(u.config).QueryRecentUpdates(u)
 }
 
 // Update returns a builder for updating this User.

@@ -76,7 +76,7 @@ func (l *GetProjectsLogic) GetProjects(req *types.ProjectListRequest) (resp *typ
 		return nil, err
 	}
 
-	var result []types.Project
+	result := make([]types.Project, 0)
 	for _, proj := range projects {
 		var technologies []string
 		for _, tech := range proj.Edges.Technologies {

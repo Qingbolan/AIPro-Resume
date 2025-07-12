@@ -340,6 +340,7 @@ type (
 		ID                  string        `json:"id"`
 		Title               string        `json:"title"`
 		TitleZh             string        `json:"title_zh,omitempty"`
+		Slug                string        `json:"slug,omitempty"`
 		Author              string        `json:"author"`
 		PublishDate         string        `json:"publish_date"`
 		ReadTime            string        `json:"read_time"`
@@ -417,6 +418,10 @@ type (
 	}
 	BlogRequest {
 		Slug     string `path:"slug"`
+		Language string `form:"lang,default=en"`
+	}
+	BlogByIdRequest {
+		ID       string `path:"id"`
 		Language string `form:"lang,default=en"`
 	}
 	// Graph Data for project visualization
@@ -785,6 +790,18 @@ service backend-api {
 	@doc "Get single blog post by slug"
 	@handler GetBlogPost
 	get /posts/:slug (BlogRequest) returns (BlogData)
+
+	@doc "Get single blog post by ID"
+	@handler GetBlogPostById
+	get /posts/id/:id (BlogByIdRequest) returns (BlogData)
+
+	@doc "Update blog post view count"
+	@handler UpdateBlogViews
+	post /posts/:id/views (UpdateBlogViewsRequest)
+
+	@doc "Update blog post like count"
+	@handler UpdateBlogLikes
+	post /posts/:id/likes (UpdateBlogLikesRequest) returns (UpdateBlogLikesResponse)
 
 	@doc "Get blog categories"
 	@handler GetBlogCategories

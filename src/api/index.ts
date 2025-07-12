@@ -24,7 +24,6 @@ export {
   post, 
   put, 
   del, 
-  withFallback, 
   formatLanguage 
 } from './utils';
 

@@ -55,20 +55,6 @@ func (rpdtc *ResearchProjectDetailTranslationCreate) SetNillableCreatedAt(t *tim
 	return rpdtc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rpdtc *ResearchProjectDetailTranslationCreate) SetUpdatedAt(t time.Time) *ResearchProjectDetailTranslationCreate {
-	rpdtc.mutation.SetUpdatedAt(t)
-	return rpdtc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (rpdtc *ResearchProjectDetailTranslationCreate) SetNillableUpdatedAt(t *time.Time) *ResearchProjectDetailTranslationCreate {
-	if t != nil {
-		rpdtc.SetUpdatedAt(*t)
-	}
-	return rpdtc
-}
-
 // SetID sets the "id" field.
 func (rpdtc *ResearchProjectDetailTranslationCreate) SetID(u uuid.UUID) *ResearchProjectDetailTranslationCreate {
 	rpdtc.mutation.SetID(u)
@@ -138,10 +124,6 @@ func (rpdtc *ResearchProjectDetailTranslationCreate) defaults() {
 		v := researchprojectdetailtranslation.DefaultCreatedAt()
 		rpdtc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := rpdtc.mutation.UpdatedAt(); !ok {
-		v := researchprojectdetailtranslation.DefaultUpdatedAt()
-		rpdtc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := rpdtc.mutation.ID(); !ok {
 		v := researchprojectdetailtranslation.DefaultID()
 		rpdtc.mutation.SetID(v)
@@ -171,9 +153,6 @@ func (rpdtc *ResearchProjectDetailTranslationCreate) check() error {
 	}
 	if _, ok := rpdtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ResearchProjectDetailTranslation.created_at"`)}
-	}
-	if _, ok := rpdtc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ResearchProjectDetailTranslation.updated_at"`)}
 	}
 	if len(rpdtc.mutation.ResearchProjectDetailIDs()) == 0 {
 		return &ValidationError{Name: "research_project_detail", err: errors.New(`ent: missing required edge "ResearchProjectDetailTranslation.research_project_detail"`)}
@@ -223,10 +202,6 @@ func (rpdtc *ResearchProjectDetailTranslationCreate) createSpec() (*ResearchProj
 	if value, ok := rpdtc.mutation.CreatedAt(); ok {
 		_spec.SetField(researchprojectdetailtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := rpdtc.mutation.UpdatedAt(); ok {
-		_spec.SetField(researchprojectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := rpdtc.mutation.ResearchProjectDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

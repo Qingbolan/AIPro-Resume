@@ -208,18 +208,31 @@ class ResumeParser(BaseParser):
         education_websites = metadata.get('education_websites', {})
         
         for edu in education_data:
-            institution = edu.get('institution', '').lower()
+            # First priority: Check for directly specified logo key
+            if '_logo_key' in edu:
+                logo_key = edu['_logo_key']
+                if logo_key in education_logos:
+                    edu['institution_logo_url'] = education_logos[logo_key]
+                # Remove the temporary key
+                del edu['_logo_key']
+            else:
+                # Fallback to automatic matching
+                institution = edu.get('institution', '').lower()
+                
+                # Try to match logos automatically
+                for key, logo_url in education_logos.items():
+                    if key.lower() in institution or any(keyword in institution for keyword in key.lower().split('_')):
+                        edu['institution_logo_url'] = logo_url
+                        break
             
-            # Try to match logos and websites
-            for key, logo_url in education_logos.items():
-                if key.lower() in institution or any(keyword in institution for keyword in key.lower().split('_')):
-                    edu['institution_logo_url'] = logo_url
-                    break
-            
-            for key, website_url in education_websites.items():
-                if key.lower() in institution or any(keyword in institution for keyword in key.lower().split('_')):
-                    edu['institution_website'] = website_url
-                    break
+            # Handle websites (only auto-match if not directly specified)
+            if not edu.get('institution_website'):
+                institution = edu.get('institution', '').lower()
+                
+                for key, website_url in education_websites.items():
+                    if key.lower() in institution or any(keyword in institution for keyword in key.lower().split('_')):
+                        edu['institution_website'] = website_url
+                        break
         
         return education_data
     
@@ -253,8 +266,16 @@ class ResumeParser(BaseParser):
             if not line:
                 continue
             
+            # Parse direct metadata (Logo, Website)
+            if line.startswith('*Logo*:'):
+                logo_key = line.replace('*Logo*:', '').strip()
+                education_record['_logo_key'] = logo_key
+            elif line.startswith('*Website*:'):
+                website_url = line.replace('*Website*:', '').strip()
+                education_record['institution_website'] = website_url
+            
             # Parse degree (usually in bold)
-            if line.startswith('**') and line.endswith('**'):
+            elif line.startswith('**') and line.endswith('**'):
                 degree_text = line.strip('*').strip()
                 education_record['degree'] = degree_text
                 
@@ -267,6 +288,10 @@ class ResumeParser(BaseParser):
             # Parse dates (usually in italic)
             elif line.startswith('*') and not line.startswith('**'):
                 date_text = line.strip('*').strip()
+                
+                # Skip if it's metadata we've already handled
+                if date_text.startswith('Logo:') or date_text.startswith('Website:'):
+                    continue
                 
                 # Check if it's a date range
                 if any(year in date_text for year in ['20', '19']) or 'Future' in date_text:
@@ -353,13 +378,26 @@ class ResumeParser(BaseParser):
             if not line:
                 continue
             
+            # Parse direct metadata (Logo, Website)
+            if line.startswith('*Logo*:'):
+                logo_key = line.replace('*Logo*:', '').strip()
+                # We'll use this in the enhancement phase
+                experience_record['_logo_key'] = logo_key
+            elif line.startswith('*Website*:'):
+                website_url = line.replace('*Website*:', '').strip()
+                experience_record['company_website'] = website_url
+            
             # Parse position (usually in bold)
-            if line.startswith('**') and line.endswith('**'):
+            elif line.startswith('**') and line.endswith('**'):
                 experience_record['position'] = line.strip('*').strip()
             
             # Parse dates and location (usually in italic)
             elif line.startswith('*') and not line.startswith('**'):
                 date_text = line.strip('*').strip()
+                
+                # Skip if it's metadata we've already handled
+                if date_text.startswith('Logo:') or date_text.startswith('Website:'):
+                    continue
                 
                 # Check if it's a date range
                 if any(year in date_text for year in ['20', '19']) or 'Now' in date_text:
@@ -408,20 +446,59 @@ class ResumeParser(BaseParser):
     
     def _parse_publication_entry(self, pub_text: str) -> Optional[Dict[str, Any]]:
         """Parse a single publication entry"""
-        # Extract title (usually before the first period)
-        title_match = re.search(r'^([^.]+)\.', pub_text)
-        title = title_match.group(1).strip() if title_match else pub_text[:100]
-        
-        # Extract authors
+        # Extract authors first (usually at the beginning)
         authors = self._extract_authors(pub_text)
+        
+        # Extract title - look for text in quotes or after authors
+        title = ''
+        
+        # Pattern 1: Title in quotes
+        quote_match = re.search(r'"([^"]+)"', pub_text)
+        if quote_match:
+            title = quote_match.group(1).strip()
+        else:
+            # Pattern 2: Title after authors, before journal/venue
+            # Remove authors from beginning
+            pub_text_no_authors = pub_text
+            if authors:
+                for author in authors:
+                    pub_text_no_authors = pub_text_no_authors.replace(author, '', 1)
+            
+            # Clean up and look for title
+            pub_text_no_authors = re.sub(r'^[,.\s]+', '', pub_text_no_authors)
+            
+            # Extract until journal indicators or year
+            title_match = re.search(r'^([^.(]+?)(?:\s+(?:In|Proceedings|Journal|\(\d{4}\)|$))', pub_text_no_authors)
+            if title_match:
+                title = title_match.group(1).strip()
+            else:
+                # Fallback: take first reasonable chunk
+                title_parts = pub_text_no_authors.split('.')
+                if len(title_parts) > 0:
+                    title = title_parts[0].strip()
+        
+        # If title is still suspicious (too short, looks like author name), use fallback
+        if len(title) < 10 or re.match(r'^[A-Z][a-z]+,?\s*[A-Z]\.?$', title):
+            title = "Publication title needs manual review"
         
         # Extract year
         year_match = re.search(r'\((\d{4})\)', pub_text)
         year = int(year_match.group(1)) if year_match else None
         
-        # Extract journal/venue
-        venue_match = re.search(r'In\s+([^,]+)', pub_text)
-        journal = venue_match.group(1).strip() if venue_match else ''
+        # Extract journal/venue - look for various patterns
+        journal = ''
+        venue_patterns = [
+            r'In\s+([^,.(]+)',
+            r'Proceedings of\s+([^,.(]+)',
+            r'Journal of\s+([^,.(]+)',
+            r'([A-Z][^,.(]*(?:Conference|Workshop|Symposium|Journal)[^,.(]*)',
+        ]
+        
+        for pattern in venue_patterns:
+            venue_match = re.search(pattern, pub_text, re.IGNORECASE)
+            if venue_match:
+                journal = venue_match.group(1).strip()
+                break
         
         # Extract DOI if present
         doi_match = re.search(r'doi:?\s*([^\s]+)', pub_text, re.IGNORECASE)
@@ -429,6 +506,7 @@ class ResumeParser(BaseParser):
         
         publication_record = {
             'title': title,
+            'authors': authors,  # Keep as list for separate table handling
             'journal_name': journal,
             'publication_type': self._determine_publication_type(pub_text),
             'publication_date': date(year, 1, 1) if year else None,
@@ -441,19 +519,37 @@ class ResumeParser(BaseParser):
     
     def _extract_authors(self, pub_text: str) -> List[str]:
         """Extract authors from publication text"""
-        # Look for author patterns
+        # Look for author patterns at the beginning of the text
         author_patterns = [
-            r'^([^.]+),\s*[A-Z]\.',  # Last, F. format
-            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',  # First Last format
+            r'^([^."]+?)(?:\s*[."]|\s+In\s|\s+Proceedings|\s+\(\d{4}\))',  # Authors before title/venue/year
+            r'^([A-Z][^.]+?)\.',  # Authors ending with period
         ]
         
         for pattern in author_patterns:
             match = re.search(pattern, pub_text)
             if match:
-                # Split by common separators
-                authors_text = match.group(1)
-                authors = [author.strip() for author in re.split(r'[,&]', authors_text)]
-                return [author for author in authors if author]
+                authors_text = match.group(1).strip()
+                
+                # Split by common separators (and, comma, semicolon)
+                authors = []
+                for separator in [' and ', ' & ', ';', ',']:
+                    if separator in authors_text:
+                        authors = [author.strip() for author in authors_text.split(separator)]
+                        break
+                
+                # If no separators found, treat as single author
+                if not authors:
+                    authors = [authors_text]
+                
+                # Clean up author names and filter out empty ones
+                cleaned_authors = []
+                for author in authors:
+                    author = author.strip()
+                    # Skip if it looks like a title or is too short
+                    if author and len(author) > 2 and not author.lower().startswith('in '):
+                        cleaned_authors.append(author)
+                
+                return cleaned_authors
         
         return []
     
@@ -704,18 +800,41 @@ class ResumeParser(BaseParser):
         experience_websites = metadata.get('experience_websites', {})
         
         for exp in experience_data:
-            company = exp.get('company', '').lower()
+            # First priority: Check for directly specified logo key
+            if '_logo_key' in exp:
+                logo_key = exp['_logo_key']
+                if logo_key in experience_logos:
+                    exp['company_logo_url'] = experience_logos[logo_key]
+                # Remove the temporary key
+                del exp['_logo_key']
+            else:
+                # Fallback to automatic matching
+                company = exp.get('company', '').lower()
+                description = ' '.join(exp.get('details', [])).lower()
+                search_text = f"{company} {description}"
+                
+                # Try to match logos automatically
+                for key, logo_url in experience_logos.items():
+                    key_lower = key.lower()
+                    if (key_lower in company or 
+                        key_lower in description or 
+                        any(keyword in search_text for keyword in key_lower.split('_'))):
+                        exp['company_logo_url'] = logo_url
+                        break
             
-            # Try to match logos and websites
-            for key, logo_url in experience_logos.items():
-                if key.lower() in company or any(keyword in company for keyword in key.lower().split('_')):
-                    exp['company_logo_url'] = logo_url
-                    break
-            
-            for key, website_url in experience_websites.items():
-                if key.lower() in company or any(keyword in company for keyword in key.lower().split('_')):
-                    exp['company_website'] = website_url
-                    break
+            # Handle websites (only auto-match if not directly specified)
+            if not exp.get('company_website'):
+                company = exp.get('company', '').lower()
+                description = ' '.join(exp.get('details', [])).lower()
+                search_text = f"{company} {description}"
+                
+                for key, website_url in experience_websites.items():
+                    key_lower = key.lower()
+                    if (key_lower in company or 
+                        key_lower in description or 
+                        any(keyword in search_text for keyword in key_lower.split('_'))):
+                        exp['company_website'] = website_url
+                        break
         
         return experience_data
     

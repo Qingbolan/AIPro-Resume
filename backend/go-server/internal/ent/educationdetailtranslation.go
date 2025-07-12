@@ -28,8 +28,6 @@ type EducationDetailTranslation struct {
 	DetailText string `json:"detail_text,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EducationDetailTranslationQuery when eager-loading is set.
 	Edges        EducationDetailTranslationEdges `json:"edges"`
@@ -76,7 +74,7 @@ func (*EducationDetailTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case educationdetailtranslation.FieldLanguageCode, educationdetailtranslation.FieldDetailText:
 			values[i] = new(sql.NullString)
-		case educationdetailtranslation.FieldCreatedAt, educationdetailtranslation.FieldUpdatedAt:
+		case educationdetailtranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case educationdetailtranslation.FieldID, educationdetailtranslation.FieldEducationDetailID:
 			values[i] = new(uuid.UUID)
@@ -124,12 +122,6 @@ func (edt *EducationDetailTranslation) assignValues(columns []string, values []a
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				edt.CreatedAt = value.Time
-			}
-		case educationdetailtranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				edt.UpdatedAt = value.Time
 			}
 		default:
 			edt.selectValues.Set(columns[i], values[i])
@@ -188,9 +180,6 @@ func (edt *EducationDetailTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(edt.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(edt.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

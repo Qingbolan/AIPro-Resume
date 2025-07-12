@@ -42,6 +42,7 @@ func (Project) Fields() []ent.Field {
 			Optional(),
 		field.String("project_type").
 			MaxLen(50).
+			NotEmpty().
 			Default("Web Application"),
 		field.Enum("status").
 			Values("active", "completed", "paused", "cancelled").

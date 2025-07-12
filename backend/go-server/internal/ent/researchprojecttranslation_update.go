@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/researchproject"
 	"silan-backend/internal/ent/researchprojecttranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -133,12 +132,6 @@ func (rptu *ResearchProjectTranslationUpdate) ClearFundingSource() *ResearchProj
 	return rptu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rptu *ResearchProjectTranslationUpdate) SetUpdatedAt(t time.Time) *ResearchProjectTranslationUpdate {
-	rptu.mutation.SetUpdatedAt(t)
-	return rptu
-}
-
 // SetResearchProject sets the "research_project" edge to the ResearchProject entity.
 func (rptu *ResearchProjectTranslationUpdate) SetResearchProject(r *ResearchProject) *ResearchProjectTranslationUpdate {
 	return rptu.SetResearchProjectID(r.ID)
@@ -174,7 +167,6 @@ func (rptu *ResearchProjectTranslationUpdate) ClearLanguage() *ResearchProjectTr
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rptu *ResearchProjectTranslationUpdate) Save(ctx context.Context) (int, error) {
-	rptu.defaults()
 	return withHooks(ctx, rptu.sqlSave, rptu.mutation, rptu.hooks)
 }
 
@@ -197,14 +189,6 @@ func (rptu *ResearchProjectTranslationUpdate) Exec(ctx context.Context) error {
 func (rptu *ResearchProjectTranslationUpdate) ExecX(ctx context.Context) {
 	if err := rptu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (rptu *ResearchProjectTranslationUpdate) defaults() {
-	if _, ok := rptu.mutation.UpdatedAt(); !ok {
-		v := researchprojecttranslation.UpdateDefaultUpdatedAt()
-		rptu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -276,9 +260,6 @@ func (rptu *ResearchProjectTranslationUpdate) sqlSave(ctx context.Context) (n in
 	}
 	if rptu.mutation.FundingSourceCleared() {
 		_spec.ClearField(researchprojecttranslation.FieldFundingSource, field.TypeString)
-	}
-	if value, ok := rptu.mutation.UpdatedAt(); ok {
-		_spec.SetField(researchprojecttranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if rptu.mutation.ResearchProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -460,12 +441,6 @@ func (rptuo *ResearchProjectTranslationUpdateOne) ClearFundingSource() *Research
 	return rptuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rptuo *ResearchProjectTranslationUpdateOne) SetUpdatedAt(t time.Time) *ResearchProjectTranslationUpdateOne {
-	rptuo.mutation.SetUpdatedAt(t)
-	return rptuo
-}
-
 // SetResearchProject sets the "research_project" edge to the ResearchProject entity.
 func (rptuo *ResearchProjectTranslationUpdateOne) SetResearchProject(r *ResearchProject) *ResearchProjectTranslationUpdateOne {
 	return rptuo.SetResearchProjectID(r.ID)
@@ -514,7 +489,6 @@ func (rptuo *ResearchProjectTranslationUpdateOne) Select(field string, fields ..
 
 // Save executes the query and returns the updated ResearchProjectTranslation entity.
 func (rptuo *ResearchProjectTranslationUpdateOne) Save(ctx context.Context) (*ResearchProjectTranslation, error) {
-	rptuo.defaults()
 	return withHooks(ctx, rptuo.sqlSave, rptuo.mutation, rptuo.hooks)
 }
 
@@ -537,14 +511,6 @@ func (rptuo *ResearchProjectTranslationUpdateOne) Exec(ctx context.Context) erro
 func (rptuo *ResearchProjectTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := rptuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (rptuo *ResearchProjectTranslationUpdateOne) defaults() {
-	if _, ok := rptuo.mutation.UpdatedAt(); !ok {
-		v := researchprojecttranslation.UpdateDefaultUpdatedAt()
-		rptuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -633,9 +599,6 @@ func (rptuo *ResearchProjectTranslationUpdateOne) sqlSave(ctx context.Context) (
 	}
 	if rptuo.mutation.FundingSourceCleared() {
 		_spec.ClearField(researchprojecttranslation.FieldFundingSource, field.TypeString)
-	}
-	if value, ok := rptuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(researchprojecttranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if rptuo.mutation.ResearchProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{

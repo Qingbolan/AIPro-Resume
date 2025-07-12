@@ -330,6 +330,49 @@ MODE=production
 GRAFANA_PASSWORD=admin
 ```
 
+```
+api-test-portfolio/
+├── workspace.yaml                          # 统一配置文件
+├── content/
+│   ├── projects/                          # 基于文件夹的项目
+│   │   ├── ai-chatbot/                    # AI聊天机器人
+│   │   │   ├── README.md, config.yaml
+│   │   │   ├── assets/architecture-diagram.md
+│   │   │   └── notes/meeting-notes.md
+│   │   ├── ecommerce-platform/            # 电商平台
+│   │   └── data-visualization-tool/       # 数据可视化工具
+│   ├── ideas/                             # 研究导向的想法
+│   │   ├── quantum-ml-framework/          # 量子机器学习框架
+│   │   │   ├── README.md, config.yaml
+│   │   │   ├── research/literature-review.md
+│   │   │   └── experiments/vqe-experiment.md
+│   │   └── ai-code-refactoring-tool/      # AI代码重构工具
+│   │       ├── README.md, config.yaml
+│   │       ├── references/literature-survey.md
+│   │       └── prototypes/ast-analyzer.md
+│   ├── updates/                           # 时间轴更新
+│   │   └── 2024/
+│   │       ├── 01/2024-01-01-ziyun2024-plan-launch.md
+│   │       ├── 03/2024-03-31-q1-milestone-achieved.md
+│   │       ├── 06/2024-06-15-ai-chatbot-beta-release.md
+│   │       ├── 09/2024-09-15-quantum-ml-research-progress.md
+│   │       └── 12/2024-12-19-workspace-upgrade-complete.md
+│   └── blog/
+│       ├── posts/2024-12-19-workspace-evolution.md
+│       └── drafts/2024-12-20-quantum-ml-future.md
+├── templates/                             # 内容模板
+│   ├── projects/web-app.yaml, web-app-readme.md
+│   ├── ideas/research-idea.yaml
+│   ├── updates/milestone.md
+│   └── blog/technical-post.md
+└── .silan/                                # 系统数据
+    ├── cache/README.md
+    ├── logs/README.md
+    ├── analytics/workspace_stats.json
+    ├── config/local.yaml
+    └── temp/.gitkeep
+```
+
 ## 📈 Monitoring
 
 The project includes comprehensive monitoring:
