@@ -25,20 +25,26 @@ class IdeaParser(BaseParser):
     def _get_content_type(self) -> str:
         return 'idea'
     
+    def debug_motivation_extraction(self, file_path: Path) -> str:
+        """Debug method to test motivation extraction"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Extract motivation section
+            import re
+            for level in ['##', '###', '####']:
+                pattern = rf'\n{level}\s+Motivation\s*\n(.*?)(?=\n{level}\s+|\Z)'
+                match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+                if match:
+                    return match.group(1).strip()
+            return ''
+        except Exception as e:
+            return f"Error: {e}"
+
     def parse_folder(self, folder_path: Path) -> Optional[ExtractedContent]:
         """
-        Parse an idea folder structure.
-        
-        Expected structure:
-        idea-name/
-        ├── README.md (main content)
-        ├── config.yaml (idea configuration)
-        ├── research/
-        ├── notes/
-        ├── experiments/
-        ├── references/
-        ├── prototypes/
-        └── assets/
+        Parse an idea folder structure with enhanced debugging.
         """
         try:
             # Look for main content file
@@ -55,10 +61,17 @@ class IdeaParser(BaseParser):
                 console.print(f"[red]❌ No main content file found in {folder_path}[/red]")
                 return None
             
+            # Debug motivation extraction
+            debug_motivation = self.debug_motivation_extraction(main_file)
+            
             # Parse main content file
             extracted = self.parse_file(main_file)
             if not extracted:
                 return None
+            
+            # Force set motivation if it was lost
+            if not extracted.main_entity.get('motivation') and debug_motivation:
+                extracted.main_entity['motivation'] = debug_motivation
             
             # Load idea configuration if exists
             config_file = folder_path / 'config.yaml'
@@ -72,6 +85,10 @@ class IdeaParser(BaseParser):
             
             # Enhance extracted data with folder structure
             self._enhance_with_folder_data(extracted, folder_path, config_data)
+            
+            # Final check - if motivation is still empty, force set it
+            if not extracted.main_entity.get('motivation') and debug_motivation:
+                extracted.main_entity['motivation'] = debug_motivation
             
             return extracted
             
@@ -92,9 +109,12 @@ class IdeaParser(BaseParser):
             else:
                 config_idea_data = config_data
             
-            # Override with config data if available
+            # Override with config data if available, but preserve motivation if already extracted
             for key, value in config_idea_data.items():
                 if key in idea_data and value is not None:
+                    # Don't override motivation if it was already extracted from content
+                    if key == 'motivation' and idea_data.get('motivation'):
+                        continue
                     idea_data[key] = value
             
             # Add folder-specific data to metadata (not main entity)
@@ -449,8 +469,44 @@ class IdeaParser(BaseParser):
     
     def _extract_idea_data(self, metadata: Dict, content: str) -> Dict[str, Any]:
         """Extract main idea information"""
+        # Extract title from metadata or content
         title = metadata.get('title', '')
+        if not title:
+            # Extract title from first heading
+            lines = content.split('\n')
+            for line in lines:
+                line = line.strip()
+                if line.startswith('# '):
+                    title = line[2:].strip()
+                    break
+        
         slug = metadata.get('slug', self._generate_slug(title))
+        
+        # Extract abstract from metadata or content
+        abstract = metadata.get('abstract', metadata.get('description', ''))
+        if not abstract:
+            # Look for Abstract section in content
+            abstract_section = self._extract_section(content, 'Abstract')
+            if abstract_section:
+                # Take first paragraph of abstract section
+                abstract = abstract_section.split('\n\n')[0].strip()
+            elif title:
+                # Fallback to a generated abstract
+                abstract = f"An innovative idea focusing on {title.lower()}"
+        
+        # Extract motivation from content first, then fallback to metadata
+        motivation = ''
+        motivation_section = self._extract_section(content, 'Motivation')
+        if motivation_section:
+            motivation = motivation_section
+        else:
+            # Look for Problem section as alternative
+            problem_section = self._extract_section(content, 'Problem')
+            if problem_section:
+                motivation = problem_section
+            else:
+                # Fallback to metadata
+                motivation = metadata.get('motivation', '')
         
         # Extract problem statement
         problem_statement = self._extract_problem_statement(content)
@@ -470,24 +526,24 @@ class IdeaParser(BaseParser):
         development_stage = self._determine_development_stage(content)
         
         # Map collaboration and funding status properly
-        collaboration_needed = metadata.get('collaborationOpen', False)
+        collaboration_needed = metadata.get('collaboration_needed', metadata.get('collaborationOpen', False))
         if isinstance(collaboration_needed, str):
             collaboration_needed = collaboration_needed.lower() in ['true', 'yes', '1']
         
-        funding_required = metadata.get('fundingStatus', 'none') != 'none'
+        funding_required = metadata.get('funding_required', False)
         if metadata.get('fundingStatus') == 'seeking':
             funding_required = True
         elif metadata.get('fundingStatus') == 'funded':
             funding_required = False
         
         # Parse duration from string like "6-8 months"
-        duration_months = self._extract_duration_months(metadata.get('estimatedDuration', ''))
+        duration_months = self._extract_duration_months(metadata.get('estimated_duration', ''))
         
         idea_data = {
             'title': title,
             'slug': slug,
-            'abstract': metadata.get('abstract', metadata.get('description', '')),
-            'motivation': metadata.get('motivation', ''),
+            'abstract': abstract,
+            'motivation': motivation, # Ensure motivation is preserved
             'methodology': solution_overview or self._extract_methodology(content),
             'expected_outcome': self._extract_expected_outcome(content),
             'status': self._map_idea_status(metadata.get('status', 'draft')),
@@ -496,7 +552,7 @@ class IdeaParser(BaseParser):
             'funding_required': funding_required,
             'estimated_budget': financial_estimates.get('budget'),
             'required_resources': self._extract_required_resources_string(content),
-            'is_public': metadata.get('is_public', False),
+            'is_public': metadata.get('is_public', True),  # Default to public for content-extracted ideas
             'view_count': 0,
             'like_count': 0,
             'priority': self._map_priority_level(feasibility_score, impact_score)
@@ -583,7 +639,7 @@ class IdeaParser(BaseParser):
             'hypothesis': IdeaStatus.HYPOTHESIS, 
             'experimenting': IdeaStatus.EXPERIMENTING,
             'validating': IdeaStatus.VALIDATING,
-            'published': IdeaStatus.published,
+            'published': IdeaStatus.PUBLISHED,
             'concluded': IdeaStatus.CONCLUDED
         }
         

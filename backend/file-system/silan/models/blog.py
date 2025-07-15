@@ -23,7 +23,7 @@ class BlogContentType(enum.Enum):
 class BlogStatus(enum.Enum):
     """Enumeration for blog status - matching Go schema"""
     DRAFT = "draft"
-    published = "published"
+    PUBLISHED = "published"
     ARCHIVED = "archived"
 
 

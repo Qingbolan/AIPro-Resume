@@ -72,6 +72,10 @@ ParserFactory.register_parser('projects', ProjectParser)
 ParserFactory.register_parser('blog', BlogParser)
 ParserFactory.register_parser('blog_post', BlogParser)
 ParserFactory.register_parser('article', BlogParser)
+ParserFactory.register_parser('vlog', BlogParser)  # Add vlog mapping
+ParserFactory.register_parser('video', BlogParser)  # Add video mapping
+ParserFactory.register_parser('podcast', BlogParser)  # Add podcast mapping
+ParserFactory.register_parser('tutorial', BlogParser)  # Add tutorial mapping
 ParserFactory.register_parser('idea', IdeaParser)
 ParserFactory.register_parser('ideas', IdeaParser)
 ParserFactory.register_parser('concept', IdeaParser)

@@ -16,8 +16,10 @@ func (m *CorsMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		origin := r.Header.Get("Origin")
 		allowedOrigins := []string{
 			"http://localhost:3000", // Frontend development server
+			"http://localhost:3001", // Alternative frontend port
 			"http://localhost:5173", // Alternative Vite dev server port
 			"http://127.0.0.1:3000",
+			"http://127.0.0.1:3001",
 			"http://127.0.0.1:5173",
 		}
 

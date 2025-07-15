@@ -1,8 +1,10 @@
 """Configuration management utilities"""
 
 import yaml
+import json
 from pathlib import Path
 from typing import Dict, Any, Optional
+from datetime import datetime
 
 from rich.console import Console
 
@@ -14,7 +16,11 @@ class ConfigManager:
     def __init__(self, project_dir: Path):
         self.project_dir = project_dir
         self.config_file = project_dir / 'silan.yaml'
+        self.db_cache_file = project_dir / '.silan_db_cache.json'
+        self.last_sync_cache_file = project_dir / '.silan_last_sync.json'
         self._config_cache: Optional[Dict[str, Any]] = None
+        self._db_cache: Optional[Dict[str, Any]] = None
+        self._last_sync_cache: Optional[Dict[str, Any]] = None
 
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from silan.yaml"""
@@ -199,6 +205,215 @@ class ConfigManager:
                 "mock_external_apis": False
             }
         }
+
+    def load_db_cache(self) -> Dict[str, Any]:
+        """Load database settings cache from .silan_db_cache.json"""
+        if self._db_cache is not None:
+            return self._db_cache
+
+        if not self.db_cache_file.exists():
+            return {}
+
+        try:
+            with open(self.db_cache_file, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+            
+            self._db_cache = cache
+            return cache
+            
+        except (json.JSONDecodeError, Exception) as e:
+            console.print(f"[yellow]⚠️  Error loading database cache: {e}[/yellow]")
+            return {}
+
+    def save_db_cache(self, db_config: Dict[str, Any]) -> bool:
+        """Save database settings to cache"""
+        try:
+            cache_data = {
+                'database': db_config,
+                'last_updated': datetime.now().isoformat(),
+                'version': '1.0'
+            }
+            
+            with open(self.db_cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            
+            self._db_cache = cache_data
+            console.print(f"[green]✅ Database settings cached to {self.db_cache_file}[/green]")
+            return True
+            
+        except Exception as e:
+            console.print(f"[red]❌ Error saving database cache: {e}[/red]")
+            return False
+
+    def get_cached_db_config(self) -> Optional[Dict[str, Any]]:
+        """Get cached database configuration"""
+        cache = self.load_db_cache()
+        if cache and 'database' in cache:
+            return cache['database']
+        return None
+
+    def update_db_cache(self, db_config: Dict[str, Any]) -> bool:
+        """Update cached database configuration"""
+        return self.save_db_cache(db_config)
+
+    def clear_db_cache(self) -> bool:
+        """Clear database settings cache"""
+        try:
+            if self.db_cache_file.exists():
+                self.db_cache_file.unlink()
+                self._db_cache = None
+                console.print("[green]✅ Database cache cleared[/green]")
+            return True
+        except Exception as e:
+            console.print(f"[red]❌ Error clearing database cache: {e}[/red]")
+            return False
+
+    def get_db_config_with_fallback(self) -> Dict[str, Any]:
+        """Get database config with cache fallback"""
+        # First try to get from main config
+        config = self.load_config()
+        db_config = config.get('database', {})
+        
+        # If no database config in main config, try cache
+        if not db_config or db_config.get('type') is None:
+            cached_config = self.get_cached_db_config()
+            if cached_config:
+                console.print("[blue]📋 Using cached database settings[/blue]")
+                return cached_config
+        
+        # If we have a valid config, cache it for future use
+        if db_config and db_config.get('type'):
+            self.update_db_cache(db_config)
+        
+        return db_config
+
+    def set_default_db_config(self, db_config: Dict[str, Any]) -> bool:
+        """Set database config as default and cache it"""
+        # Update main config
+        success = self.set_config_value('database', db_config)
+        
+        # Also cache it
+        if success:
+            self.update_db_cache(db_config)
+        
+        return success
+
+    def load_last_sync_cache(self) -> Dict[str, Any]:
+        """Load last sync configuration cache from .silan_last_sync.json"""
+        if self._last_sync_cache is not None:
+            return self._last_sync_cache
+
+        if not self.last_sync_cache_file.exists():
+            return {}
+
+        try:
+            with open(self.last_sync_cache_file, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+            
+            self._last_sync_cache = cache
+            return cache
+            
+        except (json.JSONDecodeError, Exception) as e:
+            console.print(f"[yellow]⚠️  Error loading last sync cache: {e}[/yellow]")
+            return {}
+
+    def save_last_sync_config(self, db_config: Dict[str, Any], sync_options: Dict[str, Any] = None) -> bool:
+        """Save last sync configuration to cache"""
+        try:
+            sync_options = sync_options or {}
+            cache_data = {
+                'database': db_config,
+                'sync_options': sync_options,
+                'last_sync_time': datetime.now().isoformat(),
+                'sync_count': self._get_sync_count() + 1,
+                'version': '1.0'
+            }
+            
+            with open(self.last_sync_cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            
+            self._last_sync_cache = cache_data
+            console.print(f"[dim]💾 Last sync configuration saved[/dim]")
+            return True
+            
+        except Exception as e:
+            console.print(f"[yellow]⚠️  Error saving last sync cache: {e}[/yellow]")
+            return False
+
+    def get_last_sync_config(self) -> Optional[Dict[str, Any]]:
+        """Get last sync database configuration"""
+        cache = self.load_last_sync_cache()
+        if cache and 'database' in cache:
+            return cache['database']
+        return None
+
+    def get_last_sync_options(self) -> Dict[str, Any]:
+        """Get last sync options"""
+        cache = self.load_last_sync_cache()
+        if cache and 'sync_options' in cache:
+            return cache['sync_options']
+        return {}
+
+    def get_last_sync_info(self) -> Dict[str, Any]:
+        """Get complete last sync information"""
+        return self.load_last_sync_cache()
+
+    def clear_last_sync_cache(self) -> bool:
+        """Clear last sync configuration cache"""
+        try:
+            if self.last_sync_cache_file.exists():
+                self.last_sync_cache_file.unlink()
+                self._last_sync_cache = None
+                console.print("[green]✅ Last sync cache cleared[/green]")
+            return True
+        except Exception as e:
+            console.print(f"[red]❌ Error clearing last sync cache: {e}[/red]")
+            return False
+
+    def _get_sync_count(self) -> int:
+        """Get current sync count"""
+        cache = self.load_last_sync_cache()
+        return cache.get('sync_count', 0)
+
+    def get_smart_db_config(self) -> Dict[str, Any]:
+        """Smart database config selection with priority: last sync > cache > config > default"""
+        
+        # 1. Try last sync config first (highest priority)
+        last_sync_config = self.get_last_sync_config()
+        if last_sync_config and last_sync_config.get('type'):
+            console.print(f"[blue]🔄 Using last sync {last_sync_config['type']} configuration[/blue]")
+            # Update timestamp for this usage
+            sync_options = self.get_last_sync_options()
+            self.save_last_sync_config(last_sync_config, sync_options)
+            return last_sync_config
+        
+        # 2. Fallback to cached config
+        cached_config = self.get_cached_db_config()
+        if cached_config and cached_config.get('type'):
+            console.print(f"[blue]📋 Using cached {cached_config['type']} configuration[/blue]")
+            return cached_config
+        
+        # 3. Fallback to main config
+        config = self.load_config()
+        db_config = config.get('database', {})
+        if db_config and db_config.get('type'):
+            console.print(f"[blue]⚙️  Using main config {db_config['type']} configuration[/blue]")
+            return db_config
+        
+        # 4. No configuration found
+        return {}
+
+    def has_previous_sync_config(self) -> bool:
+        """Check if there's a previous sync configuration available"""
+        last_sync = self.get_last_sync_config()
+        cached = self.get_cached_db_config()
+        main_config = self.load_config().get('database', {})
+        
+        return bool(
+            (last_sync and last_sync.get('type')) or
+            (cached and cached.get('type')) or 
+            (main_config and main_config.get('type'))
+        )
 
 
 class ThemeManager:

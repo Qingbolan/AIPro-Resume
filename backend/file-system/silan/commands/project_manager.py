@@ -13,7 +13,6 @@ from datetime import datetime, date
 from dataclasses import dataclass
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
 
 console = Console()

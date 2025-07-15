@@ -242,9 +242,25 @@ export const getBlogTags = async (language: 'en' | 'zh' = 'en'): Promise<string[
  * Update blog views
  */
 export const updateBlogViews = async (id: string, language: 'en' | 'zh' = 'en'): Promise<void> => {
-  await post(`/api/v1/blog/posts/${id}/views`, {
-    lang: formatLanguage(language)
-  });
+  // Use form data to avoid CORS preflight request
+  const formData = new URLSearchParams();
+  formData.append('lang', formatLanguage(language));
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8888'}/api/v1/blog/posts/${id}/views`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString(),
+    });
+    
+    if (!response.ok) {
+      console.warn(`Failed to update blog views: ${response.status} ${response.statusText}`);
+    }
+  } catch (error) {
+    console.warn('Failed to update blog views (non-critical):', error);
+  }
 };
 
 /**

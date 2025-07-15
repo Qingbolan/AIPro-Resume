@@ -195,9 +195,46 @@ def backend_install():
         console.print("[red]❌ Failed to install backend binary[/red]")
 
 
+@cli.command('db-config')
+@click.option('--action', default='show', 
+              type=click.Choice(['show', 'set', 'cache', 'load-cache', 'clear-cache', 'interactive', 'last-sync', 'clear-all']),
+              help='Configuration action to perform')
+@click.option('--type', help='Database type (mysql, postgresql, sqlite)')
+@click.option('--host', help='Database host')
+@click.option('--port', help='Database port')
+@click.option('--user', help='Database user')
+@click.option('--password', help='Database password')
+@click.option('--database', help='Database name')
+@click.option('--path', help='SQLite database file path')
+def db_config(action: str, type: str, host: str, port: str, user: str, password: str, database: str, path: str):
+    """Manage database configuration with caching"""
+    from .commands.db_config_manager import DatabaseConfigManager
+    
+    manager = DatabaseConfigManager()
+    
+    kwargs = {}
+    if action == 'set':
+        kwargs = {
+            'db_type': type,
+            'host': host,
+            'port': port,
+            'user': user,
+            'password': password,
+            'database': database,
+            'path': path
+        }
+        # Remove None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    
+    success = manager.execute(action, **kwargs)
+    
+    if not success:
+        exit(1)
+
+
 @cli.command('db-sync')
-@click.option('--db-type', default='sqlite', type=click.Choice(['mysql', 'postgresql', 'sqlite']),
-              help='Database type')
+@click.option('--db-type', default=None, type=click.Choice(['mysql', 'postgresql', 'sqlite']),
+              help='Database type (will use cached config if not specified)')
 @click.option('--host', default='localhost', help='Database host (MySQL/PostgreSQL only)')
 @click.option('--port', type=int, help='Database port (MySQL/PostgreSQL only)')
 @click.option('--user', help='Database user (MySQL/PostgreSQL only)')
@@ -207,41 +244,83 @@ def backend_install():
 @click.option('--dry-run', is_flag=True, help='Show what would be synced without actually syncing')
 @click.option('--create-tables', is_flag=True, help='Create database tables if they don\'t exist')
 @click.option('--start-backend', is_flag=True, help='Start backend server after sync')
+@click.option('--use-cache', is_flag=True, default=True, help='Use cached database configuration')
 def db_sync(db_type: str, host: str, port: int, user: str, password: str, 
-           database: str, db_path: str, dry_run: bool, create_tables: bool, start_backend: bool):
+           database: str, db_path: str, dry_run: bool, create_tables: bool, start_backend: bool, use_cache: bool):
     """Sync content files to database (MySQL/PostgreSQL/SQLite)"""
     from .commands.database_sync_advanced import AdvancedDatabaseSyncCommand
+    from .utils.config import ConfigManager
     
-    # Set default ports if not specified
-    if port is None:
-        port = 3306 if db_type == 'mysql' else 5432 if db_type == 'postgresql' else None
+    config_manager = ConfigManager(Path.cwd())
     
-    if db_type in ['mysql', 'postgresql']:
-        # Prompt for required fields if not provided
-        if not user:
-            user = click.prompt('Database user', default='root' if db_type == 'mysql' else 'postgres')
-        if not password and not dry_run:
-            password = click.prompt('Database password', hide_input=True, default='')
-        if not database:
-            database = click.prompt('Database name', default='silan_portfolio')
+    # Determine if we should auto-detect configuration
+    any_db_param_provided = any([db_type, user, password, database, host != 'localhost', port, db_path != 'portfolio.db'])
+    
+    # Try to get database config automatically if no explicit parameters provided
+    if use_cache and not any_db_param_provided:
+        # Smart config selection: last sync > cache > config > default
+        db_config = config_manager.get_smart_db_config()
+        if not db_config or not db_config.get('type'):
+            console.print("[yellow]⚠️  No previous database configuration found[/yellow]")
+            console.print("[blue]💡 Please run 'silan db-config interactive' or specify database parameters[/blue]")
+            return
+    elif use_cache and not db_type:
+        # Only db-type not specified, but other params might be - use fallback method
+        db_config = config_manager.get_db_config_with_fallback()
+        if not db_config or not db_config.get('type'):
+            console.print("[yellow]⚠️  No cached database configuration found. Please run 'silan db-config interactive' first[/yellow]")
+            console.print("[blue]💡 Or specify database parameters manually using --db-type[/blue]")
+            return
         
-        db_config = {
-            'type': db_type,
-            'host': host,
-            'port': port,
-            'user': user,
-            'password': password or '',
-            'database': database
-        }
+        console.print(f"[bold blue]🔄 Using cached {db_config['type']} database configuration[/bold blue]")
     else:
-        db_config = {
-            'type': 'sqlite',
-            'path': db_path
-        }
+        # Build database configuration from command line arguments
+        if not db_type:
+            db_type = 'sqlite'  # Default fallback
+        
+        # Set default ports if not specified
+        if port is None:
+            port = 3306 if db_type == 'mysql' else 5432 if db_type == 'postgresql' else None
+        
+        if db_type in ['mysql', 'postgresql']:
+            # Prompt for required fields if not provided
+            if not user:
+                user = click.prompt('Database user', default='root' if db_type == 'mysql' else 'postgres')
+            if not password and not dry_run:
+                password = click.prompt('Database password', hide_input=True, default='')
+            if not database:
+                database = click.prompt('Database name', default='silan_portfolio')
+            
+            db_config = {
+                'type': db_type,
+                'host': host,
+                'port': port,
+                'user': user,
+                'password': password or '',
+                'database': database
+            }
+        else:
+            db_config = {
+                'type': 'sqlite',
+                'path': db_path
+            }
+        
+        # Cache the configuration for future use
+        config_manager.update_db_cache(db_config)
     
-    console.print(f"[bold blue]🔄 Syncing to {db_type} database[/bold blue]")
+    console.print(f"[bold blue]🔄 Syncing to {db_config['type']} database[/bold blue]")
     if dry_run:
         console.print("[yellow]🧪 Dry run mode enabled[/yellow]")
+    
+    # Record current sync options for future use
+    sync_options = {
+        'dry_run': dry_run,
+        'create_tables': create_tables,
+        'start_backend': start_backend
+    }
+    
+    # Save this configuration as the last used sync config (before sync to avoid issues if sync fails)
+    config_manager.save_last_sync_config(db_config, sync_options)
     
     cmd = AdvancedDatabaseSyncCommand(db_config, dry_run)
     success = cmd.execute()

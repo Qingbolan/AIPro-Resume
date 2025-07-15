@@ -2,6 +2,8 @@ package blog
 
 import (
 	"context"
+	"fmt"
+	"sort"
 
 	"silan-backend/internal/ent/blogseries"
 	"silan-backend/internal/svc"
@@ -40,15 +42,68 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 		return nil, err
 	}
 
+	// Sort blog posts by series order
+	posts := series.Edges.BlogPosts
+	sort.Slice(posts, func(i, j int) bool {
+		orderI := posts[i].SeriesOrder
+		orderJ := posts[j].SeriesOrder
+		if orderI == 0 && orderJ == 0 {
+			return posts[i].PublishedAt.Before(posts[j].PublishedAt)
+		}
+		if orderI == 0 {
+			return false
+		}
+		if orderJ == 0 {
+			return true
+		}
+		return orderI < orderJ
+	})
+
 	var episodes []types.SeriesEpisode
-	for i, post := range series.Edges.BlogPosts {
+	var totalDurationMinutes int
+	completedCount := 0
+
+	for i, post := range posts {
+		// Calculate duration from reading time
+		var duration string
+		if post.ReadingTimeMinutes > 0 {
+			duration = fmt.Sprintf("%d min", post.ReadingTimeMinutes)
+			totalDurationMinutes += post.ReadingTimeMinutes
+		}
+
+		// TODO: In a real application, you'd track completion per user
+		// For now, we'll mark as completed if it's not the latest episode
+		isCompleted := i < len(posts)-1
+		if isCompleted {
+			completedCount++
+		}
+
+		// Use series_order if available, otherwise use index
+		episodeOrder := post.SeriesOrder
+		if episodeOrder == 0 {
+			episodeOrder = i + 1
+		}
+
 		episodes = append(episodes, types.SeriesEpisode{
 			ID:        post.ID.String(),
 			Title:     post.Title,
-			Completed: false,  // This would need to be tracked separately
-			Current:   i == 0, // First episode as current for now
-			Order:     i + 1,
+			Duration:  duration,
+			Completed: isCompleted,
+			Current:   i == len(posts)-1, // Latest episode as current
+			Order:     episodeOrder,
 		})
+	}
+
+	// Calculate total duration
+	var totalDuration string
+	if totalDurationMinutes > 0 {
+		hours := totalDurationMinutes / 60
+		minutes := totalDurationMinutes % 60
+		if hours > 0 {
+			totalDuration = fmt.Sprintf("%dh %dm", hours, minutes)
+		} else {
+			totalDuration = fmt.Sprintf("%dm", minutes)
+		}
 	}
 
 	return &types.BlogSeries{
@@ -57,7 +112,8 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 		Description:    series.Description,
 		ThumbnailURL:   series.ThumbnailURL,
 		Episodes:       episodes,
-		CompletedCount: 0, // This would need to be calculated
+		TotalDuration:  totalDuration,
+		CompletedCount: completedCount,
 		CreatedAt:      series.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:      series.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}, nil

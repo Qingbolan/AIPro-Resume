@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, User, Tag, ArrowRight, Search, AlertCircle, Play, Video, List, Grid } from 'lucide-react';
+import { Calendar, User, Tag, ArrowRight, Search, AlertCircle, Play, Video, List, Grid, BookOpen } from 'lucide-react';
 import { useTheme } from '../components/ThemeContext';
 import { useLanguage } from '../components/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -43,38 +43,38 @@ const BlogCard: React.FC<BlogCardProps> = ({
   const isVlog = post.type === 'vlog';
   const isSeries = post.type === 'series';
 
-  // Determine if this should use wide layout - simplified approach
+  // Enhanced layout calculation for better visual hierarchy
   const shouldUseWideLayout = useMemo(() => {
     if (featured) return true;
 
-    // Default: most content uses single column for better balance
-    // Only use wide layout for specific cases
-
-    // Manual override for specific content IDs that should be wide
-    const forceWideIds = ['5']; // Manually specify which should be wide
-    if (forceWideIds.includes(post.id)) {
-      return true;
-    }
-
-    // Very conservative automatic wide layout:
-    // Only for series with very long content AND it's in a good position
+    // Series: More frequent wide layout for better showcase
     if (isSeries) {
-      const contentLength = (post.summary || '').length + (post.summaryZh || '').length;
-      const hasSeriesImage = Boolean(post.seriesImage);
-      const isGoodPosition = index % 7 === 1; // Only positions 2, 9, 16, etc.
-
-      return hasSeriesImage && contentLength > 180 && isGoodPosition;
+      // Series get wide layout in strategic positions for better visual hierarchy
+      const isStrategicPosition = index % 6 === 0 || index % 6 === 3; // Positions 1, 4, 7, 10, etc.
+      const hasRichContent = Boolean(post.seriesImage) || Boolean(post.seriesDescription);
+      const hasMultipleEpisodes = post.totalEpisodes && post.totalEpisodes > 1;
+      
+      return isStrategicPosition || hasRichContent || hasMultipleEpisodes;
     }
 
-    // For vlogs, even more conservative - only very long content in specific positions  
+    // Vlogs: Smart adaptive width based on content and position
     if (isVlog) {
       const contentLength = (post.summary || '').length + (post.summaryZh || '').length;
-      const isGoodPosition = index % 8 === 3; // Only positions 4, 12, 20, etc.
-
-      return contentLength > 200 && isGoodPosition;
+      const hasVideoElements = Boolean(post.vlogCover) || Boolean(post.videoDuration);
+      const isBalancedPosition = index % 5 === 1 || index % 7 === 2; // More varied positions
+      
+      // Use wide layout for:
+      // 1. Vlogs with rich content (cover + decent description)
+      // 2. Strategic positions for visual balance
+      // 3. Longer content that benefits from more space
+      return hasVideoElements && (contentLength > 120 || isBalancedPosition);
     }
 
-    return false;
+    // Regular articles: Occasional wide layout for featured content
+    const contentLength = (post.summary || '').length + (post.summaryZh || '').length;
+    const isFeaturedPosition = index % 8 === 4; // Every 8th position starting from 5th
+    
+    return contentLength > 250 && isFeaturedPosition;
   }, [post, index, featured, isVlog, isSeries]);
 
   const isWideLayout = shouldUseWideLayout;
@@ -86,6 +86,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
         return <Video size={16} className="text-red-500" />;
       case 'series':
         return <List size={16} className="text-purple-500" />;
+      case 'tutorial':
+        return <BookOpen size={16} className="text-green-500" />;
+      case 'podcast':
+        return <Play size={16} className="text-orange-500" />;
       default:
         return <ArrowRight size={14} />;
     }
@@ -98,6 +102,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
         return language === 'en' ? 'Video Blog' : '视频博客';
       case 'series':
         return language === 'en' ? 'Series' : '系列';
+      case 'tutorial':
+        return language === 'en' ? 'Tutorial' : '教程';
+      case 'podcast':
+        return language === 'en' ? 'Podcast' : '播客';
       default:
         return language === 'en' ? 'Article' : '文章';
     }
@@ -139,15 +147,19 @@ const BlogCard: React.FC<BlogCardProps> = ({
       aria-label={`Read article: ${post.title}`}
     >
       {/* Image */}
-      <div className={`relative overflow-hidden ${isWideLayout ? 'h-64 md:h-72' : 'h-48'
+      <div className={`relative overflow-hidden transition-all duration-300 ${
+        isWideLayout 
+          ? (isSeries ? 'h-72 md:h-80' : 'h-64 md:h-72') 
+          : (isSeries ? 'h-52' : 'h-48')
         }`}>
-        {/* Use video thumbnail for vlogs, series image if available, or default cover */}
-        {isVlog && post.videoThumbnail ? (
+        {/* Use vlog cover for vlogs, series image for series, or default cover */}
+        {isVlog && post.vlogCover && !imageLoadError ? (
           <div className="relative w-full h-full">
             <img
-              src={post.videoThumbnail}
+              src={post.vlogCover}
               alt={language === 'zh' && post.titleZh ? post.titleZh : post.title}
               className="w-full h-full object-cover"
+              onError={() => setImageLoadError(true)}
             />
             {/* arXiv-style paper number overlay for vlogs */}
             <div className="absolute bottom-2 left-2">
@@ -155,10 +167,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 {generatePaperNumber()}
               </div>
             </div>
-            {/* Play button overlay for vlogs */}
+            {/* Enhanced play button overlay for vlogs */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-black/70 flex items-center justify-center backdrop-blur-sm">
-                <Play size={24} className="text-white ml-1" />
+              <div className={`${isWideLayout ? 'w-20 h-20' : 'w-16 h-16'} rounded-full bg-black/70 flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:scale-110`}>
+                <Play size={isWideLayout ? 28 : 24} className="text-white ml-1" />
               </div>
             </div>
           </div>
@@ -178,11 +190,19 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </div>
           </div>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-project">
+          <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-project">
             {/* arXiv-style paper number - centered display */}
             <div className={`${isWideLayout ? 'text-4xl' : 'text-2xl'} font-bold opacity-20 text-theme-primary font-mono`}>
               {generatePaperNumber()}
             </div>
+            {/* Enhanced play button for vlogs without cover */}
+            {isVlog && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className={`${isWideLayout ? 'w-20 h-20' : 'w-16 h-16'} rounded-full bg-black/20 flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:bg-black/30`}>
+                  <Play size={isWideLayout ? 28 : 24} className="text-theme-primary opacity-30" />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -194,10 +214,19 @@ const BlogCard: React.FC<BlogCardProps> = ({
           </div>
         </div>
 
-        {/* Duration/Reading time overlay */}
+        {/* Enhanced duration/reading time overlay */}
         <div className="absolute top-4 right-4">
-          <div className="px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm bg-black/50 text-white">
-            {isVlog && post.videoDuration ? post.videoDuration : post.readTime || (language === 'en' ? '5 min read' : '5分钟阅读')}
+          <div className={`px-3 py-1 rounded-full font-medium backdrop-blur-sm bg-black/50 text-white ${
+            isWideLayout ? 'text-sm' : 'text-xs'
+          }`}>
+            {isVlog && post.videoDuration ? (
+              <div className="flex items-center gap-1">
+                <Play size={12} />
+                <span>{post.videoDuration}</span>
+              </div>
+            ) : (
+              post.readTime || (language === 'en' ? '5 min read' : '5分钟阅读')
+            )}
           </div>
         </div>
 
@@ -213,74 +242,141 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
       {/* Content */}
       <div className={`p-6 ${featured ? 'md:p-8' : ''}`}>
-        {/* Meta info */}
-        <div className="flex items-center space-x-4 mb-4 text-sm">
+        {/* Enhanced meta info */}
+        <div className={`flex items-center flex-wrap gap-3 mb-4 ${
+          isWideLayout ? 'text-base' : 'text-sm'
+        }`}>
           <div className="flex items-center space-x-1 text-theme-tertiary">
-            <Calendar size={14} />
+            <Calendar size={isWideLayout ? 16 : 14} />
             <span>{new Date(post.publishDate).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center space-x-1 text-theme-tertiary">
-            <User size={14} />
+            <User size={isWideLayout ? 16 : 14} />
             <span>{post.author}</span>
           </div>
+          {/* Additional vlog-specific meta info */}
+          {isVlog && post.videoDuration && (
+            <div className="flex items-center space-x-1 text-red-500">
+              <Video size={isWideLayout ? 16 : 14} />
+              <span>{post.videoDuration}</span>
+            </div>
+          )}
+          {/* Series progress indicator */}
+          {isSeries && post.episodeNumber && post.totalEpisodes && (
+            <div className="flex items-center space-x-1 text-purple-600">
+              <List size={isWideLayout ? 16 : 14} />
+              <span>
+                {language === 'en' 
+                  ? `Ep. ${post.episodeNumber}/${post.totalEpisodes}`
+                  : `第${post.episodeNumber}/${post.totalEpisodes}集`
+                }
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Series Title (if applicable) */}
+        {/* Series Title and Info (enhanced for wide layout) */}
         {isSeries && post.seriesTitle && (
-          <div className="mb-2">
-            <div className="flex items-center gap-2 text-sm text-purple-600 font-medium">
-              <List size={14} />
-              <span>{language === 'zh' && post.seriesTitleZh ? post.seriesTitleZh : post.seriesTitle}</span>
+          <div className={`mb-3 ${isWideLayout ? 'mb-4' : 'mb-2'}`}>
+            <div className="flex items-center gap-2 text-purple-600 font-medium">
+              <List size={isWideLayout ? 16 : 14} />
+              <span className={`${isWideLayout ? 'text-base' : 'text-sm'}`}>
+                {language === 'zh' && post.seriesTitleZh ? post.seriesTitleZh : post.seriesTitle}
+              </span>
+              {post.episodeNumber && post.totalEpisodes && (
+                <span className={`ml-2 px-2 py-1 rounded-full bg-purple-100 text-purple-800 font-medium ${
+                  isWideLayout ? 'text-xs' : 'text-xs'
+                }`}>
+                  {post.episodeNumber}/{post.totalEpisodes}
+                </span>
+              )}
             </div>
             {post.seriesDescription && (
-              <p className="text-xs text-theme-tertiary mt-1">
+              <p className={`text-theme-tertiary mt-2 leading-relaxed ${
+                isWideLayout ? 'text-sm' : 'text-xs'
+              }`}>
                 {language === 'zh' && post.seriesDescriptionZh ? post.seriesDescriptionZh : post.seriesDescription}
               </p>
             )}
           </div>
         )}
 
-        {/* Title */}
-        <h2 className={`font-bold mb-3 group-hover:text-theme-primary transition-colors duration-300 text-theme-primary ${isWideLayout ? 'text-2xl md:text-3xl' : 'text-xl'
-          }`}>
+        {/* Title with enhanced styling */}
+        <h2 className={`font-bold mb-3 group-hover:text-theme-primary transition-colors duration-300 text-theme-primary leading-tight ${
+          isWideLayout 
+            ? (isSeries ? 'text-2xl md:text-4xl' : 'text-2xl md:text-3xl')
+            : (isSeries ? 'text-xl md:text-2xl' : 'text-xl')
+        }`}>
           {language === 'zh' && post.titleZh ? post.titleZh : post.title}
         </h2>
 
-        {/* Excerpt */}
-        <p className={`leading-relaxed mb-4 text-theme-secondary ${isWideLayout ? 'text-base' : 'text-sm'}`}>
+        {/* Excerpt with improved readability */}
+        <p className={`leading-relaxed mb-4 text-theme-secondary ${
+          isWideLayout 
+            ? (isSeries ? 'text-lg leading-7' : 'text-base')
+            : (isSeries ? 'text-base' : 'text-sm')
+        }`}>
           {language === 'zh' && post.summaryZh ? post.summaryZh : post.summary}
         </p>
 
-        {/* Tags */}
-        {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {post.tags.map((tag, tagIndex) => (
-              <motion.span
-                key={tagIndex}
-                className="px-3 py-1 text-xs rounded-full font-medium tag-default"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-              >
-                {tag}
-              </motion.span>
-            ))}
-          </div>
-        )}
+        {/* Enhanced tags with better spacing and typography */}
+        <div className={`flex flex-wrap gap-2 mb-4 ${isWideLayout ? 'gap-3' : 'gap-2'}`}>
+          {post.tags.slice(0, isWideLayout ? 6 : 4).map((tag, tagIndex) => (
+            <motion.span
+              key={tagIndex}
+              className={`px-3 py-1 rounded-full font-medium tag-default ${
+                isWideLayout ? 'text-sm' : 'text-xs'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              {tag}
+            </motion.span>
+          ))}
+          {post.tags.length > (isWideLayout ? 6 : 4) && (
+            <span className={`px-3 py-1 rounded-full font-medium text-theme-tertiary ${
+              isWideLayout ? 'text-sm' : 'text-xs'
+            }`}>
+              +{post.tags.length - (isWideLayout ? 6 : 4)}
+            </span>
+          )}
+        </div>
 
-        {/* Read more / Watch / Continue series */}
+        {/* Enhanced call-to-action with better visual hierarchy */}
         <motion.div
-          className="flex items-center space-x-2 text-sm font-medium text-theme-accent"
+          className={`flex items-center justify-between ${isWideLayout ? 'mt-6' : 'mt-4'}`}
           whileHover={{ x: 5 }}
         >
-          <span>
-            {isVlog
-              ? (language === 'en' ? 'Watch video' : '观看视频')
-              : isSeries
-                ? (language === 'en' ? 'Continue series' : '继续系列')
-                : (language === 'en' ? 'Read more' : '阅读更多')
-            }
-          </span>
-          {getTypeIcon()}
+          <div className={`flex items-center space-x-2 font-medium text-theme-accent ${
+            isWideLayout ? 'text-base' : 'text-sm'
+          }`}>
+            <span>
+              {isVlog
+                ? (language === 'en' ? 'Watch video' : '观看视频')
+                : isSeries
+                  ? (language === 'en' ? 'Continue series' : '继续系列')
+                  : (language === 'en' ? 'Read more' : '阅读更多')
+              }
+            </span>
+            {getTypeIcon()}
+          </div>
+          {/* Additional visual indicator for wide layout */}
+          {isWideLayout && (
+            <div className="flex items-center space-x-2 text-theme-tertiary text-xs">
+              {isVlog && (
+                <span className="flex items-center gap-1">
+                  <Video size={12} />
+                  {language === 'en' ? 'Video content' : '视频内容'}
+                </span>
+              )}
+              {isSeries && (
+                <span className="flex items-center gap-1">
+                  <BookOpen size={12} />
+                  {language === 'en' ? 'Series' : '系列'}
+                </span>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </motion.article>
@@ -363,7 +459,7 @@ const BlogStack: React.FC = () => {
         setError(null);
 
         // Fetch blog posts from API with language support
-        const fetchedPosts = await fetchBlogPosts({}, language as 'en' | 'zh');
+        const fetchedPosts = await fetchBlogPosts(language as 'en' | 'zh');
 
         if (isMounted) {
           setPosts(fetchedPosts);

@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Any
 
 from rich.console import Console
 from rich.panel import Panel

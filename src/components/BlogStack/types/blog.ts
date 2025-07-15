@@ -1,10 +1,11 @@
+import { ReactNode } from 'react';
+
 export interface BlogContent {
-  type: 'text' | 'image' | 'video' | 'code' | 'quote';
-  content: string;
-  caption?: string;
-  language?: string; // for code blocks
-  annotation?: string;
   id: string;
+  type: 'text' | 'image' | 'video' | 'quote' | 'code';
+  content: string;
+  metadata?: Record<string, any>;
+  children?: ReactNode;
 }
 
 export interface BlogData {
@@ -22,11 +23,12 @@ export interface BlogData {
   views: number;
   summary: string;
   summaryZh?: string;
-  type?: 'article' | 'vlog' | 'series';
+  type?: 'article' | 'vlog' | 'tutorial' | 'podcast';
   // Vlog specific fields
   videoUrl?: string;
   videoDuration?: string;
   videoThumbnail?: string;
+  vlogCover?: string; // Vlog cover image for display
   // Series specific fields
   seriesId?: string;
   seriesTitle?: string;

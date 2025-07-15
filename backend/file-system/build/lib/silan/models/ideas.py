@@ -18,7 +18,7 @@ class IdeaStatus(enum.Enum):
     HYPOTHESIS = "hypothesis"
     EXPERIMENTING = "experimenting"
     VALIDATING = "validating"
-    published = "published"
+    PUBLISHED = "published"
     CONCLUDED = "concluded"
 
 

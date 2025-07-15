@@ -350,7 +350,7 @@ class AdvancedDatabaseSyncCommand:
         return results
     
     def _sync_blog_content(self, session: Session, user: User, files: List[Path], progress: Progress, task_id) -> Dict[str, int]:
-        """Sync blog content with proper categories and tags"""
+        """Sync blog content with proper categories, tags, and series"""
         results = {'created': 0, 'updated': 0, 'errors': 0}
         
         for file_path in files:
@@ -360,6 +360,17 @@ class AdvancedDatabaseSyncCommand:
                     continue
                 
                 blog_data = extracted.main_entity
+                
+                # Handle series information
+                series_id = None
+                if 'series' in extracted.metadata and extracted.metadata['series']:
+                    series_info = extracted.metadata['series']
+                    series_id = self._get_or_create_blog_series(session, series_info)
+                    blog_data['series_id'] = series_id
+                    
+                    # Set series order if available
+                    if 'part_number' in series_info:
+                        blog_data['series_order'] = series_info['part_number']
                 
                 # Check if blog post exists
                 existing_post = session.execute(
@@ -381,7 +392,14 @@ class AdvancedDatabaseSyncCommand:
                 
                 session.flush()
                 
-                # Sync categories and tags (simplified for now)
+                # Sync categories
+                if extracted.categories:
+                    self._sync_blog_categories(session, blog_post, extracted.categories)
+                
+                # Sync tags
+                if extracted.tags:
+                    self._sync_blog_tags(session, blog_post, extracted.tags)
+                
                 session.commit()
                 progress.advance(task_id)
                 
@@ -648,7 +666,7 @@ class AdvancedDatabaseSyncCommand:
                 if not project_data.get('title'):
                     project_data['title'] = folder_path.name.replace('-', ' ').title()
                 
-                if not project_data.get('slug'):
+                if not project_data.get('slug') or project_data.get('slug') == 'untitled':
                     project_data['slug'] = folder_path.name
                 
                 if not project_data.get('description'):
@@ -751,12 +769,12 @@ class AdvancedDatabaseSyncCommand:
                             # Convert list to comma-separated string
                             idea_data[field] = ', '.join(str(item) for item in idea_data[field])
                 
-                # Set default values for required fields
+                # Set default values for required fields ONLY if they are missing or empty
                 defaults = {
-                    'motivation': idea_data.get('description', ''),
                     'methodology': '',
                     'expected_outcome': '',
                     'required_resources': '',
+                    'motivation': '',  # ADD MOTIVATION DEFAULT
                     'status': 'DRAFT',
                     'priority': 'MEDIUM',
                     'collaboration_needed': False,
@@ -766,7 +784,10 @@ class AdvancedDatabaseSyncCommand:
                 }
                 
                 for key, default_value in defaults.items():
-                    if key not in idea_data or idea_data[key] is None:
+                    if key not in idea_data or idea_data[key] is None or idea_data[key] == '':
+                        # Special handling for motivation - don't override if it has content
+                        if key == 'motivation' and idea_data.get('motivation'):
+                            continue
                         idea_data[key] = default_value
                 
                 # Check if idea exists (by slug not title)
@@ -816,7 +837,7 @@ class AdvancedDatabaseSyncCommand:
             'hypothesis': 'HYPOTHESIS',
             'experimenting': 'EXPERIMENTING',
             'validating': 'VALIDATING',
-            'published': 'published',
+            'published': 'PUBLISHED',
             'concluded': 'CONCLUDED'
         }
         return status_mapping.get(status.lower(), 'DRAFT')
@@ -1202,3 +1223,99 @@ class AdvancedDatabaseSyncCommand:
             console.print(f"[bold green]🎉 Advanced sync completed! Created {total_created} entities total.[/bold green]")
         else:
             console.print("[yellow]⚠️  No new entities created. Data may already exist or needs review.[/yellow]")
+
+    def _get_or_create_blog_series(self, session: Session, series_info: Dict[str, Any]) -> str:
+        """Get or create blog series and return its ID"""
+        series_name = series_info.get('name', '')
+        series_slug = series_info.get('slug', self._generate_slug(series_name))
+        
+        # Check if series exists
+        existing_series = session.execute(
+            select(BlogSeries).where(BlogSeries.slug == series_slug)
+        ).scalar_one_or_none()
+        
+        if existing_series:
+            return existing_series.id
+        
+        # Create new series
+        series_data = {
+            'title': series_name,
+            'slug': series_slug,
+            'description': series_info.get('description', ''),
+            'status': 'active',
+            'episode_count': 0  # Will be updated as posts are added
+        }
+        
+        new_series = BlogSeries(**series_data)
+        session.add(new_series)
+        session.flush()
+        
+        return new_series.id
+    
+    def _sync_blog_categories(self, session: Session, blog_post: BlogPost, categories: List[str]):
+        """Sync blog categories"""
+        # For now, just set the main category (blogs can have one main category)
+        if categories:
+            main_category = categories[0]
+            category_slug = self._generate_slug(main_category)
+            
+            # Get or create category
+            category = session.execute(
+                select(BlogCategory).where(BlogCategory.slug == category_slug)
+            ).scalar_one_or_none()
+            
+            if not category:
+                category = BlogCategory(
+                    name=main_category,  # Changed from title to name
+                    slug=category_slug,
+                    description=f"Posts in {main_category} category"
+                )
+                session.add(category)
+                session.flush()
+            
+            blog_post.category_id = category.id
+    
+    def _sync_blog_tags(self, session: Session, blog_post: BlogPost, tags: List[str]):
+        """Sync blog tags"""
+        # Clear existing tags for this post
+        blog_post.tags.clear()
+        
+        # Add new tags
+        for tag_name in tags:
+            if not tag_name or not tag_name.strip():
+                continue
+                
+            tag_slug = self._generate_slug(tag_name)
+            
+            # Get or create tag
+            tag = session.execute(
+                select(BlogTag).where(BlogTag.slug == tag_slug)
+            ).scalar_one_or_none()
+            
+            if not tag:
+                tag = BlogTag(
+                    name=tag_name.strip(),
+                    slug=tag_slug
+                )
+                session.add(tag)
+                session.flush()
+            
+            # Add tag to post
+            blog_post.tags.append(tag)
+    
+    def _generate_slug(self, text: str) -> str:
+        """Generate URL-friendly slug from text"""
+        import re
+        if not text:
+            return ''
+        
+        # Convert to lowercase and replace spaces with hyphens
+        slug = text.lower().strip()
+        # Remove special characters, keep alphanumeric and hyphens
+        slug = re.sub(r'[^a-z0-9\s-]', '', slug)
+        # Replace spaces and multiple hyphens with single hyphen
+        slug = re.sub(r'[\s-]+', '-', slug)
+        # Remove leading/trailing hyphens
+        slug = slug.strip('-')
+        
+        return slug[:100]  # Limit length

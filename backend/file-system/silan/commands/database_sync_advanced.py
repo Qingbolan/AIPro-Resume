@@ -9,9 +9,12 @@ from typing import Dict, Any, List, Optional, Union
 import hashlib
 import uuid
 
+# Typing helpers
+from typing import cast
+from sqlalchemy.engine import Engine
+
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import SQLAlchemyError
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
@@ -57,6 +60,10 @@ class AdvancedDatabaseSyncCommand:
             self.database_config = database_config
             self.database_url = self._build_database_url(database_config)
             self.db_type = database_config.get('type', 'mysql')
+            
+        # Cache database config for future use
+        if not isinstance(database_config, str) and database_config:
+            self.config_manager.update_db_cache(database_config)
         
         # SQLAlchemy setup
         self.engine = None
@@ -94,10 +101,16 @@ class AdvancedDatabaseSyncCommand:
         # Connect to database
         if not self._connect_database():
             return False
+
+        # Safety check for type checkers & runtime – ensure engine is ready before continuing
+        if self.engine is None:
+            console.print("[red]❌ Database engine is not initialized[/red]")
+            return False
             
         # Create schema
         try:
-            Base.metadata.create_all(self.engine)
+            from typing import cast
+            Base.metadata.create_all(cast(Engine, self.engine))
             console.print("[green]✅ Database schema created/verified[/green]")
         except Exception as e:
             console.print(f"[red]❌ Schema creation failed: {e}[/red]")
@@ -149,8 +162,14 @@ class AdvancedDatabaseSyncCommand:
     
     def _sync_structured_content(self) -> bool:
         """Sync content using structured parsing and proper model mapping"""
+        # Ensure SessionLocal factory is available
+        if self.SessionLocal is None:
+            console.print("[red]❌ Session factory is not initialized. Connect to the database first.[/red]")
+            return False
+
         try:
-            with self.SessionLocal() as session:
+            from typing import cast
+            with cast('sessionmaker', self.SessionLocal)() as session:
                 # Get or create default user and languages
                 user = self._get_or_create_user(session)
                 languages = self._ensure_languages(session)
@@ -350,7 +369,7 @@ class AdvancedDatabaseSyncCommand:
         return results
     
     def _sync_blog_content(self, session: Session, user: User, files: List[Path], progress: Progress, task_id) -> Dict[str, int]:
-        """Sync blog content with proper categories and tags"""
+        """Sync blog content with proper categories, tags, and series"""
         results = {'created': 0, 'updated': 0, 'errors': 0}
         
         for file_path in files:
@@ -360,6 +379,20 @@ class AdvancedDatabaseSyncCommand:
                     continue
                 
                 blog_data = extracted.main_entity
+                
+                # Handle series information
+                series_id = None
+                if 'series' in extracted.metadata and extracted.metadata['series']:
+                    try:
+                        series_info = extracted.metadata['series']
+                        series_id = self._get_or_create_blog_series(session, series_info)
+                        blog_data['series_id'] = series_id
+                        
+                        # Set series order if available
+                        if 'part_number' in series_info:
+                            blog_data['series_order'] = series_info['part_number']
+                    except Exception as e:
+                        console.print(f"[yellow]⚠️  Error handling series for {file_path}: {e}[/yellow]")
                 
                 # Check if blog post exists
                 existing_post = session.execute(
@@ -379,9 +412,23 @@ class AdvancedDatabaseSyncCommand:
                     session.add(blog_post)
                     results['created'] += 1
                 
+                # Flush to get the blog_post.id
                 session.flush()
                 
-                # Sync categories and tags (simplified for now)
+                # Sync categories
+                if extracted.categories:
+                    try:
+                        self._sync_blog_categories(session, blog_post, extracted.categories)
+                    except Exception as e:
+                        console.print(f"[yellow]⚠️  Error syncing categories for {file_path}: {e}[/yellow]")
+                
+                # Sync tags
+                if extracted.tags:
+                    try:
+                        self._sync_blog_tags(session, blog_post, extracted.tags)
+                    except Exception as e:
+                        console.print(f"[yellow]⚠️  Error syncing tags for {file_path}: {e}[/yellow]")
+                
                 session.commit()
                 progress.advance(task_id)
                 
@@ -633,12 +680,12 @@ class AdvancedDatabaseSyncCommand:
         results = {'created': 0, 'updated': 0, 'errors': 0}
         
         # Create project parser
-        project_parser = self.parser_factory.create_parser(self.content_dir, 'project')
+        project_parser = self.parser_factory.create_parser(self.content_dir, 'project')  # type: ignore[assignment]
         
         for folder_path in folders:
             try:
                 # Parse project folder
-                extracted = project_parser.parse_folder(folder_path)
+                extracted = project_parser.parse_folder(folder_path)  # type: ignore[attr-defined]
                 if not extracted or extracted.content_type != 'project':
                     continue
                 
@@ -712,12 +759,12 @@ class AdvancedDatabaseSyncCommand:
         results = {'created': 0, 'updated': 0, 'errors': 0}
         
         # Create idea parser
-        idea_parser = self.parser_factory.create_parser(self.content_dir, 'idea')
+        idea_parser = self.parser_factory.create_parser(self.content_dir, 'idea')  # type: ignore[assignment]
         
         for folder_path in folders:
             try:
                 # Parse idea folder
-                extracted = idea_parser.parse_folder(folder_path)
+                extracted = idea_parser.parse_folder(folder_path)  # type: ignore[attr-defined]
                 if not extracted or extracted.content_type != 'idea':
                     continue
                 
@@ -1205,3 +1252,116 @@ class AdvancedDatabaseSyncCommand:
             console.print(f"[bold green]🎉 Advanced sync completed! Created {total_created} entities total.[/bold green]")
         else:
             console.print("[yellow]⚠️  No new entities created. Data may already exist or needs review.[/yellow]")
+
+    def _get_or_create_blog_series(self, session: Session, series_info: Dict[str, Any]) -> str:
+        """Get or create blog series and return its ID"""
+        series_name = series_info.get('name', '')
+        series_slug = series_info.get('slug', self._generate_slug(series_name))
+        
+        # Check if series exists
+        existing_series = session.execute(
+            select(BlogSeries).where(BlogSeries.slug == series_slug)
+        ).scalar_one_or_none()
+        
+        if existing_series:
+            return existing_series.id
+        
+        # Create new series
+        series_data = {
+            'title': series_name,
+            'slug': series_slug,
+            'description': series_info.get('description', ''),
+            'status': 'active',
+            'episode_count': 0  # Will be updated as posts are added
+        }
+        
+        new_series = BlogSeries(**series_data)
+        session.add(new_series)
+        session.flush()
+        
+        return new_series.id
+    
+    def _sync_blog_categories(self, session: Session, blog_post: BlogPost, categories: List[str]):
+        """Sync blog categories"""
+        # For now, just set the main category (blogs can have one main category)
+        if categories:
+            main_category = categories[0]
+            category_slug = self._generate_slug(main_category)
+            
+            # Get or create category
+            category = session.execute(
+                select(BlogCategory).where(BlogCategory.slug == category_slug)
+            ).scalar_one_or_none()
+            
+            if not category:
+                category = BlogCategory(
+                    name=main_category,  # Changed from title to name
+                    slug=category_slug,
+                    description=f"Posts in {main_category} category"
+                )
+                session.add(category)
+                session.flush()
+            
+            blog_post.category_id = category.id
+    
+    def _sync_blog_tags(self, session: Session, blog_post: BlogPost, tags: List[str]):
+        """Sync blog tags"""
+        from ..models.blog import BlogPostTag
+        from sqlalchemy import delete
+        
+        # Clear existing tags for this post by deleting from association table directly
+        delete_stmt = delete(BlogPostTag).where(BlogPostTag.blog_post_id == blog_post.id)
+        session.execute(delete_stmt)
+        session.flush()  # Ensure deletion is committed
+        
+        # Track added tags to avoid duplicates
+        added_tag_ids = set()
+        
+        # Add new tags
+        for tag_name in tags:
+            if not tag_name or not tag_name.strip():
+                continue
+                
+            tag_slug = self._generate_slug(tag_name)
+            
+            # Get or create tag
+            tag = session.execute(
+                select(BlogTag).where(BlogTag.slug == tag_slug)
+            ).scalar_one_or_none()
+            
+            if not tag:
+                tag = BlogTag(
+                    name=tag_name.strip(),
+                    slug=tag_slug
+                )
+                session.add(tag)
+                session.flush()
+            
+            # Only add if not already added (prevent duplicates)
+            if tag.id not in added_tag_ids:
+                blog_post_tag = BlogPostTag(
+                    blog_post_id=blog_post.id,
+                    blog_tag_id=tag.id
+                )
+                session.add(blog_post_tag)
+                added_tag_ids.add(tag.id)
+        
+        # Commit the tag operations
+        session.flush()
+    
+    def _generate_slug(self, text: str) -> str:
+        """Generate URL-friendly slug from text"""
+        import re
+        if not text:
+            return ''
+        
+        # Convert to lowercase and replace spaces with hyphens
+        slug = text.lower().strip()
+        # Remove special characters, keep alphanumeric and hyphens
+        slug = re.sub(r'[^a-z0-9\s-]', '', slug)
+        # Replace spaces and multiple hyphens with single hyphen
+        slug = re.sub(r'[\s-]+', '-', slug)
+        # Remove leading/trailing hyphens
+        slug = slug.strip('-')
+        
+        return slug[:100]  # Limit length
