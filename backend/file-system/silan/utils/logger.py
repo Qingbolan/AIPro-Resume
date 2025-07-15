@@ -24,10 +24,10 @@ from pyfiglet import Figlet
 class ModernLogger:
     """
     Modern colorful logger with smooth gradient styling inspired by Vue CLI,
-    built on top of the rich library.
+    built on top of the rich library. Designed to be inherited for specialized logging.
     """
 
-    # Emoji prefixes for each level
+    # Emoji prefixes for each level - can be overridden in subclasses
     LEVEL_ICONS = {
         "DEBUG": "🐛",
         "INFO": "ℹ️",
@@ -36,9 +36,26 @@ class ModernLogger:
         "CRITICAL": "💀"
     }
 
-    # Hardcoded gradient endpoints
+    # Hardcoded gradient endpoints - can be overridden in subclasses
     GRADIENT_START = "#41B883"  # Vue green
     GRADIENT_END   = "#6574CD"  # Vue purple
+    
+    # Default custom theme - can be extended in subclasses
+    DEFAULT_THEME = {
+        "info": "bold cyan",
+        "warning": "bold yellow",
+        "error": "bold red",
+        "critical": "bold white on red",
+        "success": "#4CAF50",
+        "vue_primary": "#42B883",
+        "vue_secondary": "#35495E",
+        "logging.time": "dim white",
+        "logging.level.debug": "grey70",
+        "logging.level.info": "bold cyan",
+        "logging.level.warning": "bold yellow",
+        "logging.level.error": "bold red",
+        "logging.level.critical": "bold white on red",
+    }
 
     def __init__(
         self,
@@ -48,8 +65,21 @@ class ModernLogger:
         show_path: bool = True,
         rich_tracebacks: bool = True
     ):
+        # Store instance configuration
+        self.name = name
+        self.level = level
+        self.log_file = log_file
+        self.show_path = show_path
+        self.rich_tracebacks = rich_tracebacks
+        
+        # Initialize logger
+        self._initialize_logger()
+    
+    def _initialize_logger(self) -> None:
+        """Initialize the logger - can be overridden in subclasses"""
         # Enable rich tracebacks
-        install_rich_traceback(show_locals=True)
+        if self.rich_tracebacks:
+            install_rich_traceback(show_locals=True)
 
         # Map text levels to logging levels
         levels = {
@@ -59,24 +89,10 @@ class ModernLogger:
             "error": logging.ERROR,
             "critical": logging.CRITICAL
         }
-        log_level = levels.get(level.lower(), logging.INFO)
+        log_level = levels.get(self.level.lower(), logging.INFO)
 
-        # Define custom theme (directly using color/effect strings)
-        custom_theme = Theme({
-            "info": "bold cyan",
-            "warning": "bold yellow",
-            "error": "bold red",
-            "critical": "bold white on red",
-            "success": "#4CAF50",
-            "vue_primary": "#42B883",
-            "vue_secondary": "#35495E",
-            "logging.time": "dim white",
-            "logging.level.debug": "grey70",
-            "logging.level.info": "bold cyan",
-            "logging.level.warning": "bold yellow",
-            "logging.level.error": "bold red",
-            "logging.level.critical": "bold white on red",
-        })
+        # Get custom theme (can be overridden in subclasses)
+        custom_theme = self._get_custom_theme()
 
         # Set up console and handler
         self.console = Console(theme=custom_theme, highlight=True)
@@ -84,19 +100,25 @@ class ModernLogger:
             console=self.console,
             show_time=True,
             show_level=True,
-            show_path=show_path,
+            show_path=self.show_path,
             markup=True,
-            rich_tracebacks=rich_tracebacks,
+            rich_tracebacks=self.rich_tracebacks,
             log_time_format="%H:%M:%S"
         )
 
-        self.logger = logging.getLogger(name)
+        self.logger = logging.getLogger(self.name)
         self.logger.setLevel(log_level)
         self.logger.handlers.clear()
         self.logger.addHandler(rich_handler)
 
-        if log_file:
-            self._setup_file_handler(log_file)
+        if self.log_file:
+            self._setup_file_handler(self.log_file)
+    
+    def _get_custom_theme(self) -> Theme:
+        """Get custom theme - can be overridden in subclasses"""
+        theme_dict = self.DEFAULT_THEME.copy()
+        # Subclasses can override this method to extend or modify the theme
+        return Theme(theme_dict)
 
     def _setup_file_handler(self, log_file: str) -> None:
         log_dir = os.path.dirname(log_file)
@@ -130,25 +152,36 @@ class ModernLogger:
 
         return grad_text
 
-    # —— Logging Level Methods —— #
+    # —— Logging Level Methods (can be overridden in subclasses) —— #
 
     def debug(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.debug(f"{self.LEVEL_ICONS['DEBUG']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("DEBUG", message)
+        self.logger.debug(formatted_message, *args, **kwargs)
 
     def info(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.info(f"{self.LEVEL_ICONS['INFO']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("INFO", message)
+        self.logger.info(formatted_message, *args, **kwargs)
 
     def warning(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.warning(f"{self.LEVEL_ICONS['WARNING']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("WARNING", message)
+        self.logger.warning(formatted_message, *args, **kwargs)
 
     def error(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.error(f"{self.LEVEL_ICONS['ERROR']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("ERROR", message)
+        self.logger.error(formatted_message, *args, **kwargs)
 
     def critical(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.critical(f"{self.LEVEL_ICONS['CRITICAL']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("CRITICAL", message)
+        self.logger.critical(formatted_message, *args, **kwargs)
 
     def exception(self, message: str, *args: Any, **kwargs: Any) -> None:
-        self.logger.exception(f"{self.LEVEL_ICONS['ERROR']} {message}", *args, **kwargs)
+        formatted_message = self._format_log_message("ERROR", message)
+        self.logger.exception(formatted_message, *args, **kwargs)
+    
+    def _format_log_message(self, level: str, message: str) -> str:
+        """Format log message with icon - can be overridden in subclasses"""
+        icon = self.LEVEL_ICONS.get(level, "")
+        return f"{icon} {message}" if icon else message
 
     # —— Rich Print Methods —— #
 
@@ -255,7 +288,7 @@ class ModernLogger:
 
     # —— New: File Save Notification —— #
 
-    def file_saved(self, file_path: str, file_name: str=None) -> None:
+    def file_saved(self, file_path: str, file_name: str="") -> None:
         """
         Print "File saved" with path as clickable link and emoji indicator.
         """

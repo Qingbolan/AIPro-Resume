@@ -18,10 +18,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from .commands.project_manager import ProjectManager
-from .commands.idea_manager import IdeaManager
-from .commands.update_manager import UpdateManager
-from .commands.template_manager import TemplateManager
+from .cli.project_manager import ProjectManager
+from .cli.idea_manager import IdeaManager
+from .cli.update_manager import UpdateManager
+from .cli.template_manager import TemplateManager
 from .parsers import ParserFactory, ExtractedContent
 from .utils.config import Config
 

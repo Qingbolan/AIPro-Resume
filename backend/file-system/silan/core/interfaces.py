@@ -1,7 +1,7 @@
 """Core interfaces for the Silan application architecture"""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class ICommand(ABC):

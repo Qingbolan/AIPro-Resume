@@ -2,7 +2,7 @@
 Template Manager for Silan
 
 Manages templates for quick creation of projects, ideas, updates, and other content.
-Provides customizable templates and easy template creation commands.
+Provides customizable templates and easy template creation cli.
 """
 
 import yaml

@@ -17,6 +17,9 @@ class ResumeParser(BaseParser):
     awards, skills, and other resume-related data with high accuracy.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="resume_parser")
+    
     def _get_content_type(self) -> str:
         return 'resume'
     

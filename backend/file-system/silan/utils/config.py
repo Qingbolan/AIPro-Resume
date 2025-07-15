@@ -6,14 +6,14 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from rich.console import Console
+from .logger import ModernLogger
 
-console = Console()
 
-class ConfigManager:
+class ConfigManager(ModernLogger):
     """Manage configuration files for the project"""
     
     def __init__(self, project_dir: Path):
+        super().__init__(name="config_manager")
         self.project_dir = project_dir
         self.config_file = project_dir / 'silan.yaml'
         self.db_cache_file = project_dir / '.silan_db_cache.json'
@@ -28,8 +28,8 @@ class ConfigManager:
             return self._config_cache
 
         if not self.config_file.exists():
-            console.print(f"[red]❌ Configuration file not found: {self.config_file}[/red]")
-            console.print("[yellow]💡 Run 'silan init <project-name>' to create a new project[/yellow]")
+            self.error(f"Configuration file not found: {self.config_file}")
+            self.info("Run 'silan init <project-name>' to create a new project")
             return self._get_default_config()
 
         try:
@@ -44,10 +44,10 @@ class ConfigManager:
             return config
             
         except yaml.YAMLError as e:
-            console.print(f"[red]❌ Invalid YAML in config file: {e}[/red]")
+            self.error(f"Invalid YAML in config file: {e}")
             return self._get_default_config()
         except Exception as e:
-            console.print(f"[red]❌ Error loading config: {e}[/red]")
+            self.error(f"Error loading config: {e}")
             return self._get_default_config()
 
     def save_config(self, config: Dict[str, Any]) -> bool:
@@ -57,11 +57,11 @@ class ConfigManager:
                 yaml.dump(config, f, default_flow_style=False, allow_unicode=True, indent=2)
             
             self._config_cache = config
-            console.print(f"[green]✅ Configuration saved to {self.config_file}[/green]")
+            self.success(f"Configuration saved to {self.config_file}")
             return True
             
         except Exception as e:
-            console.print(f"[red]❌ Error saving config: {e}[/red]")
+            self.error(f"Error saving config: {e}")
             return False
 
     def update_config(self, updates: Dict[str, Any]) -> bool:
@@ -222,7 +222,7 @@ class ConfigManager:
             return cache
             
         except (json.JSONDecodeError, Exception) as e:
-            console.print(f"[yellow]⚠️  Error loading database cache: {e}[/yellow]")
+            self.warning(f"Error loading database cache: {e}")
             return {}
 
     def save_db_cache(self, db_config: Dict[str, Any]) -> bool:
@@ -238,11 +238,11 @@ class ConfigManager:
                 json.dump(cache_data, f, indent=2, ensure_ascii=False)
             
             self._db_cache = cache_data
-            console.print(f"[green]✅ Database settings cached to {self.db_cache_file}[/green]")
+            self.success(f"Database settings cached to {self.db_cache_file}")
             return True
             
         except Exception as e:
-            console.print(f"[red]❌ Error saving database cache: {e}[/red]")
+            self.error(f"Error saving database cache: {e}")
             return False
 
     def get_cached_db_config(self) -> Optional[Dict[str, Any]]:
@@ -262,10 +262,10 @@ class ConfigManager:
             if self.db_cache_file.exists():
                 self.db_cache_file.unlink()
                 self._db_cache = None
-                console.print("[green]✅ Database cache cleared[/green]")
+                self.success("Database cache cleared")
             return True
         except Exception as e:
-            console.print(f"[red]❌ Error clearing database cache: {e}[/red]")
+            self.error(f"Error clearing database cache: {e}")
             return False
 
     def get_db_config_with_fallback(self) -> Dict[str, Any]:
@@ -278,7 +278,7 @@ class ConfigManager:
         if not db_config or db_config.get('type') is None:
             cached_config = self.get_cached_db_config()
             if cached_config:
-                console.print("[blue]📋 Using cached database settings[/blue]")
+                self.info("📋 Using cached database settings")
                 return cached_config
         
         # If we have a valid config, cache it for future use
@@ -314,10 +314,10 @@ class ConfigManager:
             return cache
             
         except (json.JSONDecodeError, Exception) as e:
-            console.print(f"[yellow]⚠️  Error loading last sync cache: {e}[/yellow]")
+            self.warning(f"Error loading last sync cache: {e}")
             return {}
 
-    def save_last_sync_config(self, db_config: Dict[str, Any], sync_options: Dict[str, Any] = None) -> bool:
+    def save_last_sync_config(self, db_config: Dict[str, Any], sync_options: Optional[Dict[str, Any]] = None) -> bool:
         """Save last sync configuration to cache"""
         try:
             sync_options = sync_options or {}
@@ -333,11 +333,11 @@ class ConfigManager:
                 json.dump(cache_data, f, indent=2, ensure_ascii=False)
             
             self._last_sync_cache = cache_data
-            console.print(f"[dim]💾 Last sync configuration saved[/dim]")
+            self.success("Last sync configuration saved")
             return True
             
         except Exception as e:
-            console.print(f"[yellow]⚠️  Error saving last sync cache: {e}[/yellow]")
+            self.warning(f"Error saving last sync cache: {e}")
             return False
 
     def get_last_sync_config(self) -> Optional[Dict[str, Any]]:
@@ -364,10 +364,10 @@ class ConfigManager:
             if self.last_sync_cache_file.exists():
                 self.last_sync_cache_file.unlink()
                 self._last_sync_cache = None
-                console.print("[green]✅ Last sync cache cleared[/green]")
+                self.success("Last sync cache cleared")
             return True
         except Exception as e:
-            console.print(f"[red]❌ Error clearing last sync cache: {e}[/red]")
+            self.error(f"Error clearing last sync cache: {e}")
             return False
 
     def _get_sync_count(self) -> int:
@@ -381,7 +381,7 @@ class ConfigManager:
         # 1. Try last sync config first (highest priority)
         last_sync_config = self.get_last_sync_config()
         if last_sync_config and last_sync_config.get('type'):
-            console.print(f"[blue]🔄 Using last sync {last_sync_config['type']} configuration[/blue]")
+            self.info(f"[blue]🔄 Using last sync {last_sync_config['type']} configuration[/blue]")
             # Update timestamp for this usage
             sync_options = self.get_last_sync_options()
             self.save_last_sync_config(last_sync_config, sync_options)
@@ -390,14 +390,14 @@ class ConfigManager:
         # 2. Fallback to cached config
         cached_config = self.get_cached_db_config()
         if cached_config and cached_config.get('type'):
-            console.print(f"[blue]📋 Using cached {cached_config['type']} configuration[/blue]")
+            self.info(f"[blue]📋 Using cached {cached_config['type']} configuration[/blue]")
             return cached_config
         
         # 3. Fallback to main config
         config = self.load_config()
         db_config = config.get('database', {})
         if db_config and db_config.get('type'):
-            console.print(f"[blue]⚙️  Using main config {db_config['type']} configuration[/blue]")
+            self.info(f"[blue]⚙️  Using main config {db_config['type']} configuration[/blue]")
             return db_config
         
         # 4. No configuration found
@@ -416,10 +416,11 @@ class ConfigManager:
         )
 
 
-class ThemeManager:
+class ThemeManager(ModernLogger):
     """Manage themes for the project"""
     
     def __init__(self, project_dir: Path):
+        super().__init__(name="theme_manager")
         self.project_dir = project_dir
         self.themes_dir = project_dir / 'themes'
 
@@ -446,8 +447,8 @@ class ThemeManager:
         available_themes = self.list_themes()
         
         if theme_name not in available_themes:
-            console.print(f"[red]❌ Theme '{theme_name}' not found[/red]")
-            console.print(f"[yellow]Available themes: {', '.join(available_themes)}[/yellow]")
+            self.error(f"Theme '{theme_name}' not found")
+            self.warning(f"Available themes: {', '.join(available_themes)}")
             return False
         
         config_manager = ConfigManager(self.project_dir)
@@ -460,7 +461,7 @@ class ThemeManager:
         
         theme_dir = self.themes_dir / theme_name
         if theme_dir.exists():
-            console.print(f"[yellow]⚠️  Theme '{theme_name}' already exists[/yellow]")
+            self.warning(f"Theme '{theme_name}' already exists")
             return False
         
         # Create basic theme structure
@@ -481,6 +482,6 @@ class ThemeManager:
         with open(theme_config_file, 'w', encoding='utf-8') as f:
             yaml.dump(theme_config, f, default_flow_style=False, allow_unicode=True, indent=2)
         
-        console.print(f"[green]✅ Theme '{theme_name}' installed successfully[/green]")
-        console.print(f"[blue]📁 Theme directory: {theme_dir}[/blue]")
+        self.success(f"Theme '{theme_name}' installed successfully")
+        self.info(f"Theme directory: {theme_dir}")
         return True

@@ -17,6 +17,9 @@ class BlogParser(BaseParser):
     tags, series information, and related posts with SEO optimization.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="blog_parser")
+    
     def _get_content_type(self) -> str:
         return 'blog_post'
     

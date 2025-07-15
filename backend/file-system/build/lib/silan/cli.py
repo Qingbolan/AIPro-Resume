@@ -40,7 +40,7 @@ def cli(verbose):
 @click.option('--with-backend', is_flag=True, help='Initialize with Go backend configuration')
 def init(project_name: str, language: str, with_backend: bool):
     """Initialize a new project with content templates"""
-    from .commands.init import InitCommand
+    from .cli.init import InitCommand
     
     console.print(f"[bold green]🚀 Initializing project '{project_name}'[/bold green]")
     console.print(f"[blue]Language: {language}[/blue]")
@@ -77,7 +77,7 @@ def backend_start(db_type: str, host: str, port: int, user: str, password: str,
                  database: str, db_path: str, server_host: str, server_port: int,
                  daemon: bool, config_file: str):
     """Start the Go backend server"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     # Build database configuration
     if db_type in ['mysql', 'postgresql']:
@@ -127,7 +127,7 @@ def backend_start(db_type: str, host: str, port: int, user: str, password: str,
 @backend.command('stop')
 def backend_stop():
     """Stop the Go backend server"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     manager = BackendManager()
     success = manager.stop()
@@ -141,7 +141,7 @@ def backend_stop():
 @backend.command('status')
 def backend_status():
     """Check the status of the Go backend server"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     manager = BackendManager()
     status = manager.status()
@@ -158,7 +158,7 @@ def backend_status():
 @backend.command('restart')
 def backend_restart():
     """Restart the Go backend server"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     manager = BackendManager()
     success = manager.restart()
@@ -174,7 +174,7 @@ def backend_restart():
 @click.option('--lines', '-n', default=50, help='Number of lines to show')
 def backend_logs(follow: bool, lines: int):
     """Show backend server logs"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     manager = BackendManager()
     manager.show_logs(follow, lines)
@@ -183,7 +183,7 @@ def backend_logs(follow: bool, lines: int):
 @backend.command('install')
 def backend_install():
     """Install or build the Go backend binary"""
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     manager = BackendManager()
     success = manager.install_backend()
@@ -210,7 +210,7 @@ def backend_install():
 def db_sync(db_type: str, host: str, port: int, user: str, password: str, 
            database: str, db_path: str, dry_run: bool, create_tables: bool, start_backend: bool):
     """Sync content files to database (MySQL/PostgreSQL/SQLite)"""
-    from .commands.database_sync_advanced import AdvancedDatabaseSyncCommand
+    from .cli.database_sync_advanced import AdvancedDatabaseSyncCommand
     
     # Set default ports if not specified
     if port is None:
@@ -249,7 +249,7 @@ def db_sync(db_type: str, host: str, port: int, user: str, password: str,
     # Start backend if requested and sync was successful
     if start_backend and success and not dry_run:
         console.print("\n[bold blue]🚀 Starting backend server...[/bold blue]")
-        from .commands.backend_manager import BackendManager
+        from .cli.backend_manager import BackendManager
         
         backend_config = {
             'database': db_config,
@@ -268,7 +268,7 @@ def db_sync(db_type: str, host: str, port: int, user: str, password: str,
 def status():
     """Show content summary and database configuration"""
     from .utils.config import ConfigManager
-    from .commands.backend_manager import BackendManager
+    from .cli.backend_manager import BackendManager
     
     config_manager = ConfigManager(Path.cwd())
     config = config_manager.load_config()
@@ -313,7 +313,7 @@ def workspace():
 @click.option('--description', help='Workspace description')
 def workspace_init(name: str, author: str, description: str):
     """Initialize a new modern workspace"""
-    from .commands.workspace_manager import WorkspaceManager
+    from .cli.workspace_manager import WorkspaceManager
     
     workspace_name = name or Path.cwd().name
     manager = WorkspaceManager()
@@ -326,7 +326,7 @@ def workspace_init(name: str, author: str, description: str):
 @workspace.command('status')
 def workspace_status():
     """Show workspace status and content summary"""
-    from .commands.workspace_manager import WorkspaceManager
+    from .cli.workspace_manager import WorkspaceManager
     
     manager = WorkspaceManager()
     manager.show_status()
@@ -344,7 +344,7 @@ def project():
 @click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
 def project_create(project_name: str, template: str, no_interactive: bool):
     """Create a new project"""
-    from .commands.project_manager import ProjectManager
+    from .cli.project_manager import ProjectManager
     
     manager = ProjectManager(Path.cwd())
     success = manager.create_project(project_name, template, not no_interactive)
@@ -356,7 +356,7 @@ def project_create(project_name: str, template: str, no_interactive: bool):
 @project.command('list')
 def project_list():
     """List all projects"""
-    from .commands.project_manager import ProjectManager
+    from .cli.project_manager import ProjectManager
     
     manager = ProjectManager(Path.cwd())
     manager.show_projects()
@@ -366,7 +366,7 @@ def project_list():
 @click.argument('project_name')
 def project_show(project_name: str):
     """Show detailed project information"""
-    from .commands.project_manager import ProjectManager
+    from .cli.project_manager import ProjectManager
     
     manager = ProjectManager(Path.cwd())
     manager.show_project_details(project_name)
@@ -376,7 +376,7 @@ def project_show(project_name: str):
 @click.argument('project_name')
 def project_open(project_name: str):
     """Open project folder in file manager"""
-    from .commands.project_manager import ProjectManager
+    from .cli.project_manager import ProjectManager
     
     manager = ProjectManager(Path.cwd())
     manager.open_project_folder(project_name)
@@ -394,7 +394,7 @@ def idea():
 @click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
 def idea_create(idea_name: str, template: str, no_interactive: bool):
     """Create a new research idea"""
-    from .commands.idea_manager import IdeaManager
+    from .cli.idea_manager import IdeaManager
     
     manager = IdeaManager(Path.cwd())
     success = manager.create_idea(idea_name, template, not no_interactive)
@@ -406,7 +406,7 @@ def idea_create(idea_name: str, template: str, no_interactive: bool):
 @idea.command('list')
 def idea_list():
     """List all ideas"""
-    from .commands.idea_manager import IdeaManager
+    from .cli.idea_manager import IdeaManager
     
     manager = IdeaManager(Path.cwd())
     manager.show_ideas()
@@ -416,7 +416,7 @@ def idea_list():
 @click.argument('idea_name')
 def idea_show(idea_name: str):
     """Show detailed idea information"""
-    from .commands.idea_manager import IdeaManager
+    from .cli.idea_manager import IdeaManager
     
     manager = IdeaManager(Path.cwd())
     manager.show_idea_details(idea_name)
@@ -426,7 +426,7 @@ def idea_show(idea_name: str):
 @click.argument('idea_name')
 def idea_open(idea_name: str):
     """Open idea folder in file manager"""
-    from .commands.idea_manager import IdeaManager
+    from .cli.idea_manager import IdeaManager
     
     manager = IdeaManager(Path.cwd())
     manager.open_idea_folder(idea_name)
@@ -435,7 +435,7 @@ def idea_open(idea_name: str):
 @idea.command('stats')
 def idea_stats():
     """Show idea statistics"""
-    from .commands.idea_manager import IdeaManager
+    from .cli.idea_manager import IdeaManager
     
     manager = IdeaManager(Path.cwd())
     manager.show_statistics()
@@ -453,7 +453,7 @@ def update():
 @click.option('--no-interactive', is_flag=True, help='Create without interactive prompts')
 def update_create(title: str, type: str, no_interactive: bool):
     """Create a new update entry"""
-    from .commands.update_manager import UpdateManager
+    from .cli.update_manager import UpdateManager
     
     manager = UpdateManager(Path.cwd())
     success = manager.create_update(title, type, not no_interactive)
@@ -468,7 +468,7 @@ def update_create(title: str, type: str, no_interactive: bool):
 @click.option('--limit', type=int, default=20, help='Limit number of results')
 def update_list(year: int, month: int, limit: int):
     """List recent updates"""
-    from .commands.update_manager import UpdateManager
+    from .cli.update_manager import UpdateManager
     
     manager = UpdateManager(Path.cwd())
     manager.show_updates(year, month, limit)
@@ -478,7 +478,7 @@ def update_list(year: int, month: int, limit: int):
 @click.argument('update_file')
 def update_show(update_file: str):
     """Show detailed update information"""
-    from .commands.update_manager import UpdateManager
+    from .cli.update_manager import UpdateManager
     
     manager = UpdateManager(Path.cwd())
     manager.show_update_details(update_file)
@@ -488,7 +488,7 @@ def update_show(update_file: str):
 @click.argument('update_file')
 def update_open(update_file: str):
     """Open update file in editor"""
-    from .commands.update_manager import UpdateManager
+    from .cli.update_manager import UpdateManager
     
     manager = UpdateManager(Path.cwd())
     manager.open_update_file(update_file)
@@ -497,7 +497,7 @@ def update_open(update_file: str):
 @update.command('stats')
 def update_stats():
     """Show update statistics"""
-    from .commands.update_manager import UpdateManager
+    from .cli.update_manager import UpdateManager
     
     manager = UpdateManager(Path.cwd())
     manager.show_statistics()
@@ -513,7 +513,7 @@ def template():
 @click.option('--type', help='Template type (projects, ideas, updates, blog)')
 def template_list(type: str):
     """List available templates"""
-    from .commands.template_manager import TemplateManager
+    from .cli.template_manager import TemplateManager
     
     manager = TemplateManager(Path.cwd())
     if type:
@@ -534,7 +534,7 @@ def template_list(type: str):
 @click.option('--from-path', type=click.Path(exists=True), help='Create template from existing content')
 def template_create(template_type: str, template_name: str, from_path: str):
     """Create a new template"""
-    from .commands.template_manager import TemplateManager
+    from .cli.template_manager import TemplateManager
     
     manager = TemplateManager(Path.cwd())
     source_path = Path(from_path) if from_path else None
@@ -549,7 +549,7 @@ def template_create(template_type: str, template_name: str, from_path: str):
 @click.argument('template_name')
 def template_show(template_type: str, template_name: str):
     """Show template details"""
-    from .commands.template_manager import TemplateManager
+    from .cli.template_manager import TemplateManager
     
     manager = TemplateManager(Path.cwd())
     manager.show_template_details(template_type, template_name)
@@ -560,7 +560,7 @@ def template_show(template_type: str, template_name: str):
 @click.argument('template_name')
 def template_delete(template_type: str, template_name: str):
     """Delete a template"""
-    from .commands.template_manager import TemplateManager
+    from .cli.template_manager import TemplateManager
     
     manager = TemplateManager(Path.cwd())
     manager.delete_template(template_type, template_name)
@@ -572,7 +572,7 @@ def template_delete(template_type: str, template_name: str):
 @click.option('--template', '-t', help='Template to use')
 def quick_create(content_type: str, name: str, template: str):
     """Quick create content from templates"""
-    from .commands.template_manager import TemplateManager
+    from .cli.template_manager import TemplateManager
     
     manager = TemplateManager(Path.cwd())
     success = manager.quick_create(content_type, name, template)
