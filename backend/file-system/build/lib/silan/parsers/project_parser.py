@@ -95,20 +95,46 @@ class ProjectParser(BaseParser):
             else:
                 config_project_data = config_data
             
+            # Debug logging
+            self.debug(f"Enhancing project {project_data.get('title', 'Unknown')} with config data")
+            self.debug(f"Config description: {config_project_data.get('description', 'Missing')}")
+            self.debug(f"Before - project description: {project_data.get('description', 'Missing')}")
+            
             # Override with config data if available
             for key, value in config_project_data.items():
                 if key in project_data and value is not None:
+                    old_value = project_data[key]
                     project_data[key] = value
+                    self.debug(f"Updated {key}: '{old_value}' -> '{value}'")
+                # Also add any new fields that don't exist yet
+                elif key not in project_data and value is not None:
+                    project_data[key] = value
+                    self.debug(f"Added new {key}: '{value}'")
             
             # Handle nested config structure - extract links
             if 'links' in config_project_data:
                 links = config_project_data['links']
+                self.debug(f"Processing links: {links}")
                 if 'github' in links:
                     project_data['github_url'] = links['github']
+                    self.debug(f"Set github_url: {links['github']}")
                 if 'demo' in links:
                     project_data['demo_url'] = links['demo']
+                    self.debug(f"Set demo_url: {links['demo']}")
                 if 'documentation' in links:
                     project_data['documentation_url'] = links['documentation']
+                    self.debug(f"Set documentation_url: {links['documentation']}")
+            
+            # Handle nested metadata - extract featured flag
+            if 'metadata' in config_project_data:
+                metadata = config_project_data['metadata']
+                if 'featured' in metadata:
+                    project_data['is_featured'] = metadata['featured']
+                    self.debug(f"Set is_featured: {metadata['featured']}")
+            
+            self.debug(f"After - project description: {project_data.get('description', 'Missing')}")
+            self.debug(f"After - github_url: {project_data.get('github_url', 'Missing')}")
+            self.debug(f"After - is_featured: {project_data.get('is_featured', 'Missing')}")
             
             # Add folder-specific data to metadata (not main entity)
             extracted.metadata['folder_path'] = str(folder_path)
@@ -301,6 +327,7 @@ class ProjectParser(BaseParser):
         
         # Store all extracted data
         extracted.metadata.update({
+            'frontmatter': metadata,  # Preserve original frontmatter
             'details': project_details,
             'relationships': relationships,
             'metrics': metrics,

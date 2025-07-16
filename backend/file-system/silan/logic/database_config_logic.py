@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Dict, Any
 
-from ..core.exceptions import ValidationError, ConfigurationError
+from ..core.exceptions import ValidationError
 from ..utils import ModernLogger, FileOperations, CLIInterface, DataValidator, ConfigManager
 
 

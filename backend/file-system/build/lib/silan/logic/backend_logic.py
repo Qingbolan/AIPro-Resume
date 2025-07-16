@@ -4,6 +4,8 @@ import subprocess
 import time
 import json
 import psutil
+import shutil
+import platform
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -21,7 +23,7 @@ class BackendLogic(ModernLogger):
         
         # Configuration
         self.project_dir = Path.cwd()
-        self.backend_dir = self.project_dir / "backend"
+        self.backend_dir = self.project_dir / "backend" / "go-server"
         self.silan_dir = self.project_dir / ".silan"
         self.pid_file = self.silan_dir / "backend.pid"
         self.log_file = self.silan_dir / "backend.log"
@@ -114,20 +116,22 @@ class BackendLogic(ModernLogger):
                 )
                 return True
             
-            # Validate backend binary exists
+            # Validate backend binary exists, install if missing
             binary_path = self._get_binary_path()
             if not binary_path.exists():
-                self.error(f"Backend binary not found: {binary_path}")
-                self.cli.display_error_panel(
-                    "Backend Binary Missing",
-                    "Backend binary not found",
-                    {
-                        "Solution 1": "Run 'silan backend install' to build the backend",
-                        "Solution 2": "Check if Go is installed",
-                        "Solution 3": "Verify backend source code exists"
-                    }
-                )
-                return False
+                self.info("Backend binary not found, installing automatically...")
+                if not self.install_backend():
+                    self.error(f"Failed to install backend binary: {binary_path}")
+                    self.cli.display_error_panel(
+                        "Backend Installation Failed",
+                        "Failed to install backend binary",
+                        {
+                            "Solution 1": "Run 'silan backend install' manually",
+                            "Solution 2": "Check silan package installation",
+                            "Solution 3": "Verify platform compatibility"
+                        }
+                    )
+                    return False
             
             # Show start configuration
             self._show_start_configuration(config)
@@ -436,22 +440,37 @@ class BackendLogic(ModernLogger):
         # Database configuration
         if 'database' in config:
             db_config = config['database']
-            cmd.extend(['--db-type', db_config.get('type', 'sqlite')])
+            db_type = db_config.get('type', 'sqlite')
             
-            if db_config.get('type') == 'sqlite':
-                cmd.extend(['--db-path', db_config.get('path', 'portfolio.db')])
+            if db_type == 'sqlite':
+                # For SQLite, use --db-driver and --db-source
+                cmd.extend(['--db-driver', 'sqlite3'])
+                cmd.extend(['--db-source', db_config.get('path', 'portfolio.db')])
             else:
-                cmd.extend(['--db-host', db_config.get('host', 'localhost')])
-                cmd.extend(['--db-port', str(db_config.get('port', 3306))])
-                cmd.extend(['--db-user', db_config.get('user', '')])
-                cmd.extend(['--db-password', db_config.get('password', '')])
-                cmd.extend(['--db-name', db_config.get('database', '')])
+                # For other databases
+                cmd.extend(['--db-driver', db_type])
+                if 'host' in db_config:
+                    cmd.extend(['--db-host', db_config['host']])
+                if 'port' in db_config:
+                    cmd.extend(['--db-port', str(db_config['port'])])
+                if 'user' in db_config:
+                    cmd.extend(['--db-user', db_config['user']])
+                if 'password' in db_config:
+                    cmd.extend(['--db-password', db_config['password']])
+                if 'database' in db_config:
+                    cmd.extend(['--db-name', db_config['database']])
+        else:
+            # Default SQLite configuration
+            cmd.extend(['--db-driver', 'sqlite3'])
+            cmd.extend(['--db-source', 'portfolio.db'])
         
         # Server configuration
         if 'server' in config:
             server_config = config['server']
-            cmd.extend(['--host', server_config.get('host', '0.0.0.0')])
-            cmd.extend(['--port', str(server_config.get('port', 8888))])
+            if 'host' in server_config:
+                cmd.extend(['--host', server_config['host']])
+            if 'port' in server_config:
+                cmd.extend(['--port', str(server_config['port'])])
         
         return cmd
     
@@ -516,11 +535,12 @@ class BackendLogic(ModernLogger):
     
     def _show_installation_plan(self) -> None:
         """Show backend installation plan"""
+        precompiled_binary = self._get_precompiled_binary_path()
         plan = {
-            "Source Directory": str(self.backend_dir),
+            "Source Binary": str(precompiled_binary) if precompiled_binary else "Not found",
             "Target Binary": str(self._get_binary_path()),
-            "Build Tool": "Go compiler",
-            "Dependencies": "Auto-resolved"
+            "Installation Method": "Copy precompiled binary",
+            "Platform": f"{platform.system()} {platform.machine()}"
         }
         
         self.cli.display_info_panel("Installation Plan", plan)
@@ -528,25 +548,13 @@ class BackendLogic(ModernLogger):
     def _check_install_prerequisites(self) -> bool:
         """Check installation prerequisites"""
         try:
-            # Check Go
-            try:
-                result = subprocess.run(['go', 'version'], capture_output=True, text=True, check=True)
-                self.debug(f"Go version: {result.stdout.strip()}")
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                self.error("Go compiler not found. Please install Go first.")
+            # Check if precompiled binary exists
+            precompiled_binary = self._get_precompiled_binary_path()
+            if not precompiled_binary or not precompiled_binary.exists():
+                self.error("Precompiled backend binary not found in silan package")
                 return False
             
-            # Check source directory
-            if not self.backend_dir.exists():
-                self.error(f"Backend source directory not found: {self.backend_dir}")
-                return False
-            
-            # Check go.mod
-            go_mod = self.backend_dir / "go.mod"
-            if not go_mod.exists():
-                self.error(f"No go.mod found in {self.backend_dir}")
-                return False
-            
+            self.debug(f"Found precompiled binary: {precompiled_binary}")
             return True
             
         except Exception as e:
@@ -554,35 +562,59 @@ class BackendLogic(ModernLogger):
             return False
     
     def _build_backend_binary(self, binary_path: Path) -> bool:
-        """Build the backend binary"""
+        """Install the backend binary by copying from precompiled binaries"""
         try:
             # Ensure target directory exists
             self.file_ops.ensure_directory(binary_path.parent)
             
-            # Build command
-            build_cmd = ['go', 'build', '-o', str(binary_path), '.']
-            
-            # Execute build
-            result = subprocess.run(
-                build_cmd,
-                cwd=self.backend_dir,
-                capture_output=True,
-                text=True
-            )
-            
-            if result.returncode == 0:
-                # Make executable
-                binary_path.chmod(0o755)
-                self.debug(f"Backend binary built successfully: {binary_path}")
-                return True
-            else:
-                self.error(f"Build failed: {result.stderr}")
+            # Get precompiled binary path
+            source_binary = self._get_precompiled_binary_path()
+            if not source_binary or not source_binary.exists():
+                self.error("Precompiled backend binary not found")
                 return False
+            
+            # Copy binary to target location
+            shutil.copy2(source_binary, binary_path)
+            
+            # Make executable
+            binary_path.chmod(0o755)
+            self.debug(f"Backend binary installed successfully: {binary_path}")
+            return True
                 
         except Exception as e:
-            self.error(f"Failed to build backend binary: {e}")
+            self.error(f"Failed to install backend binary: {e}")
             return False
     
+    def _get_precompiled_binary_path(self) -> Optional[Path]:
+        """Get path to precompiled backend binary based on platform"""
+        try:
+            # Get silan package installation directory
+            import silan
+            silan_dir = Path(silan.__file__).parent
+            bin_dir = silan_dir / "server" / "bin"
+            
+            # Platform-specific binary name
+            system = platform.system().lower()
+            arch = platform.machine().lower()
+            
+            # Map platform to binary name
+            if system == "darwin":  # macOS
+                binary_name = "silan-backend"
+            elif system == "linux":
+                binary_name = "silan-backend"
+            elif system == "windows":
+                binary_name = "silan-backend.exe"
+            else:
+                self.error(f"Unsupported platform: {system}")
+                return None
+            
+            binary_path = bin_dir / binary_name
+            return binary_path if binary_path.exists() else None
+            
+        except Exception as e:
+            self.error(f"Failed to locate precompiled binary: {e}")
+            return None
+
     def _get_backend_pid(self) -> Optional[int]:
         """Get backend PID from file"""
         try:

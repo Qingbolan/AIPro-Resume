@@ -14,7 +14,7 @@ from ..models import (
     BlogCategory, Project, ProjectTechnology,
     ProjectDetail, Idea, RecentUpdate, PersonalInfo,
     Education, EducationDetail, WorkExperience, WorkExperienceDetail, Award, Publication, PublicationAuthor,
-    SocialLink
+    ResearchProject, ResearchProjectDetail, SocialLink
 )
 from ..parsers import ParserFactory
 from ..utils import ModernLogger, CLIInterface, FileOperations, ConfigManager
@@ -381,10 +381,12 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             
             if existing_post:
                 # Update existing post
+                from ..models.blog import BlogStatus
                 existing_post.title = title
                 existing_post.content = content
                 existing_post.excerpt = frontmatter.get('excerpt', frontmatter.get('description', ''))
                 existing_post.is_featured = frontmatter.get('featured', False)
+                existing_post.status = BlogStatus.PUBLISHED  # Set status to published
                 existing_post.updated_at = datetime.utcnow()
                 
                 if frontmatter.get('date'):
@@ -394,6 +396,7 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new post
+                from ..models.blog import BlogStatus
                 assert self.current_user_id is not None
                 blog_post = BlogPost(
                     user_id=self.current_user_id,
@@ -402,19 +405,32 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                     content=content,
                     excerpt=frontmatter.get('excerpt', frontmatter.get('description', '')),
                     is_featured=frontmatter.get('featured', False),
+                    status=BlogStatus.PUBLISHED,  # Set status to published
                     published_at=self._parse_datetime(frontmatter.get('date', datetime.utcnow()))
                 )
                 session.add(blog_post)
                 session.flush()  # Get the ID
                 self.sync_stats['created_count'] += 1
             
-            # Handle tags
+            # Handle tags - check both frontmatter and top-level content_data
+            tags_to_sync = None
             if 'tags' in frontmatter and frontmatter['tags']:
-                self._sync_blog_tags(session, blog_post, frontmatter['tags'])
+                tags_to_sync = frontmatter['tags']
+            elif 'tags' in content_data and content_data['tags']:
+                tags_to_sync = content_data['tags']
             
-            # Handle categories
+            if tags_to_sync:
+                self._sync_blog_tags(session, blog_post, tags_to_sync)
+            
+            # Handle categories - check both frontmatter and top-level content_data
+            categories_to_sync = None
             if 'categories' in frontmatter and frontmatter['categories']:
-                self._sync_blog_categories(session, blog_post, frontmatter['categories'])
+                categories_to_sync = frontmatter['categories']
+            elif 'categories' in content_data and content_data['categories']:
+                categories_to_sync = content_data['categories']
+            
+            if categories_to_sync:
+                self._sync_blog_categories(session, blog_post, categories_to_sync)
             
         except Exception as e:
             raise DatabaseError(f"Failed to sync blog post: {e}")
@@ -431,8 +447,15 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 frontmatter = content_data
                 content = content_data.get('content', '')
             
-            title = frontmatter.get('title', 'Untitled Project')
-            slug = frontmatter.get('slug', self._generate_slug(title))
+            # Use top-level content_data fields (from parser) rather than nested frontmatter
+            title = content_data.get('title', frontmatter.get('title', 'Untitled Project'))
+            slug = content_data.get('slug', frontmatter.get('slug', self._generate_slug(title)))
+            description = content_data.get('description', frontmatter.get('description', ''))
+            github_url = content_data.get('github_url', frontmatter.get('github_url', ''))
+            demo_url = content_data.get('demo_url', frontmatter.get('demo_url', ''))
+            is_featured = content_data.get('is_featured', frontmatter.get('featured', False))
+            start_date = content_data.get('start_date', frontmatter.get('start_date'))
+            end_date = content_data.get('end_date', frontmatter.get('end_date'))
             
             # Check if project exists
             existing_project = session.query(Project).filter_by(slug=slug).first()
@@ -440,16 +463,17 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if existing_project:
                 # Update existing project
                 existing_project.title = title
-                existing_project.description = frontmatter.get('description', '')
-                existing_project.github_url = frontmatter.get('github_url')
-                existing_project.demo_url = frontmatter.get('demo_url')
-                existing_project.is_featured = frontmatter.get('featured', False)
+                existing_project.description = description
+                existing_project.github_url = github_url
+                existing_project.demo_url = demo_url
+                existing_project.is_featured = is_featured
+                existing_project.is_public = True  # Set as public so it shows in API
                 existing_project.updated_at = datetime.utcnow()
                 
-                if frontmatter.get('start_date'):
-                    existing_project.start_date = self._parse_date(frontmatter['start_date'])
-                if frontmatter.get('end_date'):
-                    existing_project.end_date = self._parse_date(frontmatter['end_date'])
+                if start_date:
+                    existing_project.start_date = self._parse_date(start_date)
+                if end_date:
+                    existing_project.end_date = self._parse_date(end_date)
                 
                 project = existing_project
                 self.sync_stats['updated_count'] += 1
@@ -460,20 +484,30 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                     user_id=self.current_user_id,
                     title=title,
                     slug=slug,
-                    description=frontmatter.get('description', ''),
-                    github_url=frontmatter.get('github_url'),
-                    demo_url=frontmatter.get('demo_url'),
-                    is_featured=frontmatter.get('featured', False),
-                    start_date=self._parse_date(frontmatter.get('start_date')),
-                    end_date=self._parse_date(frontmatter.get('end_date'))
+                    description=description,
+                    github_url=github_url,
+                    demo_url=demo_url,
+                    is_featured=is_featured,
+                    is_public=True,  # Set as public so it shows in API
+                    start_date=self._parse_date(start_date),
+                    end_date=self._parse_date(end_date)
                 )
                 session.add(project)
                 session.flush()
                 self.sync_stats['created_count'] += 1
             
-            # Handle technologies
-            if 'technologies' in frontmatter and frontmatter['technologies']:
-                self._sync_project_technologies(session, project, frontmatter['technologies'])
+            # Handle technologies - check both top-level and frontmatter
+            technologies_data = content_data.get('technologies', frontmatter.get('technologies', []))
+            if technologies_data:
+                # Convert structured technology data to simple list of names
+                if isinstance(technologies_data, list) and len(technologies_data) > 0:
+                    if isinstance(technologies_data[0], dict):
+                        # Convert from [{"technology_name": "React", ...}, ...] to ["React", ...]
+                        tech_names = [tech.get('technology_name', str(tech)) for tech in technologies_data if tech]
+                    else:
+                        # Already a simple list
+                        tech_names = technologies_data
+                    self._sync_project_technologies(session, project, tech_names)
             
             # Handle project details
             if content:
@@ -504,6 +538,7 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 # Update existing idea
                 existing_idea.title = title
                 existing_idea.abstract = frontmatter.get('abstract', frontmatter.get('description', ''))
+                existing_idea.is_public = True  # Set as public so it shows in API
                 existing_idea.updated_at = datetime.utcnow()
                 
                 idea = existing_idea
@@ -516,7 +551,8 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                     title=title,
                     slug=slug,
                     abstract=frontmatter.get('abstract', frontmatter.get('description', '')),
-                    motivation=content if content else None
+                    motivation=content if content else None,
+                    is_public=True  # Set as public so it shows in API
                 )
                 session.add(idea)
                 session.flush()
@@ -655,6 +691,15 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                     self._sync_publications(session, publications_data)
             except Exception as e:
                 self.error(f"Publications sync failed: {e}")
+                raise
+            
+            # Sync research projects data if available
+            try:
+                research_data = content_data.get('research', [])
+                if research_data:
+                    self._sync_research_projects(session, research_data)
+            except Exception as e:
+                self.error(f"Research projects sync failed: {e}")
                 raise
             
             # Sync social links data if available
@@ -955,6 +1000,83 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             )
             session.add(author)
     
+    def _sync_research_projects(self, session: Session, research_data: List[Dict[str, Any]]) -> None:
+        """Sync research projects data to database"""
+        for research_item in research_data:
+            # Check if research project record exists
+            existing_research = session.query(ResearchProject).filter_by(
+                user_id=self.current_user_id,
+                title=research_item.get('title', research_item.get('institution', ''))
+            ).first()
+            
+            if existing_research:
+                # Update existing research project
+                existing_research.start_date = self._parse_date(research_item.get('start_date'))
+                existing_research.end_date = self._parse_date(research_item.get('end_date'))
+                existing_research.is_ongoing = research_item.get('is_current', False)
+                existing_research.location = research_item.get('location', '')
+                existing_research.research_type = research_item.get('position', research_item.get('research_area', ''))
+                existing_research.funding_source = research_item.get('funding_source', '')
+                existing_research.updated_at = datetime.utcnow()
+                
+                research_project = existing_research
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new research project record
+                research_project = ResearchProject(
+                    user_id=self.current_user_id,
+                    title=research_item.get('title', research_item.get('institution', 'Research Project')),
+                    start_date=self._parse_date(research_item.get('start_date')),
+                    end_date=self._parse_date(research_item.get('end_date')),
+                    is_ongoing=research_item.get('is_current', False),
+                    location=research_item.get('location', ''),
+                    research_type=research_item.get('position', research_item.get('research_area', '')),
+                    funding_source=research_item.get('funding_source', ''),
+                    sort_order=len(session.query(ResearchProject).filter_by(user_id=self.current_user_id).all())
+                )
+                session.add(research_project)
+                session.flush()  # Get the ID for foreign key relationships
+                session.refresh(research_project)  # Refresh to ensure UUID is properly loaded
+                self.sync_stats['created_count'] += 1
+            
+            # Sync research project details if present
+            details = research_item.get('details', [])
+            if details:
+                session.flush()
+                session.refresh(research_project)
+                # Now sync research project details
+                self._sync_research_project_details(session, research_project, details)
+    
+    def _sync_research_project_details(self, session: Session, research_project: ResearchProject, details: List[str]) -> None:
+        """Sync research project details to database"""
+        
+        # Check if details already exist
+        existing_count = session.query(ResearchProjectDetail).filter(
+            ResearchProjectDetail.research_project_id == research_project.id
+        ).count()
+        
+        if existing_count > 0:
+            return
+        
+        # Create research project details
+        for i, detail_text in enumerate(details):
+            if not detail_text or not detail_text.strip():
+                continue
+            
+            try:
+                research_project_detail = ResearchProjectDetail(
+                    research_project_id=research_project.id,
+                    detail_text=detail_text.strip(),
+                    sort_order=i
+                )
+                session.add(research_project_detail)
+                # Force individual insert to avoid insertmanyvalues bulk processing
+                session.flush()
+                self.sync_stats['created_count'] += 1
+            except Exception as e:
+                self.warning(f"Failed to create research project detail: {e}")
+                continue
+    
     def _sync_social_links(self, session: Session, personal_info: PersonalInfo, social_links_data: List[Dict[str, Any]]) -> None:
         """Sync social links data to database"""
         # Check if social links already exist for this personal info
@@ -1029,35 +1151,61 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if not tag_name or not tag_name.strip():
                 continue
                 
-            # Get or create tag
+            tag_name = tag_name.strip()
+            generated_slug = self._generate_slug(tag_name)
+            
+            # Get or create tag - check both name and slug to avoid conflicts
             tag = session.query(BlogTag).filter_by(name=tag_name).first()
             if not tag:
-                tag = BlogTag(
-                    name=tag_name,
-                    slug=self._generate_slug(tag_name)
-                )
-                session.add(tag)
-                session.flush()
+                # Check if a tag with this slug already exists
+                tag_by_slug = session.query(BlogTag).filter_by(slug=generated_slug).first()
+                if tag_by_slug:
+                    # Use existing tag with same slug
+                    tag = tag_by_slug
+                else:
+                    # Create new tag
+                    tag = BlogTag(
+                        name=tag_name,
+                        slug=generated_slug
+                    )
+                    session.add(tag)
+                    session.flush()
             
-            # Create association
-            blog_post_tag = BlogPostTag(
+            # Create association if not already exists
+            existing_association = session.query(BlogPostTag).filter_by(
                 blog_post_id=blog_post.id,
                 blog_tag_id=tag.id
-            )
-            session.add(blog_post_tag)
+            ).first()
+            
+            if not existing_association:
+                blog_post_tag = BlogPostTag(
+                    blog_post_id=blog_post.id,
+                    blog_tag_id=tag.id
+                )
+                session.add(blog_post_tag)
     
     def _sync_blog_categories(self, session: Session, blog_post: BlogPost, categories: List[str]) -> None:
         """Sync blog categories for a post"""
         if categories and categories[0]:
-            category_name = categories[0]  # Take first category
+            category_name = categories[0].strip()  # Take first category
+            generated_slug = self._generate_slug(category_name)
+            
+            # Get or create category - check both name and slug to avoid conflicts
             category = session.query(BlogCategory).filter_by(name=category_name).first()
             if not category:
-                category = BlogCategory(
-                    name=category_name,
-                    slug=self._generate_slug(category_name)
-                )
-                session.add(category)
-                session.flush()
+                # Check if a category with this slug already exists
+                category_by_slug = session.query(BlogCategory).filter_by(slug=generated_slug).first()
+                if category_by_slug:
+                    # Use existing category with same slug
+                    category = category_by_slug
+                else:
+                    # Create new category
+                    category = BlogCategory(
+                        name=category_name,
+                        slug=generated_slug
+                    )
+                    session.add(category)
+                    session.flush()
             
             blog_post.category_id = category.id
     

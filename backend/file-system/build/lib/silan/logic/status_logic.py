@@ -1,9 +1,8 @@
 """Status logic for comprehensive project status display"""
 
-import os
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict
 
 from ..utils import ModernLogger, ConfigManager
 from .content_logic import ContentLogic
