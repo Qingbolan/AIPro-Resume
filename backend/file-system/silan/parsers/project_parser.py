@@ -301,6 +301,7 @@ class ProjectParser(BaseParser):
         
         # Store all extracted data
         extracted.metadata.update({
+            'frontmatter': metadata,  # Preserve original frontmatter
             'details': project_details,
             'relationships': relationships,
             'metrics': metrics,

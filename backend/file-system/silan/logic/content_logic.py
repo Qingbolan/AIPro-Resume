@@ -200,7 +200,7 @@ class ContentLogic(ContentLogger):
         
         # Handle different content types with their specific structures
         if content_type in ['projects', 'ideas']:
-            # For projects and ideas, look for folders with README.md files
+            # For projects and ideas, look for both folders with README.md files AND standalone .md files
             for item in type_dir.iterdir():
                 if item.is_dir():
                     # Check if this folder has a README.md file (main content)
@@ -212,6 +212,14 @@ class ContentLogic(ContentLogger):
                             'main_file': str(readme_path),
                             'name': item.name
                         })
+                elif item.is_file() and item.suffix == '.md':
+                    # Include standalone .md files as well
+                    content_items.append({
+                        'type': 'file',
+                        'path': str(item),
+                        'main_file': str(item),
+                        'name': item.stem
+                    })
         
         elif content_type in ['blog', 'updates']:
             # For blog and updates, recursively find all .md files in subdirectories
@@ -300,6 +308,17 @@ class ContentLogic(ContentLogger):
                     parsed_data['categories'] = extracted_content.categories
                 if extracted_content.tags:
                     parsed_data['tags'] = extracted_content.tags
+            
+            # For projects, ensure technologies are included in the data
+            elif content_type == 'projects':
+                if hasattr(extracted_content, 'technologies') and extracted_content.technologies:
+                    parsed_data['technologies'] = extracted_content.technologies
+            
+            # Preserve original frontmatter for all content types
+            if hasattr(extracted_content, 'metadata') and extracted_content.metadata:
+                original_frontmatter = extracted_content.metadata.get('frontmatter')
+                if original_frontmatter:
+                    parsed_data['frontmatter'] = original_frontmatter
             
             # Validate frontmatter if validator exists
             if hasattr(ContentValidator, f'validate_{content_type}_frontmatter'):
