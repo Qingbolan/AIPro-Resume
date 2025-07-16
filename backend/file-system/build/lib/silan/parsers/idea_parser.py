@@ -22,6 +22,9 @@ class IdeaParser(BaseParser):
     collaboration needs, and business potential with detailed scoring.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="idea_parser")
+    
     def _get_content_type(self) -> str:
         return 'idea'
     
@@ -58,7 +61,7 @@ class IdeaParser(BaseParser):
                     break
             
             if not main_file:
-                console.print(f"[red]❌ No main content file found in {folder_path}[/red]")
+                self.error(f"No main content file found in {folder_path}")
                 return None
             
             # Debug motivation extraction
@@ -81,7 +84,7 @@ class IdeaParser(BaseParser):
                     with open(config_file, 'r', encoding='utf-8') as f:
                         config_data = yaml.safe_load(f) or {}
                 except Exception as e:
-                    console.print(f"[yellow]⚠️ Error reading config.yaml: {e}[/yellow]")
+                    self.warning(f"Error reading config.yaml: {e}")
             
             # Enhance extracted data with folder structure
             self._enhance_with_folder_data(extracted, folder_path, config_data)
@@ -93,7 +96,7 @@ class IdeaParser(BaseParser):
             return extracted
             
         except Exception as e:
-            console.print(f"[red]❌ Error parsing idea folder {folder_path}: {e}[/red]")
+            self.error(f"Error parsing idea folder {folder_path}: {e}")
             return None
     
     def _enhance_with_folder_data(self, extracted: ExtractedContent, folder_path: Path, config_data: Dict):
@@ -650,7 +653,18 @@ class IdeaParser(BaseParser):
         technologies = []
         
         # Get from metadata
-        tech_list = metadata.get('technologies', metadata.get('tech_stack', []))
+        tech_list = metadata.get('tech_stack', [])
+        
+        # Also try to get from nested technologies structure
+        if 'technologies' in metadata:
+            tech_dict = metadata['technologies']
+            if isinstance(tech_dict, dict):
+                # Flatten all technology lists from different categories
+                for category, techs in tech_dict.items():
+                    if isinstance(techs, list):
+                        tech_list.extend(techs)
+            elif isinstance(tech_dict, list):
+                tech_list.extend(tech_dict)
         
         # Extract from content
         tech_from_content = self._extract_tech_from_content(content)

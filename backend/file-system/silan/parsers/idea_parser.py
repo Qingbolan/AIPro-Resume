@@ -653,7 +653,18 @@ class IdeaParser(BaseParser):
         technologies = []
         
         # Get from metadata
-        tech_list = metadata.get('technologies', metadata.get('tech_stack', []))
+        tech_list = metadata.get('tech_stack', [])
+        
+        # Also try to get from nested technologies structure
+        if 'technologies' in metadata:
+            tech_dict = metadata['technologies']
+            if isinstance(tech_dict, dict):
+                # Flatten all technology lists from different categories
+                for category, techs in tech_dict.items():
+                    if isinstance(techs, list):
+                        tech_list.extend(techs)
+            elif isinstance(tech_dict, list):
+                tech_list.extend(tech_dict)
         
         # Extract from content
         tech_from_content = self._extract_tech_from_content(content)

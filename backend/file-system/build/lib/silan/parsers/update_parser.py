@@ -20,6 +20,9 @@ class UpdateParser(BaseParser):
     and related project information from individual markdown files.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="update_parser")
+    
     def _get_content_type(self) -> str:
         return 'update'
     

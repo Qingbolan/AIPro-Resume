@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "silan-database-tools"
-version = "1.0.0"
+name = "silan-personal-website"
+version = "1.0.1"
 authors = [
-    {name = "Silan Hu", email = "Silan.Hu@u.nus.edu"},
+    {name = "Silan Hu", email = "silan.hu@u.nus.edu"},
 ]
 description = "A lightweight tool for syncing markdown content to databases"
 readme = "README.md"
@@ -69,8 +69,8 @@ Repository = "https://github.com/Qingbolan/AIPro-Resume.git"
 "Bug Tracker" = "https://github.com/Qingbolan/AIPro-Resume/issues"
 
 [project.scripts]
-silan = "silan.cli:cli"
-silan-db-tools = "silan.cli:cli"
+silan = "silan.silan:cli"
+silan-db-tools = "silan.silan:cli"
 silan-build-backend = "build_backend:main"
 
 [tool.setuptools.packages.find]

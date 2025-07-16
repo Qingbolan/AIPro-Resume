@@ -19,7 +19,7 @@ __description__ = "Lightweight database tools for markdown content synchronizati
 __url__ = "https://github.com/Qingbolan/AIPro-Resume"
 
 # Export main components
-from .cli import cli
+from .silan import cli
 from .parsers import ParserFactory, ParsedContentCollection
 from .utils.config import ConfigManager
 

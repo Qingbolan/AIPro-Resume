@@ -13,11 +13,9 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Union, Tuple
 from datetime import datetime, date
 from dataclasses import dataclass, field
-from rich.console import Console
 import json
 import hashlib
-
-console = Console()
+from ..utils.logger import ModernLogger
 
 @dataclass
 class ExtractedContent:
@@ -46,15 +44,17 @@ class ExtractedContent:
     validation_errors: List[str] = field(default_factory=list)
     validation_warnings: List[str] = field(default_factory=list)
 
-class BaseParser(ABC):
+class BaseParser(ABC, ModernLogger):
     """
     Abstract base class for all content parsers.
     
     Provides common functionality for parsing markdown files with frontmatter,
     extracting metadata, and validating content structure.
+    Inherits from ModernLogger for direct logging capabilities.
     """
     
-    def __init__(self, content_dir: Path):
+    def __init__(self, content_dir: Path, logger_name: str = "base_parser"):
+        ModernLogger.__init__(self, name=logger_name)
         self.content_dir = content_dir
         self.markdown = markdown2.Markdown(extras=[
             'fenced-code-blocks', 'tables', 'footnotes', 'task_list',
@@ -177,7 +177,7 @@ class BaseParser(ABC):
             return extracted
             
         except Exception as e:
-            console.print(f"[red]❌ Error parsing {file_path}: {e}[/red]")
+            self.error(f"Error parsing {file_path}: {e}")
             return None
     
     @abstractmethod

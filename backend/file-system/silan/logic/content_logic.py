@@ -49,7 +49,8 @@ class ContentLogic(ContentLogger):
             'blog': self.content_dir / 'blog',
             'projects': self.content_dir / 'projects',
             'ideas': self.content_dir / 'ideas',
-            'updates': self.content_dir / 'updates'
+            'updates': self.content_dir / 'updates',
+            'resume': self.content_dir / 'resume'
         }
         
         # Cache
@@ -78,14 +79,15 @@ class ContentLogic(ContentLogger):
             
             for content_type, type_dir in self.content_types.items():
                 if type_dir.exists():
-                    md_files = self.file_ops.find_files(type_dir, '*.md', recursive=True)
-                    count = len(md_files)
+                    # Get content items for this type (handles both files and folders)
+                    type_content_items = self._get_content_items_for_type(type_dir, content_type)
+                    count = len(type_content_items)
                     analysis['content_types'][content_type] = count
                     analysis['total_files'] += count
                     
                     # Track latest modification
-                    for file_path in md_files:
-                        file_info = self.file_ops.get_file_info(file_path)
+                    for content_item in type_content_items:
+                        file_info = self.file_ops.get_file_info(Path(content_item['path']))
                         if latest_modification is None or file_info['modified'] > latest_modification:
                             latest_modification = file_info['modified']
                 else:
@@ -122,32 +124,36 @@ class ContentLogic(ContentLogger):
                 if not type_dir.exists():
                     continue
                 
-                md_files = self.file_ops.find_files(type_dir, '*.md', recursive=True)
-                self.content_found(len(md_files), content_type)
+                # Get content items for this type (handles both files and folders)
+                type_content_items = self._get_content_items_for_type(type_dir, content_type)
+                self.content_found(len(type_content_items), content_type)
                 
-                for file_path in md_files:
+                for content_item in type_content_items:
                     try:
-                        # Read and hash content
-                        content = self.file_ops.read_file(file_path)
-                        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+                        # Calculate hash based on content type
+                        if content_item['type'] == 'folder':
+                            content_hash = self._calculate_folder_hash(Path(content_item['path']))
+                        else:
+                            content = self.file_ops.read_file(Path(content_item['main_file']))
+                            content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
                         
                         # Generate content ID
-                        content_id = self._generate_content_id(content_type, file_path)
+                        content_id = self._generate_content_id_from_item(content_type, content_item)
                         
-                        content_item = {
+                        hash_item = {
                             'id': content_id,
                             'type': content_type,
-                            'name': file_path.name,
-                            'path': str(file_path),
-                            'relative_path': str(file_path.relative_to(self.content_dir)),
+                            'name': content_item['name'],
+                            'path': content_item['path'],
+                            'relative_path': str(Path(content_item['path']).relative_to(self.content_dir)),
                             'hash': content_hash,
-                            'file_info': self.file_ops.get_file_info(file_path)
+                            'file_info': self.file_ops.get_file_info(Path(content_item['path']))
                         }
                         
-                        content_items.append(content_item)
+                        content_items.append(hash_item)
                         
                     except Exception as e:
-                        self.content_parse_error(str(file_path), str(e))
+                        self.content_parse_error(content_item['path'], str(e))
                         continue
             
             self._content_cache = content_items
@@ -167,17 +173,18 @@ class ContentLogic(ContentLogger):
                 if not type_dir.exists():
                     continue
                 
-                md_files = self.file_ops.find_files(type_dir, '*.md', recursive=True)
+                # Get content items for this type (handles both files and folders)
+                type_content_items = self._get_content_items_for_type(type_dir, content_type)
                 
-                for file_path in md_files:
+                for content_item in type_content_items:
                     try:
-                        content_item = self._parse_content_file(file_path, content_type)
-                        if content_item:
-                            content_items.append(content_item)
-                            self.content_parsed(str(file_path))
+                        parsed_item = self._parse_content_item(content_item, content_type)
+                        if parsed_item:
+                            content_items.append(parsed_item)
+                            self.content_parsed(content_item['path'])
                         
                     except Exception as e:
-                        self.content_parse_error(str(file_path), str(e))
+                        self.content_parse_error(content_item['path'], str(e))
                         continue
             
             self.info(f"📝 Parsed {len(content_items)} content files for sync")
@@ -187,6 +194,170 @@ class ContentLogic(ContentLogger):
             self.error(f"Failed to get content for sync: {e}")
             return []
     
+    def _get_content_items_for_type(self, type_dir: Path, content_type: str) -> List[Dict[str, Any]]:
+        """Get content items for a specific content type, handling both files and folders"""
+        content_items = []
+        
+        # Handle different content types with their specific structures
+        if content_type in ['projects', 'ideas']:
+            # For projects and ideas, look for folders with README.md files
+            for item in type_dir.iterdir():
+                if item.is_dir():
+                    # Check if this folder has a README.md file (main content)
+                    readme_path = item / 'README.md'
+                    if readme_path.exists():
+                        content_items.append({
+                            'type': 'folder',
+                            'path': str(item),
+                            'main_file': str(readme_path),
+                            'name': item.name
+                        })
+        
+        elif content_type in ['blog', 'updates']:
+            # For blog and updates, recursively find all .md files in subdirectories
+            for md_file in type_dir.rglob('*.md'):
+                if md_file.is_file():
+                    # Generate a meaningful name from the file path
+                    relative_path = md_file.relative_to(type_dir)
+                    name = md_file.stem
+                    
+                    # For updates, include date info in name if available
+                    if content_type == 'updates' and len(relative_path.parts) > 1:
+                        # Extract date components from path like "2024/01/2024-01-01-ziyun2024-plan-launch.md"
+                        date_parts = [part for part in relative_path.parts[:-1] if part.isdigit()]
+                        if date_parts:
+                            name = f"{'-'.join(date_parts)}-{md_file.stem}"
+                    
+                    content_items.append({
+                        'type': 'file',
+                        'path': str(md_file),
+                        'main_file': str(md_file),
+                        'name': name
+                    })
+        
+        elif content_type == 'resume':
+            # For resume, look for resume.md or any .md file in the resume directory
+            for md_file in type_dir.rglob('*.md'):
+                if md_file.is_file():
+                    content_items.append({
+                        'type': 'file',
+                        'path': str(md_file),
+                        'main_file': str(md_file),
+                        'name': md_file.stem
+                    })
+        
+        else:
+            # Default: check for standalone markdown files in the root directory
+            for md_file in type_dir.glob('*.md'):
+                if md_file.is_file():
+                    content_items.append({
+                        'type': 'file',
+                        'path': str(md_file),
+                        'main_file': str(md_file),
+                        'name': md_file.stem
+                    })
+        
+        return content_items
+    
+    def _parse_content_item(self, content_item: Dict[str, Any], content_type: str) -> Optional[Dict[str, Any]]:
+        """Parse a content item (either file or folder) for synchronization"""
+        try:
+            # Get parser for content type
+            parser_class = self.parser_factory.get_parser(content_type)
+            if not parser_class:
+                raise ParsingError(f"No parser available for content type: {content_type}")
+            
+            # Create parser instance
+            parser = parser_class(self.content_dir)
+            
+            # Parse content based on type
+            if content_item['type'] == 'folder':
+                # Use file parsing for folder-based content (parse the main file)
+                main_file_path = Path(content_item['main_file'])
+                extracted_content = parser.parse_file(main_file_path)
+                
+                # Calculate hash of the entire folder content
+                content_hash = self._calculate_folder_hash(Path(content_item['path']))
+                
+            else:
+                # Use file parsing for standalone files
+                file_path = Path(content_item['main_file'])
+                extracted_content = parser.parse_file(file_path)
+                
+                # Calculate hash of the file content
+                content = self.file_ops.read_file(file_path)
+                content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+            
+            if not extracted_content:
+                return None
+            
+            parsed_data = extracted_content.main_entity
+            
+            # Validate frontmatter if validator exists
+            if hasattr(ContentValidator, f'validate_{content_type}_frontmatter'):
+                validator_method = getattr(ContentValidator, f'validate_{content_type}_frontmatter')
+                try:
+                    validated_frontmatter = validator_method(parsed_data.get('frontmatter', {}))
+                    parsed_data['frontmatter'] = validated_frontmatter
+                except Exception as e:
+                    self.warning(f"Frontmatter validation failed for {content_item['path']}: {e}")
+            
+            # Create content item for sync
+            content_id = self._generate_content_id_from_item(content_type, content_item)
+            
+            sync_item = {
+                'id': content_id,
+                'type': content_type,
+                'name': content_item['name'],
+                'path': content_item['path'],
+                'relative_path': str(Path(content_item['path']).relative_to(self.content_dir)),
+                'hash': content_hash,
+                'data': parsed_data,
+                'file_info': self.file_ops.get_file_info(Path(content_item['path']))
+            }
+            
+            return sync_item
+            
+        except Exception as e:
+            self.error(f"Failed to parse content item {content_item['path']}: {e}")
+            return None
+    
+    def _calculate_folder_hash(self, folder_path: Path) -> str:
+        """Calculate hash of folder content for change detection"""
+        hash_md5 = hashlib.md5()
+        
+        # Hash all relevant files in the folder
+        for file_path in sorted(folder_path.rglob('*')):
+            if file_path.is_file() and file_path.suffix in ['.md', '.yaml', '.yml']:
+                try:
+                    content = self.file_ops.read_file(file_path)
+                    hash_md5.update(content.encode('utf-8'))
+                except Exception:
+                    continue
+        
+        return hash_md5.hexdigest()
+    
+    def _generate_content_id_from_item(self, content_type: str, content_item: Dict[str, Any]) -> str:
+        """Generate unique content ID from content item"""
+        try:
+            if content_item['type'] == 'folder':
+                # For folders, use the folder name
+                folder_path = Path(content_item['path'])
+                relative_path = folder_path.relative_to(self.content_dir)
+                content_id = str(relative_path)
+            else:
+                # For files, use the file path without extension
+                file_path = Path(content_item['main_file'])
+                relative_path = file_path.relative_to(self.content_dir)
+                content_id = str(relative_path.with_suffix(''))
+            
+            # Replace path separators for database compatibility
+            content_id = content_id.replace('/', '_').replace('\\', '_')
+            return f"{content_type}_{content_id}"
+        except Exception:
+            # Fallback to just name
+            return f"{content_type}_{content_item['name']}"
+
     def _parse_content_file(self, file_path: Path, content_type: str) -> Optional[Dict[str, Any]]:
         """Parse a single content file for synchronization"""
         try:

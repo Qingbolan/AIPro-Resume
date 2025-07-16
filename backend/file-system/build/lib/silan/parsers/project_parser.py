@@ -22,6 +22,9 @@ class ProjectParser(BaseParser):
     implementation notes, and performance metrics with comprehensive analysis.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="project_parser")
+    
     def _get_content_type(self) -> str:
         return 'project'
     
@@ -52,7 +55,7 @@ class ProjectParser(BaseParser):
                     break
             
             if not main_file:
-                console.print(f"[red]❌ No main content file found in {folder_path}[/red]")
+                self.error(f"No main content file found in {folder_path}")
                 return None
             
             # Parse main content file
@@ -68,7 +71,7 @@ class ProjectParser(BaseParser):
                     with open(config_file, 'r', encoding='utf-8') as f:
                         config_data = yaml.safe_load(f) or {}
                 except Exception as e:
-                    console.print(f"[yellow]⚠️ Error reading config.yaml: {e}[/yellow]")
+                    self.warning(f"Error reading config.yaml: {e}")
             
             # Enhance extracted data with folder structure
             self._enhance_with_folder_data(extracted, folder_path, config_data)
@@ -76,7 +79,7 @@ class ProjectParser(BaseParser):
             return extracted
             
         except Exception as e:
-            console.print(f"[red]❌ Error parsing project folder {folder_path}: {e}[/red]")
+            self.error(f"Error parsing project folder {folder_path}: {e}")
             return None
     
     def _enhance_with_folder_data(self, extracted: ExtractedContent, folder_path: Path, config_data: Dict):
@@ -96,6 +99,16 @@ class ProjectParser(BaseParser):
             for key, value in config_project_data.items():
                 if key in project_data and value is not None:
                     project_data[key] = value
+            
+            # Handle nested config structure - extract links
+            if 'links' in config_project_data:
+                links = config_project_data['links']
+                if 'github' in links:
+                    project_data['github_url'] = links['github']
+                if 'demo' in links:
+                    project_data['demo_url'] = links['demo']
+                if 'documentation' in links:
+                    project_data['documentation_url'] = links['documentation']
             
             # Add folder-specific data to metadata (not main entity)
             extracted.metadata['folder_path'] = str(folder_path)
@@ -296,8 +309,13 @@ class ProjectParser(BaseParser):
     
     def _extract_project_data(self, metadata: Dict, content: str) -> Dict[str, Any]:
         """Extract main project information"""
-        # Generate slug if not provided
+        # Extract title from metadata or first heading
         title = metadata.get('title', '')
+        if not title:
+            # Extract title from first heading in content
+            title = self._extract_title_from_content(content)
+        
+        # Generate slug if not provided
         slug = metadata.get('slug', self._generate_slug(title))
         
         # Parse dates
@@ -331,12 +349,36 @@ class ProjectParser(BaseParser):
         
         return project_data
     
+    def _extract_title_from_content(self, content: str) -> str:
+        """Extract title from first heading in markdown content"""
+        if not content:
+            return ''
+        
+        lines = content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith('# '):
+                return line[2:].strip()
+        
+        return ''
+    
     def _extract_project_technologies(self, metadata: Dict, content: str) -> List[Dict[str, Any]]:
         """Extract and categorize technologies used in the project"""
         technologies = []
         
         # Get technologies from metadata
         tech_stack = metadata.get('tech_stack', [])
+        
+        # Also try to get from nested technologies structure
+        if 'technologies' in metadata:
+            tech_dict = metadata['technologies']
+            if isinstance(tech_dict, dict):
+                # Flatten all technology lists from different categories
+                for category, techs in tech_dict.items():
+                    if isinstance(techs, list):
+                        tech_stack.extend(techs)
+            elif isinstance(tech_dict, list):
+                tech_stack.extend(tech_dict)
         
         # Also extract from content sections
         tech_from_content = self._extract_tech_from_content(content)

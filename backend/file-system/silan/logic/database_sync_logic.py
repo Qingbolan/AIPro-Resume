@@ -12,7 +12,9 @@ from ..core.exceptions import DatabaseError, ValidationError
 from ..models import (
     Base, User, BlogPost, BlogTag, BlogPostTag, 
     BlogCategory, Project, ProjectTechnology,
-    ProjectDetail, Idea, RecentUpdate
+    ProjectDetail, Idea, RecentUpdate, PersonalInfo,
+    Education, EducationDetail, WorkExperience, WorkExperienceDetail, Award, Publication, PublicationAuthor,
+    SocialLink
 )
 from ..parsers import ParserFactory
 from ..utils import ModernLogger, CLIInterface, FileOperations, ConfigManager
@@ -59,7 +61,7 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
         # Database components
         self.engine = None
         self.session_factory = None
-        self.current_user = None
+        self.current_user_id = None
         
         # Sync statistics
         self.sync_stats = {
@@ -109,7 +111,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
         
         elif db_type == 'sqlite':
             if 'path' not in config:
-                raise ValidationError("SQLite database config missing 'path'")
+                # Auto-create default SQLite path instead of throwing error
+                config['path'] = 'portfolio.db'
+                self.info(f"No SQLite path specified, using default: {config['path']}")
     
     def show_sync_overview(self) -> None:
         """Display synchronization overview"""
@@ -150,7 +154,21 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if not self._initialize_database():
                 return False
             
-            # Create tables if requested
+            # Always check if basic tables exist, create if needed
+            try:
+                if self.session_factory:
+                    with self.session_factory() as session:
+                        # Test if basic tables exist by trying to query users table
+                        session.execute(text("SELECT COUNT(*) FROM users LIMIT 1"))
+                else:
+                    raise DatabaseError("Session factory not initialized")
+            except Exception as e:
+                # If query fails, tables likely don't exist
+                self.warning(f"Database tables not found or incomplete: {e}")
+                self.info("🔧 Automatically creating database tables...")
+                create_tables = True
+            
+            # Create tables if requested or if they don't exist
             if create_tables:
                 self._create_database_tables()
             
@@ -219,22 +237,44 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
         """Initialize database connection"""
         try:
             connection_string = self._build_connection_string()
+            self.debug(f"Connection string: {connection_string}")
             self.engine = create_engine(
                 connection_string,
                 echo=False,
-                pool_pre_ping=True
+                pool_pre_ping=True,
+                # Disable insertmanyvalues optimization to avoid sentinel mismatch on SQLite
+                **({} if not connection_string.startswith("sqlite") else {"connect_args": {"check_same_thread": False}})
             )
+            # ------------------------------------------------------------------
+            # SQLAlchemy 2.0 enables the insertmanyvalues optimization by default
+            # which relies on RETURNING clauses to bulk-insert several rows at
+            # once.  When we work with CHAR(36) UUID primary keys on SQLite this
+            # optimisation can raise the following runtime error during a flush
+            # / commit (observed when syncing experience details):
+            #
+            #    Can't match sentinel values in result set to parameter sets;
+            #    key 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' was not found
+            #
+            # The issue is tracked upstream in SQLAlchemy (see GH-9618) and will
+            # eventually be fixed, but  the safest workaround for now is to
+            # disable insertmanyvalues for SQLite engines.  This turns the bulk
+            # insert back into individual INSERT statements and removes the
+            # sentinel mapping step that triggers the crash.
+            # ------------------------------------------------------------------
             
             # Test connection
-            with self.engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
+            with self.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
             
             self.session_factory = sessionmaker(bind=self.engine)
-            self.debug("Database connection initialized successfully")
-            return True
             
+            # Apply execution options to disable insertmanyvalues for SQLite
+            if connection_string.startswith("sqlite"):
+                self.engine = self.engine.execution_options(insertmanyvalues=False)
+            
+            return True
         except Exception as e:
-            self.error(f"Failed to initialize database: {e}")
+            self.error(f"Database initialization failed: {e}")
             return False
     
     def _build_connection_string(self) -> str:
@@ -288,10 +328,11 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             
             with self.session_factory() as session:
                 # Ensure user exists
-                if not self.current_user:
-                    self.current_user = self._get_or_create_user(session)
+                if not self.current_user_id:
+                    user = self._get_or_create_user(session)
+                    self.current_user_id = user.id
                 
-                if not self.current_user:
+                if not self.current_user_id:
                     raise DatabaseError("Failed to get or create user")
                 
                 content_type = item['type']
@@ -306,6 +347,8 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                     self._sync_idea(session, content_data, item)
                 elif content_type == 'updates':
                     self._sync_update(session, content_data, item)
+                elif content_type == 'resume':
+                    self._sync_resume(session, content_data, item)
                 else:
                     self.warning(f"Unknown content type: {content_type}")
                     return
@@ -314,13 +357,20 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['created_count'] += 1
                 
         except Exception as e:
+            session.rollback()
             raise DatabaseError(f"Failed to sync content item: {e}")
     
     def _sync_blog_post(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
         """Sync blog post to database"""
         try:
-            frontmatter = content_data.get('frontmatter', {})
-            content = content_data.get('content', '')
+            # Handle both structured data and frontmatter-based data
+            if 'frontmatter' in content_data:
+                frontmatter = content_data.get('frontmatter', {})
+                content = content_data.get('content', '')
+            else:
+                # Direct structured data from parsers
+                frontmatter = content_data
+                content = content_data.get('content', '')
             
             # Required fields
             title = frontmatter.get('title', 'Untitled')
@@ -344,9 +394,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new post
-                assert self.current_user is not None
+                assert self.current_user_id is not None
                 blog_post = BlogPost(
-                    user_id=self.current_user.id,
+                    user_id=self.current_user_id,
                     title=title,
                     slug=slug,
                     content=content,
@@ -366,16 +416,20 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if 'categories' in frontmatter and frontmatter['categories']:
                 self._sync_blog_categories(session, blog_post, frontmatter['categories'])
             
-            self.debug(f"Synced blog post: {title}")
-            
         except Exception as e:
             raise DatabaseError(f"Failed to sync blog post: {e}")
     
     def _sync_project(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
         """Sync project to database"""
         try:
-            frontmatter = content_data.get('frontmatter', {})
-            content = content_data.get('content', '')
+            # Handle both structured data and frontmatter-based data
+            if 'frontmatter' in content_data:
+                frontmatter = content_data.get('frontmatter', {})
+                content = content_data.get('content', '')
+            else:
+                # Direct structured data from parsers
+                frontmatter = content_data
+                content = content_data.get('content', '')
             
             title = frontmatter.get('title', 'Untitled Project')
             slug = frontmatter.get('slug', self._generate_slug(title))
@@ -401,9 +455,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new project
-                assert self.current_user is not None
+                assert self.current_user_id is not None
                 project = Project(
-                    user_id=self.current_user.id,
+                    user_id=self.current_user_id,
                     title=title,
                     slug=slug,
                     description=frontmatter.get('description', ''),
@@ -425,16 +479,20 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if content:
                 self._sync_project_details(session, project, content)
             
-            self.debug(f"Synced project: {title}")
-            
         except Exception as e:
             raise DatabaseError(f"Failed to sync project: {e}")
     
     def _sync_idea(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
         """Sync idea to database"""
         try:
-            frontmatter = content_data.get('frontmatter', {})
-            content = content_data.get('content', '')
+            # Handle both structured data and frontmatter-based data
+            if 'frontmatter' in content_data:
+                frontmatter = content_data.get('frontmatter', {})
+                content = content_data.get('content', '')
+            else:
+                # Direct structured data from parsers
+                frontmatter = content_data
+                content = content_data.get('content', '')
             
             title = frontmatter.get('title', 'Untitled Idea')
             slug = frontmatter.get('slug', self._generate_slug(title))
@@ -452,9 +510,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new idea
-                assert self.current_user is not None
+                assert self.current_user_id is not None
                 idea = Idea(
-                    user_id=self.current_user.id,
+                    user_id=self.current_user_id,
                     title=title,
                     slug=slug,
                     abstract=frontmatter.get('abstract', frontmatter.get('description', '')),
@@ -464,16 +522,20 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 session.flush()
                 self.sync_stats['created_count'] += 1
             
-            self.debug(f"Synced idea: {title}")
-            
         except Exception as e:
             raise DatabaseError(f"Failed to sync idea: {e}")
     
     def _sync_update(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
         """Sync update to database"""
         try:
-            frontmatter = content_data.get('frontmatter', {})
-            content = content_data.get('content', '')
+            # Handle both structured data and frontmatter-based data
+            if 'frontmatter' in content_data:
+                frontmatter = content_data.get('frontmatter', {})
+                content = content_data.get('content', '')
+            else:
+                # Direct structured data from parsers
+                frontmatter = content_data
+                content = content_data.get('content', '')
             
             title = frontmatter.get('title', 'Untitled Update')
             update_date = self._parse_date(frontmatter.get('date', datetime.utcnow().date()))
@@ -495,9 +557,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new update
-                assert self.current_user is not None
+                assert self.current_user_id is not None
                 update = RecentUpdate(
-                    user_id=self.current_user.id,
+                    user_id=self.current_user_id,
                     title=title,
                     description=content or frontmatter.get('description', ''),
                     date=update_date
@@ -506,27 +568,456 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 session.flush()
                 self.sync_stats['created_count'] += 1
             
-            self.debug(f"Synced update: {title}")
-            
         except Exception as e:
             raise DatabaseError(f"Failed to sync update: {e}")
+    
+    def _sync_resume(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
+        """Sync resume to database"""
+        try:
+            # Handle both structured data and frontmatter-based data
+            if 'frontmatter' in content_data:
+                frontmatter = content_data.get('frontmatter', {})
+                content = content_data.get('content', '')
+            else:
+                # Direct structured data from parsers
+                frontmatter = content_data
+                content = content_data.get('content', '')
+            
+            # Resume content is typically stored in personal_info table
+            # Check if personal info exists
+            existing_info = session.query(PersonalInfo).first()
+            
+            if existing_info:
+                # Update existing personal info
+                existing_info.full_name = frontmatter.get('name', frontmatter.get('full_name', ''))
+                existing_info.title = frontmatter.get('title', frontmatter.get('current_position', ''))
+                existing_info.current_status = frontmatter.get('bio', frontmatter.get('summary', ''))
+                existing_info.location = frontmatter.get('location', '')
+                existing_info.email = frontmatter.get('email', '')
+                existing_info.phone = frontmatter.get('phone', '')
+                existing_info.website = frontmatter.get('website', '')
+                existing_info.avatar_url = frontmatter.get('profile_image', frontmatter.get('avatar_url', ''))
+                existing_info.updated_at = datetime.utcnow()
+                
+                personal_info = existing_info
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new personal info
+                assert self.current_user_id is not None
+                personal_info = PersonalInfo(
+                    user_id=self.current_user_id,
+                    full_name=frontmatter.get('name', frontmatter.get('full_name', 'Unknown')),
+                    title=frontmatter.get('title', frontmatter.get('current_position', 'Professional')),
+                    current_status=frontmatter.get('bio', frontmatter.get('summary', '')),
+                    location=frontmatter.get('location', ''),
+                    email=frontmatter.get('email', ''),
+                    phone=frontmatter.get('phone', ''),
+                    website=frontmatter.get('website', ''),
+                    avatar_url=frontmatter.get('profile_image', frontmatter.get('avatar_url', '')),
+                    is_primary=True
+                )
+                session.add(personal_info)
+                session.flush()  # Get the ID for foreign key relationships
+                session.refresh(personal_info)  # Refresh to ensure UUID is properly loaded
+                self.sync_stats['created_count'] += 1
+            
+            # Sync education data if available
+            try:
+                education_data = content_data.get('education', [])
+                if education_data:
+                    self._sync_education(session, education_data)
+            except Exception as e:
+                self.error(f"Education sync failed: {e}")
+                raise
+            
+            # Sync work experience data if available
+            try:
+                experience_data = content_data.get('experience', [])
+                if experience_data:
+                    self._sync_work_experience(session, experience_data)
+            except Exception as e:
+                self.error(f"Experience sync failed: {e}")
+                raise
+            
+            # Sync awards data if available
+            try:
+                awards_data = content_data.get('awards', [])
+                if awards_data:
+                    self._sync_awards(session, awards_data)
+            except Exception as e:
+                self.error(f"Awards sync failed: {e}")
+                raise
+            
+            # Sync publications data if available
+            try:
+                publications_data = content_data.get('publications', [])
+                if publications_data:
+                    self._sync_publications(session, publications_data)
+            except Exception as e:
+                self.error(f"Publications sync failed: {e}")
+                raise
+            
+            # Sync social links data if available
+            try:
+                social_links_data = content_data.get('social_links', [])
+                if social_links_data:
+                    self._sync_social_links(session, personal_info, social_links_data)
+            except Exception as e:
+                self.error(f"Social links sync failed: {e}")
+                raise
+            
+        except Exception as e:
+            raise DatabaseError(f"Failed to sync resume: {e}")
+    
+    def _sync_education(self, session: Session, education_data: List[Dict[str, Any]]) -> None:
+        """Sync education data to database"""
+        for edu_item in education_data:
+            # Check if education record exists
+            existing_education = session.query(Education).filter_by(
+                user_id=self.current_user_id,
+                institution=edu_item.get('institution', ''),
+                degree=edu_item.get('degree', '')
+            ).first()
+            
+            if existing_education:
+                # Update existing education
+                existing_education.field_of_study = edu_item.get('field_of_study', '')
+                existing_education.start_date = self._parse_date(edu_item.get('start_date'))
+                existing_education.end_date = self._parse_date(edu_item.get('end_date'))
+                existing_education.is_current = edu_item.get('is_current', False)
+                existing_education.gpa = edu_item.get('gpa')
+                existing_education.location = edu_item.get('location', '')
+                existing_education.institution_website = edu_item.get('institution_website', '')
+                existing_education.institution_logo_url = edu_item.get('institution_logo_url', '')
+                existing_education.updated_at = datetime.utcnow()
+                
+                education = existing_education
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new education record
+                education = Education(
+                    user_id=self.current_user_id,
+                    institution=edu_item.get('institution', ''),
+                    degree=edu_item.get('degree', ''),
+                    field_of_study=edu_item.get('field_of_study', ''),
+                    start_date=self._parse_date(edu_item.get('start_date')),
+                    end_date=self._parse_date(edu_item.get('end_date')),
+                    is_current=edu_item.get('is_current', False),
+                    gpa=edu_item.get('gpa'),
+                    location=edu_item.get('location', ''),
+                    institution_website=edu_item.get('institution_website', ''),
+                    institution_logo_url=edu_item.get('institution_logo_url', ''),
+                    sort_order=len(session.query(Education).filter_by(user_id=self.current_user_id).all())
+                )
+                session.add(education)
+                session.flush()  # Get the ID for foreign key relationships
+                session.refresh(education)  # Refresh to ensure UUID is properly loaded
+                self.sync_stats['created_count'] += 1
+            
+            # Sync education details if present
+            details = edu_item.get('details', [])
+            if details:
+                session.flush()
+                session.refresh(education)
+                # Now sync education details
+                self._sync_education_details(session, education, details)
+    
+    def _sync_work_experience(self, session: Session, experience_data: List[Dict[str, Any]]) -> None:
+        """Sync work experience data to database"""
+        for exp_item in experience_data:
+            # Check if work experience record exists
+            existing_experience = session.query(WorkExperience).filter_by(
+                user_id=self.current_user_id,
+                company=exp_item.get('company', ''),
+                position=exp_item.get('position', '')
+            ).first()
+            
+            if existing_experience:
+                # Update existing experience
+                existing_experience.start_date = self._parse_date(exp_item.get('start_date'))
+                existing_experience.end_date = self._parse_date(exp_item.get('end_date'))
+                existing_experience.is_current = exp_item.get('is_current', False)
+                existing_experience.location = exp_item.get('location', '')
+                existing_experience.company_website = exp_item.get('company_website', '')
+                existing_experience.company_logo_url = exp_item.get('company_logo_url', '')
+                existing_experience.updated_at = datetime.utcnow()
+                
+                work_experience = existing_experience
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new work experience record
+                work_experience = WorkExperience(
+                    user_id=self.current_user_id,
+                    company=exp_item.get('company', ''),
+                    position=exp_item.get('position', ''),
+                    start_date=self._parse_date(exp_item.get('start_date')),
+                    end_date=self._parse_date(exp_item.get('end_date')),
+                    is_current=exp_item.get('is_current', False),
+                    location=exp_item.get('location', ''),
+                    company_website=exp_item.get('company_website', ''),
+                    company_logo_url=exp_item.get('company_logo_url', ''),
+                    sort_order=len(session.query(WorkExperience).filter_by(user_id=self.current_user_id).all())
+                )
+                session.add(work_experience)
+                session.flush()  # Get the ID for foreign key relationships
+                session.refresh(work_experience)  # Refresh to ensure UUID is properly loaded
+                self.sync_stats['created_count'] += 1
+            
+            # Sync work experience details immediately after creating the record
+            details = exp_item.get('details', [])
+            if details:
+                # Flush instead of commit to keep all inserts in one transaction
+                session.flush()
+                session.refresh(work_experience)
+                # Now sync work experience details
+                self._sync_work_experience_details(session, work_experience, details)
+    
+    def _sync_awards(self, session: Session, awards_data: List[Dict[str, Any]]) -> None:
+        """Sync awards data to database"""
+        for award_item in awards_data:
+            # Check if award record exists
+            existing_award = session.query(Award).filter_by(
+                user_id=self.current_user_id,
+                title=award_item.get('title', ''),
+                awarding_organization=award_item.get('awarding_organization', award_item.get('issuer', ''))
+            ).first()
+            
+            if existing_award:
+                # Update existing award
+                existing_award.award_date = self._parse_date(award_item.get('award_date'))
+                existing_award.description = award_item.get('description', '')
+                existing_award.updated_at = datetime.utcnow()
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new award record
+                award = Award(
+                    user_id=self.current_user_id,
+                    title=award_item.get('title', ''),
+                    awarding_organization=award_item.get('awarding_organization', award_item.get('issuer', '')),
+                    award_date=self._parse_date(award_item.get('award_date')),
+                    description=award_item.get('description', ''),
+                    sort_order=len(session.query(Award).filter_by(user_id=self.current_user_id).all())
+                )
+                session.add(award)
+                self.sync_stats['created_count'] += 1
+    
+    def _sync_education_details(self, session: Session, education: Education, details: List[str]) -> None:
+        """Sync education details to database"""
+        
+        # Check if details already exist
+        existing_count = session.query(EducationDetail).filter(
+            EducationDetail.education_id == education.id
+        ).count()
+        
+        if existing_count > 0:
+            return
+        
+        # Create new details
+        for i, detail_text in enumerate(details):
+            if not detail_text or not detail_text.strip():
+                continue
+                
+            try:
+                education_detail = EducationDetail(
+                    education_id=education.id,
+                    detail_text=detail_text.strip(),
+                    sort_order=i
+                )
+                session.add(education_detail)
+                # Force individual insert to avoid insertmanyvalues bulk processing
+                session.flush()
+                self.sync_stats['created_count'] += 1
+            except Exception as e:
+                self.warning(f"Failed to create education detail: {e}")
+                continue
+    
+    def _sync_work_experience_details(self, session: Session, work_experience: WorkExperience, details: List[str]) -> None:
+        """Sync work experience details to database"""
+        
+        # Check if details already exist
+        existing_count = session.query(WorkExperienceDetail).filter(
+            WorkExperienceDetail.work_experience_id == work_experience.id
+        ).count()
+        
+        if existing_count > 0:
+            return
+        
+        # Create new details
+        for i, detail_text in enumerate(details):
+            if not detail_text or not detail_text.strip():
+                continue
+                
+            try:
+                work_experience_detail = WorkExperienceDetail(
+                    work_experience_id=work_experience.id,
+                    detail_text=detail_text.strip(),
+                    sort_order=i
+                )
+                session.add(work_experience_detail)
+                # Force individual insert to avoid insertmanyvalues bulk processing
+                session.flush()
+                self.sync_stats['created_count'] += 1
+            except Exception as e:
+                self.warning(f"Failed to create work experience detail: {e}")
+                continue
+    
+    def _sync_publications(self, session: Session, publications_data: List[Dict[str, Any]]) -> None:
+        """Sync publications data to database"""
+        for pub_item in publications_data:
+            # Check if publication record exists
+            existing_publication = session.query(Publication).filter_by(
+                user_id=self.current_user_id,
+                title=pub_item.get('title', '')
+            ).first()
+            
+            if existing_publication:
+                # Update existing publication
+                existing_publication.publication_type = pub_item.get('publication_type', 'journal')
+                existing_publication.journal_name = pub_item.get('journal_name', '')
+                existing_publication.publication_date = pub_item.get('publication_date')
+                existing_publication.doi = pub_item.get('doi', '')
+                existing_publication.is_peer_reviewed = pub_item.get('is_peer_reviewed', True)
+                existing_publication.updated_at = datetime.utcnow()
+                
+                publication = existing_publication
+                self.sync_stats['updated_count'] += 1
+            else:
+                # Create new publication record
+                publication = Publication(
+                    user_id=self.current_user_id,
+                    title=pub_item.get('title', ''),
+                    publication_type=pub_item.get('publication_type', 'journal'),
+                    journal_name=pub_item.get('journal_name', ''),
+                    publication_date=pub_item.get('publication_date'),
+                    doi=pub_item.get('doi', ''),
+                    is_peer_reviewed=pub_item.get('is_peer_reviewed', True),
+                    sort_order=len(session.query(Publication).filter_by(user_id=self.current_user_id).all())
+                )
+                session.add(publication)
+                session.flush()
+                session.refresh(publication)  # Refresh to ensure UUID is properly loaded
+                self.sync_stats['created_count'] += 1
+            
+            # Check if publication authors already exist for this publication
+            existing_authors_count = session.query(PublicationAuthor).filter_by(
+                publication_id=publication.id
+            ).count()
+            
+            if existing_authors_count > 0:
+                continue
+            
+            # Sync publication authors
+            authors = pub_item.get('authors', [])
+            for i, author in enumerate(authors):
+                # Handle both string and dict format for authors
+                if isinstance(author, str):
+                    author_name = author
+                    is_corresponding = False
+                    affiliation = ''
+                else:
+                    author_name = author.get('name', '')
+                    is_corresponding = author.get('is_corresponding', False)
+                    affiliation = author.get('affiliation', '')
+                
+                publication_author = PublicationAuthor(
+                    publication_id=publication.id,
+                    author_name=author_name,
+                    author_order=i,
+                    is_corresponding=is_corresponding,
+                    affiliation=affiliation
+                )
+                session.add(publication_author)
+                self.sync_stats['created_count'] += 1
+    
+    def _sync_publication_authors(self, session: Session, publication: Publication, authors: List[str]) -> None:
+        """Sync publication authors for a publication"""
+        # Check if authors already exist to avoid duplicates
+        try:
+            existing_count = session.query(PublicationAuthor).filter(
+                PublicationAuthor.publication_id == str(publication.id)
+            ).count()
+            if existing_count > 0:
+                self.debug(f"Publication authors already exist for publication {publication.id}, skipping")
+                return
+        except Exception as e:
+            self.warning(f"Error checking existing publication authors, proceeding: {e}")
+        
+        for i, author_name in enumerate(authors):
+            if not author_name or not author_name.strip():
+                continue
+                
+            # Create author record
+            author = PublicationAuthor(
+                publication_id=publication.id,
+                author_name=author_name.strip(),
+                author_order=i + 1,
+                is_corresponding=False  # Could be enhanced to detect corresponding author
+            )
+            session.add(author)
+    
+    def _sync_social_links(self, session: Session, personal_info: PersonalInfo, social_links_data: List[Dict[str, Any]]) -> None:
+        """Sync social links data to database"""
+        # Check if social links already exist for this personal info
+        existing_links_count = session.query(SocialLink).filter_by(
+            personal_info_id=personal_info.id
+        ).count()
+        
+        if existing_links_count > 0:
+            return
+        
+        # Create new social links
+        for i, link_data in enumerate(social_links_data):
+            social_link = SocialLink(
+                personal_info_id=personal_info.id,
+                platform=link_data.get('platform', ''),
+                url=link_data.get('url', ''),
+                display_name=link_data.get('display_name', ''),
+                is_active=link_data.get('is_active', True),
+                sort_order=i
+            )
+            session.add(social_link)
+            self.sync_stats['created_count'] += 1
+    
+
     
     def _simulate_sync_item(self, item: Dict[str, Any]) -> None:
         """Simulate syncing an item (dry run)"""
         self.debug(f"[DRY RUN] Would sync {item['type']}: {item['name']}")
     
     def _get_or_create_user(self, session: Session) -> User:
-        """Get or create default user for content"""
-        user = session.query(User).first()
-        if not user:
+        """Get or create default user for content.
+        More defensive than the previous version:
+        1. Always look up by *username* first to avoid UNIQUE collisions.
+        2. If a concurrent insert slipped through, catch IntegrityError,
+           rollback and fetch the existing row instead of crashing.
+        """
+        # Workspace owner configuration (defaults to "admin")
+        cfg = self.config_manager.load_config().get('workspace', {}).get('owner', {})
+        username = cfg.get('username', 'admin')
+
+        # 1) Try to fetch by username (UNIQUE)
+        user: Optional[User] = session.query(User).filter_by(username=username).one_or_none()
+
+        if user is None:
+            # 2) Not found ‑> attempt to create
             user = User(
-                username='admin',
-                email='admin@example.com',
-                display_name='Admin User',
-                is_active=True
+                username=username,
+                email=cfg.get('email', 'admin@example.com'),
+                password_hash=cfg.get('password_hash', 'default_hash'),
+                first_name=cfg.get('first_name', 'Admin'),
+                last_name=cfg.get('last_name', 'User'),
+                is_active=True,
+                is_admin=True,
             )
             session.add(user)
-            session.flush()
+            try:
+                session.flush()  # May raise IntegrityError if race condition
+            except Exception as exc:
+                # Rollback partial insert and fetch the existing record
+                session.rollback()
+                self.debug(f"Race creating user '{username}', fetching existing: {exc}")
+                user = session.query(User).filter_by(username=username).one()
+
         return user
     
     def _sync_blog_tags(self, session: Session, blog_post: BlogPost, tags: List[str]) -> None:
@@ -629,7 +1120,7 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
         
         return datetime.utcnow()
     
-    def _parse_date(self, date_str: Union[str, datetime, date]) -> Optional[date]:
+    def _parse_date(self, date_str: Union[str, datetime, date, None]) -> Optional[date]:
         """Parse date from string"""
         if not date_str:
             return None

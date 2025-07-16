@@ -17,6 +17,9 @@ class ResumeParser(BaseParser):
     awards, skills, and other resume-related data with high accuracy.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="resume_parser")
+    
     def _get_content_type(self) -> str:
         return 'resume'
     
@@ -56,7 +59,19 @@ class ResumeParser(BaseParser):
         # Extract recent updates with structured format
         recent_updates = self._extract_recent_updates(content)
         
-        # Store all extracted data
+        # Include structured data in main_entity for database sync
+        personal_info.update({
+            'social_links': social_links,
+            'education': education_data,
+            'experience': experience_data,
+            'publications': publications_data,
+            'awards': awards_data,
+            'skills': skills_data,
+            'research': research_data,
+            'recent_updates': recent_updates
+        })
+        
+        # Store all extracted data in metadata as well for other uses
         extracted.metadata.update({
             'social_links': social_links,
             'education': education_data,
@@ -519,37 +534,69 @@ class ResumeParser(BaseParser):
     
     def _extract_authors(self, pub_text: str) -> List[str]:
         """Extract authors from publication text"""
+        # Clean up the text first - remove any leading numbering or whitespace
+        clean_text = re.sub(r'^\d+\.\s*', '', pub_text).strip()
+        
         # Look for author patterns at the beginning of the text
         author_patterns = [
-            r'^([^."]+?)(?:\s*[."]|\s+In\s|\s+Proceedings|\s+\(\d{4}\))',  # Authors before title/venue/year
-            r'^([A-Z][^.]+?)\.',  # Authors ending with period
+            # Pattern 1: Authors before quoted title
+            r'^([^"]+?)(?:\s*")',
+            # Pattern 2: Authors before "In" or "Proceedings"  
+            r'^([^."]+?)(?:\s+(?:In\s|Proceedings))',
+            # Pattern 3: Authors before year in parentheses
+            r'^([^."(]+?)(?:\s*\(\d{4}\))',
+            # Pattern 4: Authors ending with period before title
+            r'^([A-Z][^."]+?)\.\s*[A-Z"]',
+            # Pattern 5: General pattern - text before journal/venue indicators
+            r'^([^."]+?)(?:\s+(?:Communications|Journal|Proceedings|PeerJ|SPIE))',
         ]
         
         for pattern in author_patterns:
-            match = re.search(pattern, pub_text)
+            match = re.search(pattern, clean_text, re.IGNORECASE)
             if match:
                 authors_text = match.group(1).strip()
                 
-                # Split by common separators (and, comma, semicolon)
-                authors = []
-                for separator in [' and ', ' & ', ';', ',']:
-                    if separator in authors_text:
-                        authors = [author.strip() for author in authors_text.split(separator)]
-                        break
+                # Remove common prefixes that might be included
+                authors_text = re.sub(r'^(and|&)\s+', '', authors_text).strip()
                 
-                # If no separators found, treat as single author
-                if not authors:
+                # Split by common separators
+                authors = []
+                
+                # Try different separators in order of preference
+                if ' and ' in authors_text:
+                    authors = [author.strip() for author in authors_text.split(' and ')]
+                elif ', ' in authors_text and not '.' in authors_text.split(',')[0]:
+                    # Only split by comma if first part doesn't contain period (avoid splitting initials)
+                    authors = [author.strip() for author in authors_text.split(',')]
+                elif ' & ' in authors_text:
+                    authors = [author.strip() for author in authors_text.split(' & ')]
+                else:
+                    # Single author or couldn't split
                     authors = [authors_text]
                 
-                # Clean up author names and filter out empty ones
+                # Clean up author names and filter out invalid ones
                 cleaned_authors = []
                 for author in authors:
                     author = author.strip()
-                    # Skip if it looks like a title or is too short
-                    if author and len(author) > 2 and not author.lower().startswith('in '):
+                    
+                    # Skip if empty or too short
+                    if not author or len(author) < 2:
+                        continue
+                        
+                    # Skip common false positives
+                    if (author.lower().startswith(('in ', 'proceedings', 'journal', 'vol ')) or
+                        author.isdigit() or
+                        len(author.split()) > 6):  # Too many words, probably not an author
+                        continue
+                    
+                    # Clean up punctuation
+                    author = re.sub(r'[,;]$', '', author).strip()
+                    
+                    if author:
                         cleaned_authors.append(author)
                 
-                return cleaned_authors
+                if cleaned_authors:
+                    return cleaned_authors
         
         return []
     

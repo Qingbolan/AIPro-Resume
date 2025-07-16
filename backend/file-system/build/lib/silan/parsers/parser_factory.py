@@ -37,8 +37,21 @@ class ParserFactory:
     _default_parser = ProjectParser  # Use project parser as fallback
     
     @classmethod
+    def get_parser(cls, content_type: str) -> Optional[Type[BaseParser]]:
+        """
+        Get parser class for a specific content type.
+        
+        Args:
+            content_type: The content type to get parser for
+            
+        Returns:
+            Parser class or None if not found
+        """
+        return cls._parsers.get(content_type.lower())
+    
+    @classmethod
     def create_parser(
-        self, 
+        cls, 
         content_dir: Path, 
         content_type: Optional[str] = None,
         file_path: Optional[Path] = None,

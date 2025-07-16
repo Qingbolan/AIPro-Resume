@@ -17,6 +17,9 @@ class BlogParser(BaseParser):
     tags, series information, and related posts with SEO optimization.
     """
     
+    def __init__(self, content_dir):
+        super().__init__(content_dir, logger_name="blog_parser")
+    
     def _get_content_type(self) -> str:
         return 'blog_post'
     
@@ -287,8 +290,8 @@ class BlogParser(BaseParser):
         # 2. Infer from content keywords
         content_lower = content.lower()
         indicator_map = {
-            'TUTORIAL': ['tutorial', 'how to', 'step by step', 'guide', 'walkthrough'],
-            'ARTICLE': [
+            'tutorial': ['tutorial', 'how to', 'step by step', 'guide', 'walkthrough'],
+            'article': [
                 'review', 'comparison', 'vs', 'pros and cons', 'evaluation',
                 'analysis', 'deep dive', 'investigation', 'study', 'research',
                 'news', 'announcement', 'release', 'update', 'breaking',
@@ -296,8 +299,8 @@ class BlogParser(BaseParser):
                 'case study', 'implementation', 'project', 'experience',
                 'list of', 'top', 'best', 'worst', 'reasons'
             ],
-            'PODCAST': ['podcast', 'audio', 'interview', 'conversation', 'q&a', 'questions'],
-            'VLOG': ['vlog', 'video', 'recording', 'demonstration']
+            'podcast': ['podcast', 'audio', 'interview', 'conversation', 'q&a', 'questions'],
+            'vlog': ['vlog', 'video', 'recording', 'demonstration']
         }
 
         for enum_value, keywords in indicator_map.items():
@@ -305,34 +308,34 @@ class BlogParser(BaseParser):
                 return enum_value
 
         # 3. Default fallback
-        return 'ARTICLE'
+        return 'article'
 
     def _map_to_valid_content_type(self, content_type: str) -> str:
-        """Convert arbitrary content_type strings to valid BlogContentType enum members (uppercase)."""
+        """Convert arbitrary content_type strings to valid BlogContentType enum members (lowercase)."""
         mapping = {
             # map common lower/alternate strings to enum names
-            'article': 'ARTICLE',
-            'tutorial': 'TUTORIAL',
-            'how-to': 'TUTORIAL',
-            'howto': 'TUTORIAL',
-            'vlog': 'VLOG',
-            'video': 'VLOG',
-            'podcast': 'PODCAST',
-            'audio': 'PODCAST',
-            'interview': 'PODCAST',
-            'conversation': 'PODCAST',
-            'q&a': 'PODCAST',
+            'article': 'article',
+            'tutorial': 'tutorial',
+            'how-to': 'tutorial',
+            'howto': 'tutorial',
+            'vlog': 'vlog',
+            'video': 'vlog',
+            'podcast': 'podcast',
+            'audio': 'podcast',
+            'interview': 'podcast',
+            'conversation': 'podcast',
+            'q&a': 'podcast',
             # variations that should be treated as ARTICLE
-            'review': 'ARTICLE',
-            'analysis': 'ARTICLE',
-            'case_study': 'ARTICLE',
-            'case study': 'ARTICLE',
-            'news': 'ARTICLE',
-            'opinion': 'ARTICLE',
-            'list': 'ARTICLE'
+            'review': 'article',
+            'analysis': 'article',
+            'case_study': 'article',
+            'case study': 'article',
+            'news': 'article',
+            'opinion': 'article',
+            'list': 'article'
         }
         ct_lower = str(content_type).strip().lower()
-        return mapping.get(ct_lower, ct_lower.upper())
+        return mapping.get(ct_lower, ct_lower.lower())
     
     def _determine_status(self, metadata: Dict) -> str:
         """Determine blog post status"""

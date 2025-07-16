@@ -100,6 +100,16 @@ class ProjectParser(BaseParser):
                 if key in project_data and value is not None:
                     project_data[key] = value
             
+            # Handle nested config structure - extract links
+            if 'links' in config_project_data:
+                links = config_project_data['links']
+                if 'github' in links:
+                    project_data['github_url'] = links['github']
+                if 'demo' in links:
+                    project_data['demo_url'] = links['demo']
+                if 'documentation' in links:
+                    project_data['documentation_url'] = links['documentation']
+            
             # Add folder-specific data to metadata (not main entity)
             extracted.metadata['folder_path'] = str(folder_path)
             extracted.metadata['config_data'] = config_data
@@ -299,8 +309,13 @@ class ProjectParser(BaseParser):
     
     def _extract_project_data(self, metadata: Dict, content: str) -> Dict[str, Any]:
         """Extract main project information"""
-        # Generate slug if not provided
+        # Extract title from metadata or first heading
         title = metadata.get('title', '')
+        if not title:
+            # Extract title from first heading in content
+            title = self._extract_title_from_content(content)
+        
+        # Generate slug if not provided
         slug = metadata.get('slug', self._generate_slug(title))
         
         # Parse dates
@@ -334,12 +349,36 @@ class ProjectParser(BaseParser):
         
         return project_data
     
+    def _extract_title_from_content(self, content: str) -> str:
+        """Extract title from first heading in markdown content"""
+        if not content:
+            return ''
+        
+        lines = content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith('# '):
+                return line[2:].strip()
+        
+        return ''
+    
     def _extract_project_technologies(self, metadata: Dict, content: str) -> List[Dict[str, Any]]:
         """Extract and categorize technologies used in the project"""
         technologies = []
         
         # Get technologies from metadata
         tech_stack = metadata.get('tech_stack', [])
+        
+        # Also try to get from nested technologies structure
+        if 'technologies' in metadata:
+            tech_dict = metadata['technologies']
+            if isinstance(tech_dict, dict):
+                # Flatten all technology lists from different categories
+                for category, techs in tech_dict.items():
+                    if isinstance(techs, list):
+                        tech_stack.extend(techs)
+            elif isinstance(tech_dict, list):
+                tech_stack.extend(tech_dict)
         
         # Also extract from content sections
         tech_from_content = self._extract_tech_from_content(content)

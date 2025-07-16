@@ -60,9 +60,9 @@ class ModernLogger:
     def __init__(
         self,
         name: str = "app",
-        level: str = "info",
+        level: str = "debug",
         log_file: Optional[str] = None,
-        show_path: bool = True,
+        show_path: bool = False,
         rich_tracebacks: bool = True
     ):
         # Store instance configuration
@@ -135,7 +135,7 @@ class ModernLogger:
         Create a smooth gradient across the text from GRADIENT_START to GRADIENT_END.
         """
         def hex_to_rgb(h: str) -> Tuple[int,int,int]:
-            return tuple(int(h[i:i+2], 16) for i in (1, 3, 5))
+            return (int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16))
 
         start_rgb = hex_to_rgb(self.GRADIENT_START)
         end_rgb   = hex_to_rgb(self.GRADIENT_END)
