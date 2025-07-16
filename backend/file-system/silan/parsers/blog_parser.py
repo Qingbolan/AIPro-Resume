@@ -28,6 +28,14 @@ class BlogParser(BaseParser):
         metadata = post.metadata
         content = post.content
         
+        # Add filename to metadata for prefix detection
+        if hasattr(extracted, 'source_file') and extracted.source_file:
+            filename = extracted.source_file.name
+            metadata['filename'] = filename
+            
+            # folder_prefix should now be available from passed metadata
+            # No need to manually detect from parent folder
+        
         # Extract main blog post data
         blog_data = self._extract_blog_data(metadata, content)
         extracted.main_entity = blog_data
@@ -85,6 +93,9 @@ class BlogParser(BaseParser):
         # Extract featured image
         featured_image = self._extract_featured_image(metadata, content)
         
+        # Extract series information for main entity
+        series_info = self._extract_series_info(metadata, content)
+        
         blog_data = {
             'title': title,
             'slug': slug,
@@ -98,7 +109,8 @@ class BlogParser(BaseParser):
             'view_count': metadata.get('views', 0),
             'like_count': metadata.get('likes', 0),
             'comment_count': 0,
-            'published_at': pub_date
+            'published_at': pub_date,
+            'series': series_info
         }
         
         return blog_data
@@ -150,7 +162,60 @@ class BlogParser(BaseParser):
         """Extract blog series information"""
         series_info = None
         
-        # Check metadata for series
+        # Check folder prefix for episode series
+        folder_prefix = metadata.get('folder_prefix', '')
+        if folder_prefix.startswith('episode.'):
+            # Extract series info from episode folder name
+            # Format: episode.series-name
+            parts = folder_prefix.split('.')
+            if len(parts) >= 2:
+                series_name = parts[1].replace('-', ' ').title()
+                
+                # Try to extract part number from filename
+                filename = metadata.get('filename', '')
+                part_number = 1
+                if filename.startswith('episode'):
+                    try:
+                        # Extract number from filename like "episode1.en.md"
+                        match = re.search(r'episode(\d+)', filename)
+                        if match:
+                            part_number = int(match.group(1))
+                    except:
+                        pass
+                
+                series_info = {
+                    'name': series_name,
+                    'slug': self._generate_slug(series_name),
+                    'part_number': part_number,
+                    'description': metadata.get('series_description', '')
+                }
+        
+        # Check filename for episode prefix (legacy support)
+        filename = metadata.get('filename', '')
+        if filename.startswith('episode.') and not series_info:
+            # Extract series info from episode filename
+            # Format: episode.series-name.part-number.md
+            parts = filename.split('.')
+            if len(parts) >= 3:
+                series_name = parts[1].replace('-', ' ').title()
+                part_number = 1
+                try:
+                    # Try to find part number in filename
+                    for part in parts:
+                        if part.isdigit():
+                            part_number = int(part)
+                            break
+                except:
+                    pass
+                
+                series_info = {
+                    'name': series_name,
+                    'slug': self._generate_slug(series_name),
+                    'part_number': part_number,
+                    'description': metadata.get('series_description', '')
+                }
+        
+        # Check metadata for series (override filename if present)
         if 'series' in metadata:
             series_data = metadata['series']
             if isinstance(series_data, str):
@@ -282,10 +347,38 @@ class BlogParser(BaseParser):
     
     def _determine_content_type(self, metadata: Dict, content: str) -> str:
         """Determine blog post content type that matches BlogContentType enum"""
-        # 1. Check metadata explicitly specified type/content_type fields
+        # 1. Check folder prefix for type detection (highest priority)
+        folder_prefix = metadata.get('folder_prefix', '')
+        if folder_prefix:
+            if folder_prefix.startswith('vlog.'):
+                return 'vlog'
+            elif folder_prefix.startswith('blog.'):
+                return 'article'
+            elif folder_prefix.startswith('episode.'):
+                return 'episode'  # Episodes are their own content type
+            elif folder_prefix.startswith('tutorial.'):
+                return 'tutorial'
+            elif folder_prefix.startswith('podcast.'):
+                return 'podcast'
+        
+        # 2. Check metadata explicitly specified type/content_type fields
         content_type_raw = metadata.get('type', metadata.get('content_type', ''))
         if content_type_raw:
             return self._map_to_valid_content_type(content_type_raw)
+        
+        # 3. Check filename prefix for type detection
+        filename = metadata.get('filename', '')
+        if filename:
+            if filename.startswith('vlog.'):
+                return 'vlog'
+            elif filename.startswith('blog.'):
+                return 'article'
+            elif filename.startswith('episode.'):
+                return 'episode'  # Episodes are their own content type
+            elif filename.startswith('tutorial.'):
+                return 'tutorial'
+            elif filename.startswith('podcast.'):
+                return 'podcast'
 
         # 2. Infer from content keywords
         content_lower = content.lower()
@@ -300,7 +393,8 @@ class BlogParser(BaseParser):
                 'list of', 'top', 'best', 'worst', 'reasons'
             ],
             'podcast': ['podcast', 'audio', 'interview', 'conversation', 'q&a', 'questions'],
-            'vlog': ['vlog', 'video', 'recording', 'demonstration']
+            'vlog': ['vlog', 'video', 'recording', 'demonstration'],
+            'episode': ['episode', 'series', 'part', 'chapter', 'installment', 'continuation']
         }
 
         for enum_value, keywords in indicator_map.items():
@@ -325,6 +419,8 @@ class BlogParser(BaseParser):
             'interview': 'podcast',
             'conversation': 'podcast',
             'q&a': 'podcast',
+            'episode': 'episode',
+            'series': 'episode',
             # variations that should be treated as ARTICLE
             'review': 'article',
             'analysis': 'article',

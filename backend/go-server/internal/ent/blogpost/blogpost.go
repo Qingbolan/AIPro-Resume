@@ -194,10 +194,9 @@ const DefaultContentType = ContentTypeArticle
 
 // ContentType values.
 const (
-	ContentTypeArticle  ContentType = "article"
-	ContentTypeVlog     ContentType = "vlog"
-	ContentTypePodcast  ContentType = "podcast"
-	ContentTypeTutorial ContentType = "tutorial"
+	ContentTypeArticle ContentType = "article"
+	ContentTypeVlog    ContentType = "vlog"
+	ContentTypeEpisode ContentType = "episode"
 )
 
 func (ct ContentType) String() string {
@@ -207,7 +206,7 @@ func (ct ContentType) String() string {
 // ContentTypeValidator is a validator for the "content_type" field enum values. It is called by the builders before save.
 func ContentTypeValidator(ct ContentType) error {
 	switch ct {
-	case ContentTypeArticle, ContentTypeVlog, ContentTypePodcast, ContentTypeTutorial:
+	case ContentTypeArticle, ContentTypeVlog, ContentTypeEpisode:
 		return nil
 	default:
 		return fmt.Errorf("blogpost: invalid enum value for content_type field: %q", ct)

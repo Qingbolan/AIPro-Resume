@@ -376,18 +376,42 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             title = frontmatter.get('title', 'Untitled')
             slug = frontmatter.get('slug', self._generate_slug(title))
             
+            # Extract content_type from both locations
+            content_type = content_data.get('content_type', frontmatter.get('content_type', frontmatter.get('type', 'article')))
+            
+            # Map content_type to valid database enum values
+            content_type_mapping = {
+                'article': 'article',
+                'vlog': 'vlog', 
+                'tutorial': 'tutorial',
+                'podcast': 'podcast',
+                # Handle variations
+                'video': 'vlog',
+                'howto': 'tutorial',
+                'how-to': 'tutorial'
+            }
+            content_type = content_type_mapping.get(content_type.lower(), 'article')
+            
+            # Determine status more intelligently
+            status = self._determine_blog_status(frontmatter, content_data)
+            
             # Check if blog post exists
             existing_post = session.query(BlogPost).filter_by(slug=slug).first()
             
             if existing_post:
                 # Update existing post
-                from ..models.blog import BlogStatus
+                from ..models.blog import BlogStatus, BlogContentType
                 existing_post.title = title
                 existing_post.content = content
-                existing_post.excerpt = frontmatter.get('excerpt', frontmatter.get('description', ''))
+                existing_post.excerpt = frontmatter.get('excerpt', frontmatter.get('summary', frontmatter.get('description', '')))
                 existing_post.is_featured = frontmatter.get('featured', False)
-                existing_post.status = BlogStatus.PUBLISHED  # Set status to published
+                existing_post.content_type = BlogContentType(content_type.lower())
+                existing_post.status = BlogStatus(status.lower())
                 existing_post.updated_at = datetime.utcnow()
+                
+                # Handle view and like counts
+                existing_post.view_count = frontmatter.get('views', existing_post.view_count)
+                existing_post.like_count = frontmatter.get('likes', existing_post.like_count)
                 
                 if frontmatter.get('date'):
                     existing_post.published_at = self._parse_datetime(frontmatter['date'])
@@ -396,16 +420,19 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 self.sync_stats['updated_count'] += 1
             else:
                 # Create new post
-                from ..models.blog import BlogStatus
+                from ..models.blog import BlogStatus, BlogContentType
                 assert self.current_user_id is not None
                 blog_post = BlogPost(
                     user_id=self.current_user_id,
                     title=title,
                     slug=slug,
                     content=content,
-                    excerpt=frontmatter.get('excerpt', frontmatter.get('description', '')),
+                    excerpt=frontmatter.get('excerpt', frontmatter.get('summary', frontmatter.get('description', ''))),
                     is_featured=frontmatter.get('featured', False),
-                    status=BlogStatus.PUBLISHED,  # Set status to published
+                    content_type=BlogContentType(content_type.lower()),
+                    status=BlogStatus(status.lower()),
+                    view_count=frontmatter.get('views', 0),
+                    like_count=frontmatter.get('likes', 0),
                     published_at=self._parse_datetime(frontmatter.get('date', datetime.utcnow()))
                 )
                 session.add(blog_post)
@@ -432,8 +459,88 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if categories_to_sync:
                 self._sync_blog_categories(session, blog_post, categories_to_sync)
             
+            # Handle series - check both frontmatter and top-level content_data
+            series_to_sync = None
+            if 'series' in frontmatter and frontmatter['series']:
+                series_to_sync = frontmatter['series']
+            elif 'series' in content_data and content_data['series']:
+                series_to_sync = content_data['series']
+            
+            if series_to_sync:
+                self._sync_blog_series(session, blog_post, series_to_sync)
+            
         except Exception as e:
             raise DatabaseError(f"Failed to sync blog post: {e}")
+    
+    def _determine_blog_status(self, frontmatter: Dict[str, Any], content_data: Dict[str, Any]) -> str:
+        """Determine blog post status intelligently"""
+        # Check explicit status field
+        status = frontmatter.get('status', content_data.get('status', '')).lower()
+        
+        # Check published field
+        published = frontmatter.get('published', content_data.get('published', True))
+        
+        # Check if it's in drafts folder
+        path = content_data.get('path', '')
+        if 'drafts' in path.lower():
+            return 'draft'
+        
+        # Status mapping
+        if status in ['draft', 'unpublished', 'private']:
+            return 'draft'
+        elif status in ['published', 'public']:
+            return 'published'
+        elif status in ['archived']:
+            return 'archived'
+        elif not published:
+            return 'draft'
+        else:
+            return 'published'
+    
+    def _sync_blog_series(self, session: Session, blog_post: BlogPost, series_data: Any) -> None:
+        """Sync blog series information"""
+        try:
+            from ..models.blog import BlogSeries, BlogPost
+            
+            # Handle different series data formats
+            if isinstance(series_data, dict):
+                series_name = series_data.get('name', '')
+                series_description = series_data.get('description', '')
+                part_number = series_data.get('part', series_data.get('part_number', 1))
+            elif isinstance(series_data, str):
+                series_name = series_data
+                series_description = ''
+                part_number = 1
+            else:
+                return
+            
+            if not series_name:
+                return
+            
+            # Generate series slug
+            series_slug = self._generate_slug(series_name)
+            
+            # Get or create series
+            series = session.query(BlogSeries).filter_by(slug=series_slug).first()
+            if not series:
+                series = BlogSeries(
+                    title=series_name,
+                    slug=series_slug,
+                    description=series_description
+                )
+                session.add(series)
+                session.flush()
+            
+            # Update blog post with series info
+            blog_post.series_id = series.id
+            blog_post.series_order = part_number
+            
+            # Update episode count for the series
+            episode_count = session.query(BlogPost).filter_by(series_id=series.id).count()
+            series.episode_count = episode_count
+            
+        except Exception as e:
+            self.warning(f"Failed to sync blog series: {e}")
     
     def _sync_project(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
         """Sync project to database"""

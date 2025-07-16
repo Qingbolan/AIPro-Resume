@@ -132,12 +132,13 @@ class BaseParser(ABC, ModernLogger):
             'lessons': [r'##\s*Lessons', r'##\s*Takeaways?', r'##\s*Learnings?']
         }
     
-    def parse_file(self, file_path: Path) -> Optional[ExtractedContent]:
+    def parse_file(self, file_path: Path, metadata: Optional[Dict[str, Any]] = None) -> Optional[ExtractedContent]:
         """
         Parse a single markdown file and extract structured content.
         
         Args:
             file_path: Path to the markdown file
+            metadata: Optional additional metadata from content discovery
             
         Returns:
             ExtractedContent object with parsed data or None if parsing fails
@@ -150,19 +151,23 @@ class BaseParser(ABC, ModernLogger):
             # Calculate content hash for change detection
             content_hash = self._calculate_content_hash(post)
             
-            # Extract basic metadata
-            metadata = post.metadata
+            # Extract basic metadata and merge with passed metadata
+            post_metadata = post.metadata
+            if metadata:
+                post_metadata.update(metadata)
+            # Update the post object with merged metadata
+            post.metadata = post_metadata
             content = post.content
             
             # Create base extracted content
             extracted = ExtractedContent(
                 content_type=self._get_content_type(),
                 file_path=str(file_path),
-                language=metadata.get('language', 'en'),
+                language=post_metadata.get('language', 'en'),
                 content_hash=content_hash,
-                metadata=metadata,
-                tags=metadata.get('tags', []),
-                categories=metadata.get('categories', [])
+                metadata=post_metadata,
+                tags=post_metadata.get('tags', []),
+                categories=post_metadata.get('categories', [])
             )
             
             # Parse content using specialized parser

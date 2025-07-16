@@ -157,7 +157,7 @@ var (
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 300},
 		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
-		{Name: "content_type", Type: field.TypeEnum, Enums: []string{"article", "vlog", "podcast", "tutorial"}, Default: "article"},
+		{Name: "content_type", Type: field.TypeEnum, Enums: []string{"article", "vlog", "episode"}, Default: "article"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "published", "archived"}, Default: "draft"},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
 		{Name: "featured_image_url", Type: field.TypeString, Nullable: true, Size: 500},

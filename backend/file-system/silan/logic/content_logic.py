@@ -222,25 +222,49 @@ class ContentLogic(ContentLogger):
                     })
         
         elif content_type in ['blog', 'updates']:
-            # For blog and updates, recursively find all .md files in subdirectories
-            for md_file in type_dir.rglob('*.md'):
-                if md_file.is_file():
-                    # Generate a meaningful name from the file path
-                    relative_path = md_file.relative_to(type_dir)
-                    name = md_file.stem
-                    
-                    # For updates, include date info in name if available
-                    if content_type == 'updates' and len(relative_path.parts) > 1:
-                        # Extract date components from path like "2024/01/2024-01-01-ziyun2024-plan-launch.md"
-                        date_parts = [part for part in relative_path.parts[:-1] if part.isdigit()]
-                        if date_parts:
-                            name = f"{'-'.join(date_parts)}-{md_file.stem}"
-                    
+            # For blog and updates, handle both files and folders with prefixes
+            for item in type_dir.iterdir():
+                if item.is_dir():
+                    # Check for prefixed folders (vlog.*, blog.*, episode.*)
+                    if any(item.name.startswith(prefix) for prefix in ['vlog.', 'blog.', 'episode.']):
+                        # Look for markdown files in prefixed folder
+                        for md_file in item.rglob('*.md'):
+                            if md_file.is_file():
+                                content_items.append({
+                                    'type': 'file',
+                                    'path': str(md_file),
+                                    'main_file': str(md_file),
+                                    'name': f"{item.name}-{md_file.stem}",
+                                    'folder_prefix': item.name
+                                })
+                    else:
+                        # Recursively find all .md files in subdirectories
+                        for md_file in item.rglob('*.md'):
+                            if md_file.is_file():
+                                # Generate a meaningful name from the file path
+                                relative_path = md_file.relative_to(type_dir)
+                                name = md_file.stem
+                                
+                                # For updates, include date info in name if available
+                                if content_type == 'updates' and len(relative_path.parts) > 1:
+                                    # Extract date components from path like "2024/01/2024-01-01-ziyun2024-plan-launch.md"
+                                    date_parts = [part for part in relative_path.parts[:-1] if part.isdigit()]
+                                    if date_parts:
+                                        name = f"{'-'.join(date_parts)}-{md_file.stem}"
+                                
+                                content_items.append({
+                                    'type': 'file',
+                                    'path': str(md_file),
+                                    'main_file': str(md_file),
+                                    'name': name
+                                })
+                elif item.is_file() and item.suffix == '.md':
+                    # Direct .md files in the blog directory
                     content_items.append({
                         'type': 'file',
-                        'path': str(md_file),
-                        'main_file': str(md_file),
-                        'name': name
+                        'path': str(item),
+                        'main_file': str(item),
+                        'name': item.stem
                     })
         
         elif content_type == 'resume':
@@ -282,7 +306,13 @@ class ContentLogic(ContentLogger):
             if content_item['type'] == 'folder':
                 # Use file parsing for folder-based content (parse the main file)
                 main_file_path = Path(content_item['main_file'])
-                extracted_content = parser.parse_file(main_file_path)
+                
+                # Prepare metadata to pass to parser
+                parser_metadata = {}
+                if 'folder_prefix' in content_item:
+                    parser_metadata['folder_prefix'] = content_item['folder_prefix']
+                
+                extracted_content = parser.parse_file(main_file_path, parser_metadata)
                 
                 # Calculate hash of the entire folder content
                 content_hash = self._calculate_folder_hash(Path(content_item['path']))
@@ -290,7 +320,13 @@ class ContentLogic(ContentLogger):
             else:
                 # Use file parsing for standalone files
                 file_path = Path(content_item['main_file'])
-                extracted_content = parser.parse_file(file_path)
+                
+                # Prepare metadata to pass to parser
+                parser_metadata = {}
+                if 'folder_prefix' in content_item:
+                    parser_metadata['folder_prefix'] = content_item['folder_prefix']
+                
+                extracted_content = parser.parse_file(file_path, parser_metadata)
                 
                 # Calculate hash of the file content
                 content = self.file_ops.read_file(file_path)

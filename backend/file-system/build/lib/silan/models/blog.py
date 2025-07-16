@@ -16,8 +16,7 @@ class BlogContentType(enum.Enum):
     """Enumeration for blog content types - matching Go schema"""
     ARTICLE = "article"
     VLOG = "vlog"
-    PODCAST = "podcast"
-    TUTORIAL = "tutorial"
+    EPISODE = "episode"
 
 
 class BlogStatus(enum.Enum):
@@ -66,8 +65,8 @@ class BlogPost(Base, TimestampMixin):
     slug: Mapped[str] = mapped_column(String(300), unique=True, nullable=False)
     excerpt: Mapped[Optional[str]] = mapped_column(Text)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    content_type: Mapped[BlogContentType] = mapped_column(Enum(BlogContentType), default=BlogContentType.ARTICLE)
-    status: Mapped[BlogStatus] = mapped_column(Enum(BlogStatus), default=BlogStatus.DRAFT)
+    content_type: Mapped[BlogContentType] = mapped_column(Enum(BlogContentType, values_callable=lambda obj: [e.value for e in obj]), default=BlogContentType.ARTICLE)
+    status: Mapped[BlogStatus] = mapped_column(Enum(BlogStatus, values_callable=lambda obj: [e.value for e in obj]), default=BlogStatus.DRAFT)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
     featured_image_url: Mapped[Optional[str]] = mapped_column(String(500))
     reading_time_minutes: Mapped[Optional[int]] = mapped_column(Integer)

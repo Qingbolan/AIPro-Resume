@@ -261,7 +261,7 @@ class ParserFactory:
                 extracted = cls.parse_file_with_auto_detection(file_path, content_dir)
                 
                 if extracted:
-                    content_type = extracted.content_type
+                    content_type = extracted.content_type.lower()
                     if content_type not in results:
                         results[content_type] = []
                     results[content_type].append(extracted)
