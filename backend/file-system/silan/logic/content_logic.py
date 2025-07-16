@@ -293,6 +293,14 @@ class ContentLogic(ContentLogger):
             
             parsed_data = extracted_content.main_entity
             
+            # For blog posts, ensure categories and tags are included in the data
+            if content_type == 'blog':
+                # Add categories and tags from parsed content to the data
+                if extracted_content.categories:
+                    parsed_data['categories'] = extracted_content.categories
+                if extracted_content.tags:
+                    parsed_data['tags'] = extracted_content.tags
+            
             # Validate frontmatter if validator exists
             if hasattr(ContentValidator, f'validate_{content_type}_frontmatter'):
                 validator_method = getattr(ContentValidator, f'validate_{content_type}_frontmatter')

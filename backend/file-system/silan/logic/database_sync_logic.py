@@ -408,13 +408,25 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 session.flush()  # Get the ID
                 self.sync_stats['created_count'] += 1
             
-            # Handle tags
+            # Handle tags - check both frontmatter and top-level content_data
+            tags_to_sync = None
             if 'tags' in frontmatter and frontmatter['tags']:
-                self._sync_blog_tags(session, blog_post, frontmatter['tags'])
+                tags_to_sync = frontmatter['tags']
+            elif 'tags' in content_data and content_data['tags']:
+                tags_to_sync = content_data['tags']
             
-            # Handle categories
+            if tags_to_sync:
+                self._sync_blog_tags(session, blog_post, tags_to_sync)
+            
+            # Handle categories - check both frontmatter and top-level content_data
+            categories_to_sync = None
             if 'categories' in frontmatter and frontmatter['categories']:
-                self._sync_blog_categories(session, blog_post, frontmatter['categories'])
+                categories_to_sync = frontmatter['categories']
+            elif 'categories' in content_data and content_data['categories']:
+                categories_to_sync = content_data['categories']
+            
+            if categories_to_sync:
+                self._sync_blog_categories(session, blog_post, categories_to_sync)
             
         except Exception as e:
             raise DatabaseError(f"Failed to sync blog post: {e}")
@@ -1029,35 +1041,61 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             if not tag_name or not tag_name.strip():
                 continue
                 
-            # Get or create tag
+            tag_name = tag_name.strip()
+            generated_slug = self._generate_slug(tag_name)
+            
+            # Get or create tag - check both name and slug to avoid conflicts
             tag = session.query(BlogTag).filter_by(name=tag_name).first()
             if not tag:
-                tag = BlogTag(
-                    name=tag_name,
-                    slug=self._generate_slug(tag_name)
-                )
-                session.add(tag)
-                session.flush()
+                # Check if a tag with this slug already exists
+                tag_by_slug = session.query(BlogTag).filter_by(slug=generated_slug).first()
+                if tag_by_slug:
+                    # Use existing tag with same slug
+                    tag = tag_by_slug
+                else:
+                    # Create new tag
+                    tag = BlogTag(
+                        name=tag_name,
+                        slug=generated_slug
+                    )
+                    session.add(tag)
+                    session.flush()
             
-            # Create association
-            blog_post_tag = BlogPostTag(
+            # Create association if not already exists
+            existing_association = session.query(BlogPostTag).filter_by(
                 blog_post_id=blog_post.id,
                 blog_tag_id=tag.id
-            )
-            session.add(blog_post_tag)
+            ).first()
+            
+            if not existing_association:
+                blog_post_tag = BlogPostTag(
+                    blog_post_id=blog_post.id,
+                    blog_tag_id=tag.id
+                )
+                session.add(blog_post_tag)
     
     def _sync_blog_categories(self, session: Session, blog_post: BlogPost, categories: List[str]) -> None:
         """Sync blog categories for a post"""
         if categories and categories[0]:
-            category_name = categories[0]  # Take first category
+            category_name = categories[0].strip()  # Take first category
+            generated_slug = self._generate_slug(category_name)
+            
+            # Get or create category - check both name and slug to avoid conflicts
             category = session.query(BlogCategory).filter_by(name=category_name).first()
             if not category:
-                category = BlogCategory(
-                    name=category_name,
-                    slug=self._generate_slug(category_name)
-                )
-                session.add(category)
-                session.flush()
+                # Check if a category with this slug already exists
+                category_by_slug = session.query(BlogCategory).filter_by(slug=generated_slug).first()
+                if category_by_slug:
+                    # Use existing category with same slug
+                    category = category_by_slug
+                else:
+                    # Create new category
+                    category = BlogCategory(
+                        name=category_name,
+                        slug=generated_slug
+                    )
+                    session.add(category)
+                    session.flush()
             
             blog_post.category_id = category.id
     

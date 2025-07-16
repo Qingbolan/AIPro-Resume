@@ -6,11 +6,11 @@
     }
   },
   "sync_options": {
-    "dry_run": true,
-    "create_tables": false,
+    "dry_run": false,
+    "create_tables": true,
     "start_backend": false
   },
-  "last_sync_time": "2025-07-16T10:14:56.744440",
-  "sync_count": 3,
+  "last_sync_time": "2025-07-16T10:24:33.845318",
+  "sync_count": 1,
   "version": "1.0"
 }
