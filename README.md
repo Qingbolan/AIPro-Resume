@@ -1,23 +1,29 @@
-# AIPro-Resume
+# Silan Personal Website - AI-Powered Resume Platform
 
-A modern, interactive, and SEO-optimized personal resume website platform for AI professionals and full-stack developers. This project showcases a comprehensive full-stack application with hybrid database architecture, modern frontend technologies, and enterprise-grade backend services.
+A revolutionary full-stack personal website platform that transforms professional online presence through intelligent content management, modern web technologies, and automated workflows. Built for AI professionals, researchers, and full-stack developers who demand sophisticated yet maintainable digital presence.
 
 ![Project Overview](image/README/overview.png)
 
+**🌐 Live Demo**: [https://silan.tech](https://silan.tech)  
+**💻 Source Code**: [https://github.com/Qingbolan/AIPro-Resume](https://github.com/Qingbolan/AIPro-Resume)
+
 ## 🚀 Project Overview
 
-AIPro-Resume is a comprehensive portfolio and resume platform designed specifically for AI researchers, data scientists, and full-stack developers. The platform combines modern web technologies with robust backend services to create a professional, interactive, and highly customizable personal website.
+The Silan Personal Website is a comprehensive full-stack platform that revolutionizes how technical professionals present themselves online. Unlike traditional portfolio sites, this platform combines intelligent content management with modern web technologies to create a seamless workflow from development to professional presentation.
 
-### Key Features
+### Revolutionary Features
 
 - **🎨 Modern React Frontend** - Interactive UI with TypeScript, Tailwind CSS, and Framer Motion
 - **⚡ High-Performance Backend** - Go-Zero microservices architecture with Ent ORM
 - **🗄️ Hybrid Database System** - MySQL for structured data, Redis for caching
-- **🔧 Python CLI Tools** - Advanced content management and database synchronization
+- **🔧 Python CLI Tools** - Intelligent content management and database synchronization
+- **📝 File-Based Content Management** - Markdown-first approach with automated sync
+- **🤖 AI-Enhanced Features** - Intelligent project parsing and content organization
 - **🐳 Docker Containerization** - Complete development and production environments
 - **📱 Responsive Design** - Mobile-first approach with progressive enhancement
 - **🌐 Multi-language Support** - i18n implementation for global accessibility
 - **📊 Analytics & Monitoring** - Prometheus and Grafana integration
+- **🔍 SEO Optimized** - Built-in search engine optimization and social media integration
 
 ## 🏗️ Architecture
 
@@ -43,22 +49,44 @@ AIPro-Resume is a comprehensive portfolio and resume platform designed specifica
 ### DevOps & Tools
 
 - **Docker & Docker Compose** for containerization
-- **Python CLI** for content management
+- **Python CLI** for intelligent content management
 - **Nginx** for reverse proxy (production)
 - **Prometheus & Grafana** for monitoring
 - **GitHub Actions** for CI/CD
 
+## 💡 What Makes This Special
+
+### Developer-Centric Workflow
+```bash
+# Simple CLI commands for content management
+silan init project "AI Research Platform"
+silan sync content
+silan status
+```
+
+### Intelligent Content Processing
+- **Automatic Metadata Extraction**: Parse README files for project information
+- **Technology Detection**: Identify frameworks and tools from project structure
+- **Content Relationships**: Map connections between projects, skills, and ideas
+- **Multi-format Support**: Handle markdown, YAML, and various content types
+
+### Professional Presentation
+- **Responsive Design**: Optimized for all devices and screen sizes
+- **Interactive Elements**: Engaging animations and user interactions
+- **SEO Optimization**: Built-in search engine optimization
+- **Performance**: 95+ Lighthouse scores across all categories
+
 ## 📁 Project Structure
 
 ```
-AIPro-Resume/
+Silan-Personal-Website/
 ├── README.md                           # Project documentation
 ├── package.json                        # Frontend dependencies
 ├── vite.config.ts                      # Vite configuration
 ├── tailwind.config.js                  # Tailwind CSS config
 ├── tsconfig.json                       # TypeScript configuration
 ├── 
-├── src/                                # Frontend source code
+├── src/                                # Frontend React Application
 │   ├── components/                     # React components
 │   │   ├── Resume/                     # Resume-specific components
 │   │   ├── BlogStack/                  # Blog system components
@@ -72,30 +100,39 @@ AIPro-Resume/
 │   ├── utils/                          # Utility functions
 │   └── i18n/                           # Internationalization
 │
-├── backend/                            # Backend services
-│   ├── hybrid-database-system/         # Main backend system
-│   │   ├── go-backend/                 # Go-Zero microservices
-│   │   │   ├── internal/               # Internal packages
-│   │   │   │   ├── config/             # Configuration
-│   │   │   │   ├── handler/            # HTTP handlers
-│   │   │   │   ├── logic/              # Business logic
-│   │   │   │   ├── svc/                # Service context
-│   │   │   │   ├── types/              # Type definitions
-│   │   │   │   ├── middleware/         # HTTP middleware
-│   │   │   │   └── ent/                # Ent ORM generated code
-│   │   │   │       └── schema/         # Database schema definitions
-│   │   │   ├── api/                    # API definitions
-│   │   │   ├── etc/                    # Configuration files
-│   │   │   └── docker-compose.yml      # Container orchestration
-│   │   ├── mysql/                      # MySQL initialization
-│   │   └── monitoring/                 # Prometheus & Grafana config
-│   └── simple-file-system/             # Python CLI tools
+├── backend/                            # Backend Services
+│   ├── go-server/                      # Go-Zero High-Performance Backend
+│   │   ├── internal/                   # Internal packages
+│   │   │   ├── config/                 # Configuration
+│   │   │   ├── handler/                # HTTP handlers
+│   │   │   ├── logic/                  # Business logic
+│   │   │   ├── svc/                    # Service context
+│   │   │   ├── types/                  # Type definitions
+│   │   │   ├── middleware/             # HTTP middleware
+│   │   │   └── ent/                    # Ent ORM generated code
+│   │   │       └── schema/             # Database schema definitions
+│   │   ├── api/                        # API definitions
+│   │   ├── etc/                        # Configuration files
+│   │   └── docker-compose.yml          # Container orchestration
+│   └── file-system/                    # Python CLI & Content Management
 │       ├── silan/                      # CLI package
-│       │   ├── commands/               # CLI commands
+│       │   ├── cli/                    # CLI commands
 │       │   ├── models/                 # Data models
 │       │   ├── parsers/                # Content parsers
+│       │   ├── logic/                  # Business logic
+│       │   ├── services/               # Service layer
 │       │   └── utils/                  # Utility functions
 │       └── requirements.txt            # Python dependencies
+│
+├── api-test-portfolio/                 # Content Management System
+│   ├── content/                        # File-based content storage
+│   │   ├── blog/                       # Blog posts and articles
+│   │   ├── projects/                   # Portfolio projects
+│   │   ├── ideas/                      # Research ideas
+│   │   ├── resume/                     # Resume information
+│   │   └── updates/                    # Timeline updates
+│   ├── templates/                      # Content templates
+│   └── silan.yaml                      # Configuration
 │
 ├── public/                             # Static assets
 ├── docs/                               # Documentation
@@ -115,7 +152,7 @@ AIPro-Resume/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/silan-hu/AIPro-Resume.git
+git clone https://github.com/Qingbolan/AIPro-Resume.git
 cd AIPro-Resume
 ```
 
@@ -135,7 +172,7 @@ npm run build
 ### 3. Backend Setup (Go-Zero)
 
 ```bash
-cd backend/hybrid-database-system/go-backend
+cd backend/go-server
 
 # Install Go dependencies
 go mod download
@@ -150,7 +187,7 @@ go run backend.go
 ### 4. Python CLI Setup
 
 ```bash
-cd backend/simple-file-system
+cd backend/file-system
 
 # Create virtual environment
 python -m venv venv
@@ -166,10 +203,23 @@ pip install -e .
 silan --help
 ```
 
-### 5. Docker Setup (Recommended)
+### 5. Content Management Setup
 
 ```bash
-cd backend/hybrid-database-system
+# Navigate to content directory
+cd api-test-portfolio/content
+
+# Initialize your content using CLI
+silan init project "My First Project"
+silan init blog "My First Blog Post"
+silan sync content
+silan status
+```
+
+### 6. Docker Setup (Recommended)
+
+```bash
+cd backend/go-server
 
 # Start all services
 docker-compose up -d
@@ -296,7 +346,7 @@ The project uses a hybrid database approach:
 npm run build
 
 # Build backend
-cd backend/hybrid-database-system/go-backend
+cd backend/go-server
 go build -o bin/backend backend.go
 
 # Deploy with Docker
@@ -330,47 +380,47 @@ MODE=production
 GRAFANA_PASSWORD=admin
 ```
 
+## 📝 Content Management Features
+
+### Intelligent Content Processing
+
+The platform's content management system automatically:
+
+- **Parses Project Structure**: Extracts metadata from README files and project configurations
+- **Identifies Technologies**: Analyzes dependencies and tech stack from project files
+- **Creates Relationships**: Maps connections between projects, skills, and ideas
+- **Optimizes for SEO**: Generates meta tags and structured data automatically
+
+### File-Based Content Structure
+
 ```
-api-test-portfolio/
-├── workspace.yaml                          # 统一配置文件
-├── content/
-│   ├── projects/                          # 基于文件夹的项目
-│   │   ├── ai-chatbot/                    # AI聊天机器人
-│   │   │   ├── README.md, config.yaml
-│   │   │   ├── assets/architecture-diagram.md
-│   │   │   └── notes/meeting-notes.md
-│   │   ├── ecommerce-platform/            # 电商平台
-│   │   └── data-visualization-tool/       # 数据可视化工具
-│   ├── ideas/                             # 研究导向的想法
-│   │   ├── quantum-ml-framework/          # 量子机器学习框架
-│   │   │   ├── README.md, config.yaml
-│   │   │   ├── research/literature-review.md
-│   │   │   └── experiments/vqe-experiment.md
-│   │   └── ai-code-refactoring-tool/      # AI代码重构工具
-│   │       ├── README.md, config.yaml
-│   │       ├── references/literature-survey.md
-│   │       └── prototypes/ast-analyzer.md
-│   ├── updates/                           # 时间轴更新
-│   │   └── 2024/
-│   │       ├── 01/2024-01-01-ziyun2024-plan-launch.md
-│   │       ├── 03/2024-03-31-q1-milestone-achieved.md
-│   │       ├── 06/2024-06-15-ai-chatbot-beta-release.md
-│   │       ├── 09/2024-09-15-quantum-ml-research-progress.md
-│   │       └── 12/2024-12-19-workspace-upgrade-complete.md
-│   └── blog/
-│       ├── posts/2024-12-19-workspace-evolution.md
-│       └── drafts/2024-12-20-quantum-ml-future.md
-├── templates/                             # 内容模板
-│   ├── projects/web-app.yaml, web-app-readme.md
-│   ├── ideas/research-idea.yaml
-│   ├── updates/milestone.md
-│   └── blog/technical-post.md
-└── .silan/                                # 系统数据
-    ├── cache/README.md
-    ├── logs/README.md
-    ├── analytics/workspace_stats.json
-    ├── config/local.yaml
-    └── temp/.gitkeep
+api-test-portfolio/content/
+├── silan.yaml                             # Configuration
+├── blog/                                  # Blog posts and articles
+│   ├── silan-website-usage-guide/         # Tutorial series
+│   │   ├── part1-getting-started.md
+│   │   └── part2-content-management.md
+│   ├── silan-website-idea-significance/   # Vision and significance
+│   │   └── en.md
+│   └── vlog.ai-coding-tutorial/           # Video content
+│       └── en.md
+├── projects/                              # Portfolio projects
+│   └── silan-personal-website/            # Main project showcase
+│       ├── README.md
+│       └── config.yaml
+├── ideas/                                 # Research ideas
+│   └── silan-personal-website/            # Project idea documentation
+│       ├── README.md
+│       └── config.yaml
+├── resume/                                # Professional information
+│   └── resume.md
+└── updates/                               # Timeline updates
+    └── 2024/
+        ├── 01/2024-01-01-ziyun2024-plan-launch.md
+        ├── 03/2024-03-31-q1-milestone-achieved.md
+        ├── 06/2024-06-15-ai-chatbot-beta-release.md
+        ├── 09/2024-09-15-quantum-ml-research-progress.md
+        └── 12/2024-12-19-workspace-upgrade-complete.md
 ```
 
 ## 📈 Monitoring

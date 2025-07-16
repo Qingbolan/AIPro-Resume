@@ -56,9 +56,6 @@ class BlogParser(BaseParser):
         # Extract related posts/references
         related_posts = self._extract_related_posts(content)
         
-        # Extract SEO data
-        seo_data = self._extract_seo_data(metadata, content)
-        
         # Store all extracted data
         extracted.metadata.update({
             'categories_data': [{'name': cat, 'slug': self._generate_slug(cat)} for cat in categories],
@@ -66,7 +63,6 @@ class BlogParser(BaseParser):
             'series': series_info,
             'content_analysis': content_analysis,
             'related_posts': related_posts,
-            'seo': seo_data,
             'sections': self._extract_sections(content)
         })
     
@@ -383,7 +379,6 @@ class BlogParser(BaseParser):
         # 2. Infer from content keywords
         content_lower = content.lower()
         indicator_map = {
-            'tutorial': ['tutorial', 'how to', 'step by step', 'guide', 'walkthrough'],
             'article': [
                 'review', 'comparison', 'vs', 'pros and cons', 'evaluation',
                 'analysis', 'deep dive', 'investigation', 'study', 'research',
@@ -407,28 +402,12 @@ class BlogParser(BaseParser):
     def _map_to_valid_content_type(self, content_type: str) -> str:
         """Convert arbitrary content_type strings to valid BlogContentType enum members (lowercase)."""
         mapping = {
-            # map common lower/alternate strings to enum names
             'article': 'article',
-            'tutorial': 'tutorial',
-            'how-to': 'tutorial',
-            'howto': 'tutorial',
+            'blog': 'article',
             'vlog': 'vlog',
             'video': 'vlog',
-            'podcast': 'podcast',
-            'audio': 'podcast',
-            'interview': 'podcast',
-            'conversation': 'podcast',
-            'q&a': 'podcast',
             'episode': 'episode',
             'series': 'episode',
-            # variations that should be treated as ARTICLE
-            'review': 'article',
-            'analysis': 'article',
-            'case_study': 'article',
-            'case study': 'article',
-            'news': 'article',
-            'opinion': 'article',
-            'list': 'article'
         }
         ct_lower = str(content_type).strip().lower()
         return mapping.get(ct_lower, ct_lower.lower())
@@ -711,24 +690,6 @@ class BlogParser(BaseParser):
                 })
         
         return related_posts
-    
-    def _extract_seo_data(self, metadata: Dict, content: str) -> Dict[str, Any]:
-        """Extract SEO-related data"""
-        title = metadata.get('title', '')
-        description = metadata.get('meta_description', self._extract_excerpt(content))
-        
-        seo_data = {
-            'meta_title': title,
-            'meta_description': description[:160],  # Limit to 160 chars
-            'focus_keywords': self._extract_focus_keywords(content),
-            'title_length': len(title),
-            'description_length': len(description),
-            'has_structured_data': self._check_structured_data(content),
-            'internal_links': len(re.findall(r'\[([^\]]+)\]\((?!http)', content)),
-            'external_links': len(re.findall(r'\[([^\]]+)\]\(http', content))
-        }
-        
-        return seo_data
     
     def _extract_focus_keywords(self, content: str) -> List[str]:
         """Extract potential focus keywords"""
