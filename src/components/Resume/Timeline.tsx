@@ -76,7 +76,7 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
               </div>
             </div>
             
-            {item.details.length > 0 && (
+            {item.details && Array.isArray(item.details) && item.details.length > 0 && (
               <div className="bg-theme-surface-elevated rounded-lg p-4 border border-theme-card/50">
                 <ul className="space-y-2">
                   {item.details.map((detail, i) => (

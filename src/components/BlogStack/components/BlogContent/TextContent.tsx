@@ -62,8 +62,11 @@ export const TextContent: React.FC<TextContentProps> = ({
       ([annotationId]) => annotationId.startsWith(contentId)
     );
 
+    // Process markdown formatting first
+    let processedText = processMarkdownText(text);
+
     if (relevantAnnotations.length === 0) {
-      return isFirstParagraph ? renderFirstLetterDropCap(text) : text;
+      return isFirstParagraph ? renderFirstLetterDropCap(processedText) : processedText;
     }
 
     // Sort annotations by start offset to avoid overlap issues
@@ -97,10 +100,11 @@ export const TextContent: React.FC<TextContentProps> = ({
       // Add text before annotation
       if (startOffset > lastIndex) {
         const beforeText = text.slice(lastIndex, startOffset);
+        const processedBeforeText = processMarkdownText(beforeText);
         if (isFirstParagraph && lastIndex === 0) {
-          parts.push(renderFirstLetterDropCap(beforeText));
+          parts.push(renderFirstLetterDropCap(processedBeforeText));
         } else {
-          parts.push(beforeText);
+          parts.push(processedBeforeText);
         }
       }
       
@@ -133,7 +137,7 @@ export const TextContent: React.FC<TextContentProps> = ({
             onClick={() => onHighlightAnnotation(annotationId)}
             title={annotation.text}
           >
-            {actualSelectedText}
+            {processMarkdownText(actualSelectedText)}
           </span>
           
           {/* Compact inline annotation indicator */}
@@ -211,35 +215,147 @@ export const TextContent: React.FC<TextContentProps> = ({
 
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push(text.slice(lastIndex));
+      const remainingText = text.slice(lastIndex);
+      parts.push(processMarkdownText(remainingText));
     }
 
     return parts;
   };
 
   // Function to render first letter as drop cap
-  const renderFirstLetterDropCap = (text: string) => {
-    if (!text || text.length === 0) return text;
+  const renderFirstLetterDropCap = (content: React.ReactNode) => {
+    // If content is a string, process as before
+    if (typeof content === 'string') {
+      if (!content || content.length === 0) return content;
+      
+      const firstChar = content.charAt(0);
+      const restOfText = content.slice(1);
+      
+      return (
+        <>
+          <span 
+            className="float-left text-5xl lg:text-6xl xl:text-7xl leading-none 
+                       text-theme-accent font-bold italic mr-2 mt-1"
+            style={{
+              fontFamily: 'Georgia, "Times New Roman", Charter, serif',
+              lineHeight: '0.8',
+              paddingTop: '4px'
+            }}
+          >
+            {firstChar}
+          </span>
+          {restOfText}
+        </>
+      );
+    }
     
-    const firstChar = text.charAt(0);
-    const restOfText = text.slice(1);
-    
-    return (
-      <>
-        <span 
-          className="float-left text-5xl lg:text-6xl xl:text-7xl leading-none 
-                     text-theme-accent font-bold italic mr-2 mt-1"
-          style={{
-            fontFamily: 'Georgia, "Times New Roman", Charter, serif',
-            lineHeight: '0.8',
-            paddingTop: '4px'
-          }}
-        >
-          {firstChar}
-        </span>
-        {restOfText}
-      </>
+    // If content is already a React node, return as is
+    return content;
+  };
+
+  // Function to process markdown text into JSX
+  const processMarkdownText = (text: string): React.ReactNode => {
+    if (!text) return text;
+
+    // Handle headers
+    if (text.match(/^#+\s/)) {
+      const level = text.match(/^#+/)?.[0].length || 1;
+      const content = text.replace(/^#+\s/, '');
+      
+      const HeaderTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
+      const sizeClasses = {
+        1: 'text-3xl font-bold',
+        2: 'text-2xl font-semibold', 
+        3: 'text-xl font-semibold',
+        4: 'text-lg font-medium',
+        5: 'text-base font-medium',
+        6: 'text-sm font-medium'
+      };
+      
+      return React.createElement(HeaderTag, {
+        className: `${sizeClasses[level as keyof typeof sizeClasses] || sizeClasses[6]} 
+                    text-theme-primary mb-4 mt-6 leading-tight`
+      }, content);
+    }
+
+    // Process inline markdown
+    let processedText: React.ReactNode = text;
+
+    // Handle bold text
+    processedText = processInlineMarkdown(
+      processedText,
+      /\*\*(.*?)\*\*/g,
+      (match, content) => (
+        <strong key={Math.random()} className="font-semibold text-theme-primary">
+          {content}
+        </strong>
+      )
     );
+
+    // Handle italic text (but avoid processing already processed bold text)
+    if (typeof processedText === 'string') {
+      processedText = processInlineMarkdown(
+        processedText,
+        /\*(.*?)\*/g,
+        (match, content) => (
+          <em key={Math.random()} className="italic">
+            {content}
+          </em>
+        )
+      );
+    }
+
+    // Handle inline code (but avoid processing already processed text)
+    if (typeof processedText === 'string') {
+      processedText = processInlineMarkdown(
+        processedText,
+        /`(.*?)`/g,
+        (match, content) => (
+          <code key={Math.random()} 
+                className="px-1.5 py-0.5 bg-theme-surface-elevated rounded text-sm font-mono 
+                           text-theme-accent border border-theme-card-border">
+            {content}
+          </code>
+        )
+      );
+    }
+
+    return processedText;
+  };
+
+  // Helper function to process inline markdown patterns
+  const processInlineMarkdown = (
+    content: React.ReactNode, 
+    pattern: RegExp, 
+    replacer: (match: string, content: string) => React.ReactNode
+  ): React.ReactNode => {
+    // If content is not a string, return as is
+    if (typeof content !== 'string') return content;
+    
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    pattern.lastIndex = 0; // Reset regex state
+    
+    while ((match = pattern.exec(content)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        parts.push(content.slice(lastIndex, match.index));
+      }
+      
+      // Add replaced content
+      parts.push(replacer(match[0], match[1]));
+      
+      lastIndex = pattern.lastIndex;
+    }
+    
+    // Add remaining text
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
+    
+    return parts.length === 1 ? parts[0] : parts;
   };
 
   // Handle clicks outside to unpin annotations
@@ -248,6 +364,9 @@ export const TextContent: React.FC<TextContentProps> = ({
       setClickedAnnotation(null);
     }
   };
+
+  // Check if the content is a header
+  const isHeader = item.content.match(/^#+\s/);
 
   return (
     <article className="mb-12 break-inside-avoid group relative" onClick={handleOutsideClick}>
@@ -258,19 +377,27 @@ export const TextContent: React.FC<TextContentProps> = ({
         onMouseUp={onTextSelection}
       >
         <div className="prose prose-lg max-w-none">
-          <p className={`text-theme-text-primary leading-relaxed tracking-wide font-normal 
-                         text-justify hyphens-auto selection:bg-theme-accent/20 
-                         sm:text-base lg:text-lg xl:leading-[1.8] ${
-                           isFirstParagraph ? 'first-letter:text-theme-accent first-letter:font-bold first-letter:italic' : ''
-                         }`}
-             style={{ 
-               fontFamily: 'Georgia, "Times New Roman", Charter, serif',
-               textRendering: 'optimizeLegibility',
-               WebkitFontSmoothing: 'antialiased',
-               MozOsxFontSmoothing: 'grayscale'
-             }}>
-            {renderTextWithAnnotations(item.content, item.id)}
-          </p>
+          {isHeader ? (
+            // Render headers directly without <p> wrapper
+            <div className="text-theme-text-primary selection:bg-theme-accent/20">
+              {renderTextWithAnnotations(item.content, item.id)}
+            </div>
+          ) : (
+            // Render regular text with <p> wrapper
+            <p className={`text-theme-text-primary leading-relaxed tracking-wide font-normal 
+                           text-justify hyphens-auto selection:bg-theme-accent/20 
+                           sm:text-base lg:text-lg xl:leading-[1.8] ${
+                             isFirstParagraph ? 'first-letter:text-theme-accent first-letter:font-bold first-letter:italic' : ''
+                           }`}
+               style={{ 
+                 fontFamily: 'Georgia, "Times New Roman", Charter, serif',
+                 textRendering: 'optimizeLegibility',
+                 WebkitFontSmoothing: 'antialiased',
+                 MozOsxFontSmoothing: 'grayscale'
+               }}>
+              {renderTextWithAnnotations(item.content, item.id)}
+            </p>
+          )}
         </div>
 
         {/* Annotation Count Badge - Right Side Indicator */}

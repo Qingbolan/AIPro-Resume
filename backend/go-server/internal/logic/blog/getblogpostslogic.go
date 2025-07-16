@@ -31,9 +31,13 @@ func NewGetBlogPostsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetB
 
 func (l *GetBlogPostsLogic) GetBlogPosts(req *types.BlogListRequest) (resp *types.BlogListResponse, err error) {
 	query := l.svcCtx.DB.BlogPost.Query().
-		Where(blogpost.StatusEQ(blogpost.StatusPublished)).
+		Where(blogpost.Or(
+			blogpost.StatusEQ(blogpost.StatusPublished),
+			blogpost.StatusEQ(blogpost.StatusDraft),
+		)).
 		WithUser().
 		WithCategory().
+		WithSeries().
 		WithTags()
 
 	// Apply filters
@@ -103,18 +107,35 @@ func (l *GetBlogPostsLogic) GetBlogPosts(req *types.BlogListRequest) (resp *type
 			author = post.Edges.User.FirstName + " " + post.Edges.User.LastName
 		}
 
+		// Add series information if this is part of a series
+		var seriesID, seriesTitle, seriesDescription string
+		var episodeNumber, totalEpisodes int
+		if post.Edges.Series != nil {
+			seriesID = post.Edges.Series.ID.String()
+			seriesTitle = post.Edges.Series.Title
+			seriesDescription = post.Edges.Series.Description
+			episodeNumber = post.SeriesOrder
+			totalEpisodes = post.Edges.Series.EpisodeCount
+		}
+
 		result = append(result, types.BlogData{
-			ID:          post.ID.String(),
-			Title:       post.Title,
-			Author:      author,
-			PublishDate: publishDate,
-			ReadTime:    readTime,
-			Category:    category,
-			Tags:        tags,
-			Likes:       int64(post.LikeCount),
-			Views:       int64(post.ViewCount),
-			Summary:     post.Excerpt,
-			Type:        string(post.ContentType),
+			ID:                post.ID.String(),
+			Title:             post.Title,
+			Slug:              post.Slug,
+			Author:            author,
+			PublishDate:       publishDate,
+			ReadTime:          readTime,
+			Category:          category,
+			Tags:              tags,
+			Likes:             int64(post.LikeCount),
+			Views:             int64(post.ViewCount),
+			Summary:           post.Excerpt,
+			Type:              string(post.ContentType),
+			SeriesID:          seriesID,
+			SeriesTitle:       seriesTitle,
+			SeriesDescription: seriesDescription,
+			EpisodeNumber:     episodeNumber,
+			TotalEpisodes:     totalEpisodes,
 		})
 	}
 

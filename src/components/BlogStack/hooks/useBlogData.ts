@@ -23,10 +23,18 @@ export const useBlogData = (id: string | undefined) => {
         // Fetch blog data with language support
         const blogData = await fetchBlogById(id, language as 'en' | 'zh');
         
+        console.log('🔍 useBlogData - Raw blog data received:', blogData);
+        console.log('🔍 useBlogData - Blog seriesId:', blogData?.seriesId);
+        console.log('🔍 useBlogData - Blog type:', blogData?.type);
+        
         if (blogData) {
           setBlog(blogData);
-          // Update view count
-          await updateBlogViews(id, language as 'en' | 'zh');
+          // Try to update view count, but don't fail if it doesn't work
+          try {
+            await updateBlogViews(id, language as 'en' | 'zh');
+          } catch (viewError) {
+            console.log('View count update failed (this is non-critical):', viewError);
+          }
         } else {
           setError(language === 'en' ? 'Blog post not found' : '博客文章未找到');
         }

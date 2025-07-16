@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // AwardTranslation holds the schema definition for the AwardTranslation entity.
 type AwardTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the AwardTranslation schema.
+func (AwardTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "award_translations"},
+	}
 }
 
 // Fields of the AwardTranslation.
@@ -39,9 +48,6 @@ func (AwardTranslation) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 

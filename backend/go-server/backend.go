@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 
 	"silan-backend/internal/config"
@@ -90,6 +91,46 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+
+	// Add global OPTIONS handler for CORS
+	server.AddRoute(rest.Route{
+		Method: http.MethodOptions,
+		Path:   "/*",
+		Handler: func(w http.ResponseWriter, r *http.Request) {
+			// Set CORS headers manually
+			origin := r.Header.Get("Origin")
+			allowedOrigins := []string{
+				"http://localhost:3000",
+				"http://localhost:3001",
+				"http://localhost:5173",
+				"http://127.0.0.1:3000",
+				"http://127.0.0.1:3001",
+				"http://127.0.0.1:5173",
+			}
+
+			// Check if the origin is allowed
+			isAllowed := false
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == allowedOrigin {
+					isAllowed = true
+					break
+				}
+			}
+
+			if isAllowed {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+			} else if origin == "" {
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+			}
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, Origin, X-Requested-With")
+			w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Content-Type")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Max-Age", "86400")
+
+			w.WriteHeader(http.StatusOK)
+		},
+	})
 
 	fmt.Printf("Starting Silan Backend Server...\n")
 	fmt.Printf("Server: %s:%d\n", c.Host, c.Port)

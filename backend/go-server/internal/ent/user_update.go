@@ -14,6 +14,7 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/project"
 	"silan-backend/internal/ent/publication"
+	"silan-backend/internal/ent/recentupdate"
 	"silan-backend/internal/ent/researchproject"
 	"silan-backend/internal/ent/user"
 	"silan-backend/internal/ent/workexperience"
@@ -202,14 +203,14 @@ func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	return uu
 }
 
-// AddPersonalInfoIDs adds the "personal_info" edge to the PersonalInfo entity by IDs.
+// AddPersonalInfoIDs adds the "personal_infos" edge to the PersonalInfo entity by IDs.
 func (uu *UserUpdate) AddPersonalInfoIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddPersonalInfoIDs(ids...)
 	return uu
 }
 
-// AddPersonalInfo adds the "personal_info" edges to the PersonalInfo entity.
-func (uu *UserUpdate) AddPersonalInfo(p ...*PersonalInfo) *UserUpdate {
+// AddPersonalInfos adds the "personal_infos" edges to the PersonalInfo entity.
+func (uu *UserUpdate) AddPersonalInfos(p ...*PersonalInfo) *UserUpdate {
 	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -217,14 +218,14 @@ func (uu *UserUpdate) AddPersonalInfo(p ...*PersonalInfo) *UserUpdate {
 	return uu.AddPersonalInfoIDs(ids...)
 }
 
-// AddEducationIDs adds the "education" edge to the Education entity by IDs.
+// AddEducationIDs adds the "educations" edge to the Education entity by IDs.
 func (uu *UserUpdate) AddEducationIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddEducationIDs(ids...)
 	return uu
 }
 
-// AddEducation adds the "education" edges to the Education entity.
-func (uu *UserUpdate) AddEducation(e ...*Education) *UserUpdate {
+// AddEducations adds the "educations" edges to the Education entity.
+func (uu *UserUpdate) AddEducations(e ...*Education) *UserUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -232,14 +233,14 @@ func (uu *UserUpdate) AddEducation(e ...*Education) *UserUpdate {
 	return uu.AddEducationIDs(ids...)
 }
 
-// AddWorkExperienceIDs adds the "work_experience" edge to the WorkExperience entity by IDs.
+// AddWorkExperienceIDs adds the "work_experiences" edge to the WorkExperience entity by IDs.
 func (uu *UserUpdate) AddWorkExperienceIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddWorkExperienceIDs(ids...)
 	return uu
 }
 
-// AddWorkExperience adds the "work_experience" edges to the WorkExperience entity.
-func (uu *UserUpdate) AddWorkExperience(w ...*WorkExperience) *UserUpdate {
+// AddWorkExperiences adds the "work_experiences" edges to the WorkExperience entity.
+func (uu *UserUpdate) AddWorkExperiences(w ...*WorkExperience) *UserUpdate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -337,25 +338,40 @@ func (uu *UserUpdate) AddAwards(a ...*Award) *UserUpdate {
 	return uu.AddAwardIDs(ids...)
 }
 
+// AddRecentUpdateIDs adds the "recent_updates" edge to the RecentUpdate entity by IDs.
+func (uu *UserUpdate) AddRecentUpdateIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddRecentUpdateIDs(ids...)
+	return uu
+}
+
+// AddRecentUpdates adds the "recent_updates" edges to the RecentUpdate entity.
+func (uu *UserUpdate) AddRecentUpdates(r ...*RecentUpdate) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.AddRecentUpdateIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearPersonalInfo clears all "personal_info" edges to the PersonalInfo entity.
-func (uu *UserUpdate) ClearPersonalInfo() *UserUpdate {
-	uu.mutation.ClearPersonalInfo()
+// ClearPersonalInfos clears all "personal_infos" edges to the PersonalInfo entity.
+func (uu *UserUpdate) ClearPersonalInfos() *UserUpdate {
+	uu.mutation.ClearPersonalInfos()
 	return uu
 }
 
-// RemovePersonalInfoIDs removes the "personal_info" edge to PersonalInfo entities by IDs.
+// RemovePersonalInfoIDs removes the "personal_infos" edge to PersonalInfo entities by IDs.
 func (uu *UserUpdate) RemovePersonalInfoIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemovePersonalInfoIDs(ids...)
 	return uu
 }
 
-// RemovePersonalInfo removes "personal_info" edges to PersonalInfo entities.
-func (uu *UserUpdate) RemovePersonalInfo(p ...*PersonalInfo) *UserUpdate {
+// RemovePersonalInfos removes "personal_infos" edges to PersonalInfo entities.
+func (uu *UserUpdate) RemovePersonalInfos(p ...*PersonalInfo) *UserUpdate {
 	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -363,20 +379,20 @@ func (uu *UserUpdate) RemovePersonalInfo(p ...*PersonalInfo) *UserUpdate {
 	return uu.RemovePersonalInfoIDs(ids...)
 }
 
-// ClearEducation clears all "education" edges to the Education entity.
-func (uu *UserUpdate) ClearEducation() *UserUpdate {
-	uu.mutation.ClearEducation()
+// ClearEducations clears all "educations" edges to the Education entity.
+func (uu *UserUpdate) ClearEducations() *UserUpdate {
+	uu.mutation.ClearEducations()
 	return uu
 }
 
-// RemoveEducationIDs removes the "education" edge to Education entities by IDs.
+// RemoveEducationIDs removes the "educations" edge to Education entities by IDs.
 func (uu *UserUpdate) RemoveEducationIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemoveEducationIDs(ids...)
 	return uu
 }
 
-// RemoveEducation removes "education" edges to Education entities.
-func (uu *UserUpdate) RemoveEducation(e ...*Education) *UserUpdate {
+// RemoveEducations removes "educations" edges to Education entities.
+func (uu *UserUpdate) RemoveEducations(e ...*Education) *UserUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -384,20 +400,20 @@ func (uu *UserUpdate) RemoveEducation(e ...*Education) *UserUpdate {
 	return uu.RemoveEducationIDs(ids...)
 }
 
-// ClearWorkExperience clears all "work_experience" edges to the WorkExperience entity.
-func (uu *UserUpdate) ClearWorkExperience() *UserUpdate {
-	uu.mutation.ClearWorkExperience()
+// ClearWorkExperiences clears all "work_experiences" edges to the WorkExperience entity.
+func (uu *UserUpdate) ClearWorkExperiences() *UserUpdate {
+	uu.mutation.ClearWorkExperiences()
 	return uu
 }
 
-// RemoveWorkExperienceIDs removes the "work_experience" edge to WorkExperience entities by IDs.
+// RemoveWorkExperienceIDs removes the "work_experiences" edge to WorkExperience entities by IDs.
 func (uu *UserUpdate) RemoveWorkExperienceIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemoveWorkExperienceIDs(ids...)
 	return uu
 }
 
-// RemoveWorkExperience removes "work_experience" edges to WorkExperience entities.
-func (uu *UserUpdate) RemoveWorkExperience(w ...*WorkExperience) *UserUpdate {
+// RemoveWorkExperiences removes "work_experiences" edges to WorkExperience entities.
+func (uu *UserUpdate) RemoveWorkExperiences(w ...*WorkExperience) *UserUpdate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -531,6 +547,27 @@ func (uu *UserUpdate) RemoveAwards(a ...*Award) *UserUpdate {
 	return uu.RemoveAwardIDs(ids...)
 }
 
+// ClearRecentUpdates clears all "recent_updates" edges to the RecentUpdate entity.
+func (uu *UserUpdate) ClearRecentUpdates() *UserUpdate {
+	uu.mutation.ClearRecentUpdates()
+	return uu
+}
+
+// RemoveRecentUpdateIDs removes the "recent_updates" edge to RecentUpdate entities by IDs.
+func (uu *UserUpdate) RemoveRecentUpdateIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveRecentUpdateIDs(ids...)
+	return uu
+}
+
+// RemoveRecentUpdates removes "recent_updates" edges to RecentUpdate entities.
+func (uu *UserUpdate) RemoveRecentUpdates(r ...*RecentUpdate) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRecentUpdateIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	uu.defaults()
@@ -656,12 +693,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if uu.mutation.PersonalInfoCleared() {
+	if uu.mutation.PersonalInfosCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -669,12 +706,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedPersonalInfoIDs(); len(nodes) > 0 && !uu.mutation.PersonalInfoCleared() {
+	if nodes := uu.mutation.RemovedPersonalInfosIDs(); len(nodes) > 0 && !uu.mutation.PersonalInfosCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -685,12 +722,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.PersonalInfoIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.PersonalInfosIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -701,12 +738,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.EducationCleared() {
+	if uu.mutation.EducationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -714,12 +751,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedEducationIDs(); len(nodes) > 0 && !uu.mutation.EducationCleared() {
+	if nodes := uu.mutation.RemovedEducationsIDs(); len(nodes) > 0 && !uu.mutation.EducationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -730,12 +767,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.EducationIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.EducationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -746,12 +783,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.WorkExperienceCleared() {
+	if uu.mutation.WorkExperiencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -759,12 +796,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedWorkExperienceIDs(); len(nodes) > 0 && !uu.mutation.WorkExperienceCleared() {
+	if nodes := uu.mutation.RemovedWorkExperiencesIDs(); len(nodes) > 0 && !uu.mutation.WorkExperiencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -775,12 +812,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.WorkExperienceIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.WorkExperiencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -1061,6 +1098,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.RecentUpdatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRecentUpdatesIDs(); len(nodes) > 0 && !uu.mutation.RecentUpdatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RecentUpdatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1245,14 +1327,14 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// AddPersonalInfoIDs adds the "personal_info" edge to the PersonalInfo entity by IDs.
+// AddPersonalInfoIDs adds the "personal_infos" edge to the PersonalInfo entity by IDs.
 func (uuo *UserUpdateOne) AddPersonalInfoIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddPersonalInfoIDs(ids...)
 	return uuo
 }
 
-// AddPersonalInfo adds the "personal_info" edges to the PersonalInfo entity.
-func (uuo *UserUpdateOne) AddPersonalInfo(p ...*PersonalInfo) *UserUpdateOne {
+// AddPersonalInfos adds the "personal_infos" edges to the PersonalInfo entity.
+func (uuo *UserUpdateOne) AddPersonalInfos(p ...*PersonalInfo) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -1260,14 +1342,14 @@ func (uuo *UserUpdateOne) AddPersonalInfo(p ...*PersonalInfo) *UserUpdateOne {
 	return uuo.AddPersonalInfoIDs(ids...)
 }
 
-// AddEducationIDs adds the "education" edge to the Education entity by IDs.
+// AddEducationIDs adds the "educations" edge to the Education entity by IDs.
 func (uuo *UserUpdateOne) AddEducationIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddEducationIDs(ids...)
 	return uuo
 }
 
-// AddEducation adds the "education" edges to the Education entity.
-func (uuo *UserUpdateOne) AddEducation(e ...*Education) *UserUpdateOne {
+// AddEducations adds the "educations" edges to the Education entity.
+func (uuo *UserUpdateOne) AddEducations(e ...*Education) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -1275,14 +1357,14 @@ func (uuo *UserUpdateOne) AddEducation(e ...*Education) *UserUpdateOne {
 	return uuo.AddEducationIDs(ids...)
 }
 
-// AddWorkExperienceIDs adds the "work_experience" edge to the WorkExperience entity by IDs.
+// AddWorkExperienceIDs adds the "work_experiences" edge to the WorkExperience entity by IDs.
 func (uuo *UserUpdateOne) AddWorkExperienceIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddWorkExperienceIDs(ids...)
 	return uuo
 }
 
-// AddWorkExperience adds the "work_experience" edges to the WorkExperience entity.
-func (uuo *UserUpdateOne) AddWorkExperience(w ...*WorkExperience) *UserUpdateOne {
+// AddWorkExperiences adds the "work_experiences" edges to the WorkExperience entity.
+func (uuo *UserUpdateOne) AddWorkExperiences(w ...*WorkExperience) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -1380,25 +1462,40 @@ func (uuo *UserUpdateOne) AddAwards(a ...*Award) *UserUpdateOne {
 	return uuo.AddAwardIDs(ids...)
 }
 
+// AddRecentUpdateIDs adds the "recent_updates" edge to the RecentUpdate entity by IDs.
+func (uuo *UserUpdateOne) AddRecentUpdateIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddRecentUpdateIDs(ids...)
+	return uuo
+}
+
+// AddRecentUpdates adds the "recent_updates" edges to the RecentUpdate entity.
+func (uuo *UserUpdateOne) AddRecentUpdates(r ...*RecentUpdate) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.AddRecentUpdateIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearPersonalInfo clears all "personal_info" edges to the PersonalInfo entity.
-func (uuo *UserUpdateOne) ClearPersonalInfo() *UserUpdateOne {
-	uuo.mutation.ClearPersonalInfo()
+// ClearPersonalInfos clears all "personal_infos" edges to the PersonalInfo entity.
+func (uuo *UserUpdateOne) ClearPersonalInfos() *UserUpdateOne {
+	uuo.mutation.ClearPersonalInfos()
 	return uuo
 }
 
-// RemovePersonalInfoIDs removes the "personal_info" edge to PersonalInfo entities by IDs.
+// RemovePersonalInfoIDs removes the "personal_infos" edge to PersonalInfo entities by IDs.
 func (uuo *UserUpdateOne) RemovePersonalInfoIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemovePersonalInfoIDs(ids...)
 	return uuo
 }
 
-// RemovePersonalInfo removes "personal_info" edges to PersonalInfo entities.
-func (uuo *UserUpdateOne) RemovePersonalInfo(p ...*PersonalInfo) *UserUpdateOne {
+// RemovePersonalInfos removes "personal_infos" edges to PersonalInfo entities.
+func (uuo *UserUpdateOne) RemovePersonalInfos(p ...*PersonalInfo) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
@@ -1406,20 +1503,20 @@ func (uuo *UserUpdateOne) RemovePersonalInfo(p ...*PersonalInfo) *UserUpdateOne 
 	return uuo.RemovePersonalInfoIDs(ids...)
 }
 
-// ClearEducation clears all "education" edges to the Education entity.
-func (uuo *UserUpdateOne) ClearEducation() *UserUpdateOne {
-	uuo.mutation.ClearEducation()
+// ClearEducations clears all "educations" edges to the Education entity.
+func (uuo *UserUpdateOne) ClearEducations() *UserUpdateOne {
+	uuo.mutation.ClearEducations()
 	return uuo
 }
 
-// RemoveEducationIDs removes the "education" edge to Education entities by IDs.
+// RemoveEducationIDs removes the "educations" edge to Education entities by IDs.
 func (uuo *UserUpdateOne) RemoveEducationIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemoveEducationIDs(ids...)
 	return uuo
 }
 
-// RemoveEducation removes "education" edges to Education entities.
-func (uuo *UserUpdateOne) RemoveEducation(e ...*Education) *UserUpdateOne {
+// RemoveEducations removes "educations" edges to Education entities.
+func (uuo *UserUpdateOne) RemoveEducations(e ...*Education) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -1427,20 +1524,20 @@ func (uuo *UserUpdateOne) RemoveEducation(e ...*Education) *UserUpdateOne {
 	return uuo.RemoveEducationIDs(ids...)
 }
 
-// ClearWorkExperience clears all "work_experience" edges to the WorkExperience entity.
-func (uuo *UserUpdateOne) ClearWorkExperience() *UserUpdateOne {
-	uuo.mutation.ClearWorkExperience()
+// ClearWorkExperiences clears all "work_experiences" edges to the WorkExperience entity.
+func (uuo *UserUpdateOne) ClearWorkExperiences() *UserUpdateOne {
+	uuo.mutation.ClearWorkExperiences()
 	return uuo
 }
 
-// RemoveWorkExperienceIDs removes the "work_experience" edge to WorkExperience entities by IDs.
+// RemoveWorkExperienceIDs removes the "work_experiences" edge to WorkExperience entities by IDs.
 func (uuo *UserUpdateOne) RemoveWorkExperienceIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemoveWorkExperienceIDs(ids...)
 	return uuo
 }
 
-// RemoveWorkExperience removes "work_experience" edges to WorkExperience entities.
-func (uuo *UserUpdateOne) RemoveWorkExperience(w ...*WorkExperience) *UserUpdateOne {
+// RemoveWorkExperiences removes "work_experiences" edges to WorkExperience entities.
+func (uuo *UserUpdateOne) RemoveWorkExperiences(w ...*WorkExperience) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -1572,6 +1669,27 @@ func (uuo *UserUpdateOne) RemoveAwards(a ...*Award) *UserUpdateOne {
 		ids[i] = a[i].ID
 	}
 	return uuo.RemoveAwardIDs(ids...)
+}
+
+// ClearRecentUpdates clears all "recent_updates" edges to the RecentUpdate entity.
+func (uuo *UserUpdateOne) ClearRecentUpdates() *UserUpdateOne {
+	uuo.mutation.ClearRecentUpdates()
+	return uuo
+}
+
+// RemoveRecentUpdateIDs removes the "recent_updates" edge to RecentUpdate entities by IDs.
+func (uuo *UserUpdateOne) RemoveRecentUpdateIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveRecentUpdateIDs(ids...)
+	return uuo
+}
+
+// RemoveRecentUpdates removes "recent_updates" edges to RecentUpdate entities.
+func (uuo *UserUpdateOne) RemoveRecentUpdates(r ...*RecentUpdate) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRecentUpdateIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1729,12 +1847,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if uuo.mutation.PersonalInfoCleared() {
+	if uuo.mutation.PersonalInfosCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -1742,12 +1860,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedPersonalInfoIDs(); len(nodes) > 0 && !uuo.mutation.PersonalInfoCleared() {
+	if nodes := uuo.mutation.RemovedPersonalInfosIDs(); len(nodes) > 0 && !uuo.mutation.PersonalInfosCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -1758,12 +1876,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.PersonalInfoIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.PersonalInfosIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PersonalInfoTable,
-			Columns: []string{user.PersonalInfoColumn},
+			Table:   user.PersonalInfosTable,
+			Columns: []string{user.PersonalInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(personalinfo.FieldID, field.TypeUUID),
@@ -1774,12 +1892,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.EducationCleared() {
+	if uuo.mutation.EducationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -1787,12 +1905,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedEducationIDs(); len(nodes) > 0 && !uuo.mutation.EducationCleared() {
+	if nodes := uuo.mutation.RemovedEducationsIDs(); len(nodes) > 0 && !uuo.mutation.EducationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -1803,12 +1921,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.EducationIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.EducationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.EducationTable,
-			Columns: []string{user.EducationColumn},
+			Table:   user.EducationsTable,
+			Columns: []string{user.EducationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(education.FieldID, field.TypeUUID),
@@ -1819,12 +1937,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.WorkExperienceCleared() {
+	if uuo.mutation.WorkExperiencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -1832,12 +1950,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedWorkExperienceIDs(); len(nodes) > 0 && !uuo.mutation.WorkExperienceCleared() {
+	if nodes := uuo.mutation.RemovedWorkExperiencesIDs(); len(nodes) > 0 && !uuo.mutation.WorkExperiencesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -1848,12 +1966,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.WorkExperienceIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.WorkExperiencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.WorkExperienceTable,
-			Columns: []string{user.WorkExperienceColumn},
+			Table:   user.WorkExperiencesTable,
+			Columns: []string{user.WorkExperiencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workexperience.FieldID, field.TypeUUID),
@@ -2127,6 +2245,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(award.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RecentUpdatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRecentUpdatesIDs(); len(nodes) > 0 && !uuo.mutation.RecentUpdatesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RecentUpdatesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RecentUpdatesTable,
+			Columns: []string{user.RecentUpdatesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(recentupdate.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

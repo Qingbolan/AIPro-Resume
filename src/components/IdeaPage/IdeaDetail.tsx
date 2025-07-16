@@ -22,177 +22,8 @@ import { useTheme } from '../ThemeContext';
 import { useLanguage } from '../LanguageContext';
 import CommunityFeedback from '../CommunityFeedback';
 import { IdeaData } from '../../types';
+import { fetchIdeaById } from '../../api/ideas/ideaApi';
 
-// Academic research focused mock data
-const mockAcademicIdeas: Record<string, IdeaData> = {
-  '1': {
-    id: '1',
-    title: 'Leveraging Large Language Models for Automated Code Refactoring: A Novel Approach',
-    description: 'A research investigation into using transformer-based models for intelligent code refactoring',
-    abstract: 'This research explores the application of large language models (LLMs) in automated code refactoring tasks. We hypothesize that transformer architectures can understand code semantics better than traditional static analysis tools, leading to more contextually appropriate refactoring suggestions.',
-    abstractZh: '本研究探索大型语言模型(LLM)在自动化代码重构任务中的应用。我们假设transformer架构比传统静态分析工具能更好地理解代码语义，从而提供更符合上下文的重构建议。',
-    hypothesis: 'LLMs pre-trained on large code corpora can identify code patterns and suggest semantically meaningful refactorings that preserve functionality while improving code quality metrics.',
-    hypothesisZh: '在大型代码语料库上预训练的LLM能够识别代码模式，并建议在保持功能的同时改善代码质量指标的语义有意义的重构。',
-    motivation: 'Current refactoring tools rely heavily on syntactic patterns and miss semantic improvements. With the rise of code-understanding LLMs, there is an opportunity to develop more intelligent refactoring systems.',
-    motivationZh: '当前的重构工具严重依赖语法模式，错过了语义改进。随着代码理解LLM的兴起，有机会开发更智能的重构系统。',
-    category: 'Software Engineering Research',
-    tags: ['Large Language Models', 'Code Analysis', 'Software Engineering', 'Machine Learning'],
-    status: 'experimenting',
-    createdAt: '2024-01-15',
-    lastUpdated: '2024-01-25',
-    researchField: 'Software Engineering',
-    difficulty: 'advanced',
-    estimatedDuration: '8-12 months',
-    fundingStatus: 'seeking',
-    openForCollaboration: true,
-    validationStatus: 'in-progress',
-    methodology: 'We employ a mixed-methods approach combining quantitative evaluation on code quality metrics with qualitative analysis of developer feedback. The study uses pre-trained CodeT5 and CodeBERT models fine-tuned on refactoring datasets.',
-    methodologyZh: '我们采用混合方法，结合代码质量指标的定量评估和开发者反馈的定性分析。研究使用在重构数据集上微调的预训练CodeT5和CodeBERT模型。',
-    techStack: ['Python', 'Transformers', 'CodeBERT', 'CodeT5', 'AST Parser', 'PyTorch'],
-    preliminaryResults: 'Initial experiments show 15% improvement in refactoring suggestion quality compared to AST-based tools. User studies indicate higher developer satisfaction with LLM-generated suggestions.',
-    preliminaryResultsZh: '初步实验显示重构建议质量比基于AST的工具提高15%。用户研究表明开发者对LLM生成建议的满意度更高。',
-    keyFindings: [
-      'LLMs can understand semantic code patterns beyond syntactic rules',
-      'Context-aware suggestions reduce false positives by 40%',
-      'Developer acceptance rate increased from 60% to 85%'
-    ],
-    keyFindingsZh: [
-      'LLM能够理解超越语法规则的语义代码模式',
-      '上下文感知建议将误报率降低40%',
-      '开发者接受率从60%提高到85%'
-    ],
-    limitations: [
-      'High computational cost for large codebases',
-      'Model bias towards popular programming patterns',
-      'Limited evaluation on legacy code systems'
-    ],
-    limitationsZh: [
-      '大型代码库的高计算成本',
-      '模型对流行编程模式的偏见',
-      '对遗留代码系统的有限评估'
-    ],
-    experiments: [
-      {
-        id: 'exp1',
-        title: 'Baseline Evaluation on RefactoringMiner Dataset',
-        titleZh: 'RefactoringMiner数据集上的基线评估',
-        description: 'Evaluate existing refactoring tools and establish baseline metrics',
-        descriptionZh: '评估现有重构工具并建立基线指标',
-        status: 'completed',
-        startDate: '2024-01-15',
-        endDate: '2024-01-30',
-        results: 'Traditional tools achieved 73% precision, 68% recall on semantic refactoring tasks'
-      },
-      {
-        id: 'exp2',
-        title: 'LLM Fine-tuning on Code Refactoring Pairs',
-        titleZh: '代码重构对上的LLM微调',
-        description: 'Fine-tune CodeT5 on paired before/after refactoring examples',
-        descriptionZh: '在配对的重构前后示例上微调CodeT5',
-        status: 'running',
-        startDate: '2024-02-01'
-      }
-    ],
-    relatedWorks: [
-      {
-        id: 'ref1',
-        title: 'Code2Vec: Learning Distributed Representations of Code',
-        authors: ['Uri Alon', 'Meital Zilberstein', 'Omer Levy', 'Eran Yahav'],
-        year: 2019,
-        venue: 'POPL',
-        url: 'https://arxiv.org/abs/1803.09473',
-        notes: 'Foundational work on code representation learning'
-      },
-      {
-        id: 'ref2',
-        title: 'CodeBERT: A Pre-Trained Model for Programming and Natural Languages',
-        authors: ['Zhangyin Feng', 'Daya Guo', 'Duyu Tang'],
-        year: 2020,
-        venue: 'EMNLP',
-        url: 'https://arxiv.org/abs/2002.08155',
-        notes: 'First bidirectional encoder for code understanding'
-      }
-    ],
-    collaborators: [
-      {
-        id: 'c1',
-        name: 'Dr. Sarah Chen',
-        affiliation: 'University of Technology',
-        role: 'advisor'
-      },
-      {
-        id: 'c2',
-        name: 'Alex Rodriguez',
-        affiliation: 'Graduate Student',
-        role: 'contributor'
-      }
-    ],
-    feedbackRequested: [
-      {
-        type: 'methodology',
-        description: 'Seeking feedback on experimental design and evaluation metrics'
-      },
-      {
-        type: 'implementation',
-        description: 'Looking for collaboration on large-scale evaluation infrastructure'
-      }
-    ],
-    publications: [
-      {
-        id: 'pub1',
-        title: 'Preliminary Study: LLMs for Code Refactoring',
-        authors: ['Your Name', 'Dr. Sarah Chen'],
-        venue: 'ICSE Workshop on AI for Software Engineering',
-        year: 2024,
-        status: 'submitted'
-      }
-    ],
-    futureDirections: [
-      'Extend to multi-language refactoring scenarios',
-      'Investigate few-shot learning for domain-specific refactoring',
-      'Develop real-time IDE integration with user feedback loops'
-    ],
-    futureDirectionsZh: [
-      '扩展到多语言重构场景',
-      '研究领域特定重构的少样本学习',
-      '开发带用户反馈循环的实时IDE集成'
-    ],
-    keywords: ['large language models', 'code refactoring', 'program synthesis', 'software engineering'],
-    codeRepository: 'https://github.com/username/llm-refactoring-research',
-    demoUrl: 'https://demo.llm-refactoring.com'
-  },
-  // Simplified versions for other ideas
-  '2': {
-    id: '2',
-    title: 'Quantum Machine Learning Framework',
-    description: 'Framework combining quantum computing with traditional ML algorithms',
-    abstract: 'A comprehensive framework that bridges the gap between quantum computing and classical machine learning, enabling hybrid algorithms that leverage quantum speedup for specific ML tasks.',
-    category: 'Quantum Computing Research',
-    tags: ['Quantum Computing', 'Machine Learning', 'Framework'],
-    status: 'hypothesis',
-    createdAt: '2024-01-10',
-    researchField: 'Quantum Computing',
-    difficulty: 'expert',
-    estimatedDuration: '12-18 months',
-    fundingStatus: 'seeking',
-    openForCollaboration: true
-  },
-  '3': {
-    id: '3',
-    title: 'Decentralized Knowledge Base',
-    description: 'A blockchain-based platform for sharing and verifying technical knowledge',
-    abstract: 'A decentralized platform that uses blockchain technology to create a trustless, incentivized system for sharing, verifying, and maintaining technical knowledge and documentation.',
-    category: 'Blockchain Research',
-    tags: ['Blockchain', 'Knowledge Sharing', 'Decentralization'],
-    status: 'draft',
-    createdAt: '2024-01-05',
-    researchField: 'Computer Science',
-    difficulty: 'intermediate',
-    estimatedDuration: '8-12 months',
-    fundingStatus: 'unfunded',
-    openForCollaboration: true
-  }
-};
 
 const IdeaDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -207,16 +38,34 @@ const IdeaDetail: React.FC = () => {
 
   useEffect(() => {
     const loadIdea = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const ideaData = mockAcademicIdeas[id || '1'];
-      if (ideaData) {
-        setIdea(ideaData);
+      if (!id) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        setLoading(true);
+        
+        // Fetch idea from API with language support
+        const ideaData = await fetchIdeaById(id, language as 'en' | 'zh');
+        
+        if (ideaData) {
+          setIdea(ideaData);
+        } else {
+          // If no data found, you can optionally fall back to mock data for development
+          // or show a not found message
+          setIdea(null);
+        }
+      } catch (err) {
+        console.error('Error loading idea:', err);
+        setIdea(null);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     loadIdea();
-  }, [id]);
+  }, [id, language]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -577,13 +426,15 @@ const IdeaDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {idea.tags.map((tag, index) => (
-                  <span key={index} className="px-3 py-1 bg-theme-surface text-theme-primary rounded-lg text-sm font-medium">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {idea.tags && idea.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {idea.tags.map((tag, index) => (
+                    <span key={index} className="px-3 py-1 bg-theme-surface text-theme-primary rounded-lg text-sm font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

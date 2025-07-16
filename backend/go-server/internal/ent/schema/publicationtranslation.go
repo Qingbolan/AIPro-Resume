@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // PublicationTranslation holds the schema definition for the PublicationTranslation entity.
 type PublicationTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the PublicationTranslation schema.
+func (PublicationTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "publication_translations"},
+	}
 }
 
 // Fields of the PublicationTranslation.
@@ -37,9 +46,6 @@ func (PublicationTranslation) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 

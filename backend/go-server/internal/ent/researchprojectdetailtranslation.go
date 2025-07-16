@@ -28,8 +28,6 @@ type ResearchProjectDetailTranslation struct {
 	DetailText string `json:"detail_text,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResearchProjectDetailTranslationQuery when eager-loading is set.
 	Edges        ResearchProjectDetailTranslationEdges `json:"edges"`
@@ -76,7 +74,7 @@ func (*ResearchProjectDetailTranslation) scanValues(columns []string) ([]any, er
 		switch columns[i] {
 		case researchprojectdetailtranslation.FieldLanguageCode, researchprojectdetailtranslation.FieldDetailText:
 			values[i] = new(sql.NullString)
-		case researchprojectdetailtranslation.FieldCreatedAt, researchprojectdetailtranslation.FieldUpdatedAt:
+		case researchprojectdetailtranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case researchprojectdetailtranslation.FieldID, researchprojectdetailtranslation.FieldResearchProjectDetailID:
 			values[i] = new(uuid.UUID)
@@ -124,12 +122,6 @@ func (rpdt *ResearchProjectDetailTranslation) assignValues(columns []string, val
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				rpdt.CreatedAt = value.Time
-			}
-		case researchprojectdetailtranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				rpdt.UpdatedAt = value.Time
 			}
 		default:
 			rpdt.selectValues.Set(columns[i], values[i])
@@ -188,9 +180,6 @@ func (rpdt *ResearchProjectDetailTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(rpdt.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(rpdt.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

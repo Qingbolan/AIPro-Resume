@@ -206,7 +206,7 @@ def cli():
 @click.argument('project_name')
 def init(project_name: str, template: str):
     """Initialize a new personal website project"""
-    from .commands.init import InitCommand
+    from .cli.init import InitCommand
     InitCommand(project_name, template).execute()
 
 @cli.command()
@@ -214,7 +214,7 @@ def init(project_name: str, template: str):
 @click.option('--output', '-o', default='dist', help='Output directory')
 def build(watch: bool, output: str):
     """Build the static website"""
-    from .commands.build import BuildCommand
+    from .cli.build import BuildCommand
     BuildCommand(output, watch).execute()
 
 @cli.command()
@@ -222,7 +222,7 @@ def build(watch: bool, output: str):
 @click.option('--host', '-h', default='localhost', help='Development server host')
 def dev(port: int, host: str):
     """Start development server with hot reload"""
-    from .commands.dev import DevCommand
+    from .cli.dev import DevCommand
     DevCommand(host, port).execute()
 
 if __name__ == '__main__':

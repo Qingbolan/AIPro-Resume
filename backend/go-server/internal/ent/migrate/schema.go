@@ -46,7 +46,6 @@ var (
 		{Name: "award_type", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "award_id", Type: field.TypeUUID},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 	}
@@ -58,13 +57,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "award_translations_awards_translations",
-				Columns:    []*schema.Column{AwardTranslationsColumns[7]},
+				Columns:    []*schema.Column{AwardTranslationsColumns[6]},
 				RefColumns: []*schema.Column{AwardsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "award_translations_languages_award_translations",
-				Columns:    []*schema.Column{AwardTranslationsColumns[8]},
+				Columns:    []*schema.Column{AwardTranslationsColumns[7]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -93,7 +92,6 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 100},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "blog_category_id", Type: field.TypeUUID},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 	}
@@ -105,13 +103,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blog_category_translations_blog_categories_translations",
-				Columns:    []*schema.Column{BlogCategoryTranslationsColumns[5]},
+				Columns:    []*schema.Column{BlogCategoryTranslationsColumns[4]},
 				RefColumns: []*schema.Column{BlogCategoriesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "blog_category_translations_languages_blog_category_translations",
-				Columns:    []*schema.Column{BlogCategoryTranslationsColumns[6]},
+				Columns:    []*schema.Column{BlogCategoryTranslationsColumns[5]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -159,7 +157,7 @@ var (
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 300},
 		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
-		{Name: "content_type", Type: field.TypeEnum, Enums: []string{"article", "vlog", "podcast", "tutorial"}, Default: "article"},
+		{Name: "content_type", Type: field.TypeEnum, Enums: []string{"article", "vlog", "episode"}, Default: "article"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "published", "archived"}, Default: "draft"},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
 		{Name: "featured_image_url", Type: field.TypeString, Nullable: true, Size: 500},
@@ -234,7 +232,6 @@ var (
 		{Name: "excerpt", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "blog_post_id", Type: field.TypeUUID},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 	}
@@ -246,13 +243,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blog_post_translations_blog_posts_translations",
-				Columns:    []*schema.Column{BlogPostTranslationsColumns[6]},
+				Columns:    []*schema.Column{BlogPostTranslationsColumns[5]},
 				RefColumns: []*schema.Column{BlogPostsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "blog_post_translations_languages_blog_post_translations",
-				Columns:    []*schema.Column{BlogPostTranslationsColumns[7]},
+				Columns:    []*schema.Column{BlogPostTranslationsColumns[6]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -282,7 +279,6 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 300},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "blog_series_id", Type: field.TypeUUID},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 	}
@@ -294,13 +290,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blog_series_translations_blog_series_translations",
-				Columns:    []*schema.Column{BlogSeriesTranslationsColumns[5]},
+				Columns:    []*schema.Column{BlogSeriesTranslationsColumns[4]},
 				RefColumns: []*schema.Column{BlogSeriesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "blog_series_translations_languages_blog_series_translations",
-				Columns:    []*schema.Column{BlogSeriesTranslationsColumns[6]},
+				Columns:    []*schema.Column{BlogSeriesTranslationsColumns[5]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -345,7 +341,7 @@ var (
 		PrimaryKey: []*schema.Column{EducationColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "education_users_education",
+				Symbol:     "education_users_educations",
 				Columns:    []*schema.Column{EducationColumns[14]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -380,7 +376,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "detail_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "education_detail_id", Type: field.TypeUUID},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 	}
@@ -392,13 +387,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "education_detail_translations_education_details_translations",
-				Columns:    []*schema.Column{EducationDetailTranslationsColumns[4]},
+				Columns:    []*schema.Column{EducationDetailTranslationsColumns[3]},
 				RefColumns: []*schema.Column{EducationDetailsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "education_detail_translations_languages_education_detail_translations",
-				Columns:    []*schema.Column{EducationDetailTranslationsColumns[5]},
+				Columns:    []*schema.Column{EducationDetailTranslationsColumns[4]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -542,7 +537,7 @@ var (
 		PrimaryKey: []*schema.Column{PersonalInfoColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "personal_info_users_personal_info",
+				Symbol:     "personal_info_users_personal_infos",
 				Columns:    []*schema.Column{PersonalInfoColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -656,7 +651,6 @@ var (
 		{Name: "lessons_learned", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "future_enhancements", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "project_detail_id", Type: field.TypeUUID},
 	}
@@ -668,13 +662,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_detail_translations_languages_project_detail_translations",
-				Columns:    []*schema.Column{ProjectDetailTranslationsColumns[9]},
+				Columns:    []*schema.Column{ProjectDetailTranslationsColumns[8]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "project_detail_translations_project_details_translations",
-				Columns:    []*schema.Column{ProjectDetailTranslationsColumns[10]},
+				Columns:    []*schema.Column{ProjectDetailTranslationsColumns[9]},
 				RefColumns: []*schema.Column{ProjectDetailsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -712,7 +706,6 @@ var (
 		{Name: "alt_text", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "caption", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "project_image_id", Type: field.TypeUUID},
 	}
@@ -724,13 +717,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_image_translations_languages_project_image_translations",
-				Columns:    []*schema.Column{ProjectImageTranslationsColumns[5]},
+				Columns:    []*schema.Column{ProjectImageTranslationsColumns[4]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "project_image_translations_project_images_translations",
-				Columns:    []*schema.Column{ProjectImageTranslationsColumns[6]},
+				Columns:    []*schema.Column{ProjectImageTranslationsColumns[5]},
 				RefColumns: []*schema.Column{ProjectImagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -741,7 +734,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "relationship_type", Type: field.TypeString, Size: 50},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "source_project_id", Type: field.TypeUUID},
 		{Name: "target_project_id", Type: field.TypeUUID},
 	}
@@ -753,13 +745,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "project_relationships_projects_source_relationships",
-				Columns:    []*schema.Column{ProjectRelationshipsColumns[4]},
+				Columns:    []*schema.Column{ProjectRelationshipsColumns[3]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "project_relationships_projects_target_relationships",
-				Columns:    []*schema.Column{ProjectRelationshipsColumns[5]},
+				Columns:    []*schema.Column{ProjectRelationshipsColumns[4]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -886,7 +878,6 @@ var (
 		{Name: "journal_name", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "conference_name", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "publication_id", Type: field.TypeUUID},
 	}
@@ -898,14 +889,83 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "publication_translations_languages_publication_translations",
-				Columns:    []*schema.Column{PublicationTranslationsColumns[6]},
+				Columns:    []*schema.Column{PublicationTranslationsColumns[5]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "publication_translations_publications_translations",
-				Columns:    []*schema.Column{PublicationTranslationsColumns[7]},
+				Columns:    []*schema.Column{PublicationTranslationsColumns[6]},
 				RefColumns: []*schema.Column{PublicationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// RecentUpdatesColumns holds the columns for the "recent_updates" table.
+	RecentUpdatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"work", "education", "research", "publication", "project"}, Default: "project"},
+		{Name: "title", Type: field.TypeString, Size: 200},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "date", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "date"}},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "ongoing", "completed"}, Default: "active"},
+		{Name: "priority", Type: field.TypeEnum, Enums: []string{"high", "medium", "low"}, Default: "medium"},
+		{Name: "external_id", Type: field.TypeString, Nullable: true, Size: 100},
+		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "video_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "document_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "gallery", Type: field.TypeJSON, Nullable: true},
+		{Name: "attachments", Type: field.TypeJSON, Nullable: true},
+		{Name: "media_metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "demo_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "github_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "external_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "social_links", Type: field.TypeJSON, Nullable: true},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// RecentUpdatesTable holds the schema information for the "recent_updates" table.
+	RecentUpdatesTable = &schema.Table{
+		Name:       "recent_updates",
+		Columns:    RecentUpdatesColumns,
+		PrimaryKey: []*schema.Column{RecentUpdatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "recent_updates_users_recent_updates",
+				Columns:    []*schema.Column{RecentUpdatesColumns[22]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// RecentUpdateTranslationsColumns holds the columns for the "recent_update_translations" table.
+	RecentUpdateTranslationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "title", Type: field.TypeString, Size: 200},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "language_code", Type: field.TypeString, Size: 5},
+		{Name: "recent_update_id", Type: field.TypeUUID},
+	}
+	// RecentUpdateTranslationsTable holds the schema information for the "recent_update_translations" table.
+	RecentUpdateTranslationsTable = &schema.Table{
+		Name:       "recent_update_translations",
+		Columns:    RecentUpdateTranslationsColumns,
+		PrimaryKey: []*schema.Column{RecentUpdateTranslationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "recent_update_translations_languages_recent_update_translations",
+				Columns:    []*schema.Column{RecentUpdateTranslationsColumns[4]},
+				RefColumns: []*schema.Column{LanguagesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "recent_update_translations_recent_updates_translations",
+				Columns:    []*schema.Column{RecentUpdateTranslationsColumns[5]},
+				RefColumns: []*schema.Column{RecentUpdatesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -968,7 +1028,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "detail_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "research_project_detail_id", Type: field.TypeUUID},
 	}
@@ -980,13 +1039,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "research_project_detail_translations_languages_research_project_detail_translations",
-				Columns:    []*schema.Column{ResearchProjectDetailTranslationsColumns[4]},
+				Columns:    []*schema.Column{ResearchProjectDetailTranslationsColumns[3]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "research_project_detail_translations_research_project_details_translations",
-				Columns:    []*schema.Column{ResearchProjectDetailTranslationsColumns[5]},
+				Columns:    []*schema.Column{ResearchProjectDetailTranslationsColumns[4]},
 				RefColumns: []*schema.Column{ResearchProjectDetailsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1000,7 +1059,6 @@ var (
 		{Name: "research_type", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "funding_source", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "research_project_id", Type: field.TypeUUID},
 	}
@@ -1012,13 +1070,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "research_project_translations_languages_research_project_translations",
-				Columns:    []*schema.Column{ResearchProjectTranslationsColumns[7]},
+				Columns:    []*schema.Column{ResearchProjectTranslationsColumns[6]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "research_project_translations_research_projects_translations",
-				Columns:    []*schema.Column{ResearchProjectTranslationsColumns[8]},
+				Columns:    []*schema.Column{ResearchProjectTranslationsColumns[7]},
 				RefColumns: []*schema.Column{ResearchProjectsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1094,7 +1152,7 @@ var (
 		PrimaryKey: []*schema.Column{WorkExperienceColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "work_experience_users_work_experience",
+				Symbol:     "work_experience_users_work_experiences",
 				Columns:    []*schema.Column{WorkExperienceColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -1129,7 +1187,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "detail_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "language_code", Type: field.TypeString, Size: 5},
 		{Name: "work_experience_detail_id", Type: field.TypeUUID},
 	}
@@ -1141,13 +1198,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "work_experience_detail_translations_languages_work_experience_detail_translations",
-				Columns:    []*schema.Column{WorkExperienceDetailTranslationsColumns[4]},
+				Columns:    []*schema.Column{WorkExperienceDetailTranslationsColumns[3]},
 				RefColumns: []*schema.Column{LanguagesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "work_experience_detail_translations_work_experience_details_translations",
-				Columns:    []*schema.Column{WorkExperienceDetailTranslationsColumns[5]},
+				Columns:    []*schema.Column{WorkExperienceDetailTranslationsColumns[4]},
 				RefColumns: []*schema.Column{WorkExperienceDetailsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1216,6 +1273,8 @@ var (
 		PublicationsTable,
 		PublicationAuthorsTable,
 		PublicationTranslationsTable,
+		RecentUpdatesTable,
+		RecentUpdateTranslationsTable,
 		ResearchProjectsTable,
 		ResearchProjectDetailsTable,
 		ResearchProjectDetailTranslationsTable,
@@ -1236,11 +1295,17 @@ func init() {
 	}
 	AwardTranslationsTable.ForeignKeys[0].RefTable = AwardsTable
 	AwardTranslationsTable.ForeignKeys[1].RefTable = LanguagesTable
+	AwardTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "award_translations",
+	}
 	BlogCategoriesTable.Annotation = &entsql.Annotation{
 		Table: "blog_categories",
 	}
 	BlogCategoryTranslationsTable.ForeignKeys[0].RefTable = BlogCategoriesTable
 	BlogCategoryTranslationsTable.ForeignKeys[1].RefTable = LanguagesTable
+	BlogCategoryTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "blog_category_translations",
+	}
 	BlogCommentsTable.ForeignKeys[0].RefTable = BlogCommentsTable
 	BlogCommentsTable.ForeignKeys[1].RefTable = BlogPostsTable
 	BlogCommentsTable.Annotation = &entsql.Annotation{
@@ -1259,11 +1324,17 @@ func init() {
 	}
 	BlogPostTranslationsTable.ForeignKeys[0].RefTable = BlogPostsTable
 	BlogPostTranslationsTable.ForeignKeys[1].RefTable = LanguagesTable
+	BlogPostTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "blog_post_translations",
+	}
 	BlogSeriesTable.Annotation = &entsql.Annotation{
 		Table: "blog_series",
 	}
 	BlogSeriesTranslationsTable.ForeignKeys[0].RefTable = BlogSeriesTable
 	BlogSeriesTranslationsTable.ForeignKeys[1].RefTable = LanguagesTable
+	BlogSeriesTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "blog_series_translations",
+	}
 	BlogTagsTable.Annotation = &entsql.Annotation{
 		Table: "blog_tags",
 	}
@@ -1291,6 +1362,9 @@ func init() {
 	}
 	IdeaTranslationsTable.ForeignKeys[0].RefTable = IdeasTable
 	IdeaTranslationsTable.ForeignKeys[1].RefTable = LanguagesTable
+	IdeaTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "idea_translations",
+	}
 	LanguagesTable.Annotation = &entsql.Annotation{
 		Table: "languages",
 	}
@@ -1313,27 +1387,54 @@ func init() {
 	}
 	ProjectDetailTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	ProjectDetailTranslationsTable.ForeignKeys[1].RefTable = ProjectDetailsTable
+	ProjectDetailTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "project_detail_translations",
+	}
 	ProjectImagesTable.ForeignKeys[0].RefTable = ProjectsTable
 	ProjectImagesTable.Annotation = &entsql.Annotation{
 		Table: "project_images",
 	}
 	ProjectImageTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	ProjectImageTranslationsTable.ForeignKeys[1].RefTable = ProjectImagesTable
+	ProjectImageTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "project_image_translations",
+	}
 	ProjectRelationshipsTable.ForeignKeys[0].RefTable = ProjectsTable
 	ProjectRelationshipsTable.ForeignKeys[1].RefTable = ProjectsTable
+	ProjectRelationshipsTable.Annotation = &entsql.Annotation{
+		Table: "project_relationships",
+	}
 	ProjectTechnologiesTable.ForeignKeys[0].RefTable = ProjectsTable
 	ProjectTechnologiesTable.Annotation = &entsql.Annotation{
 		Table: "project_technologies",
 	}
 	ProjectTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	ProjectTranslationsTable.ForeignKeys[1].RefTable = ProjectsTable
+	ProjectTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "project_translations",
+	}
 	PublicationsTable.ForeignKeys[0].RefTable = UsersTable
 	PublicationsTable.Annotation = &entsql.Annotation{
 		Table: "publications",
 	}
 	PublicationAuthorsTable.ForeignKeys[0].RefTable = PublicationsTable
+	PublicationAuthorsTable.Annotation = &entsql.Annotation{
+		Table: "publication_authors",
+	}
 	PublicationTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	PublicationTranslationsTable.ForeignKeys[1].RefTable = PublicationsTable
+	PublicationTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "publication_translations",
+	}
+	RecentUpdatesTable.ForeignKeys[0].RefTable = UsersTable
+	RecentUpdatesTable.Annotation = &entsql.Annotation{
+		Table: "recent_updates",
+	}
+	RecentUpdateTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
+	RecentUpdateTranslationsTable.ForeignKeys[1].RefTable = RecentUpdatesTable
+	RecentUpdateTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "recent_update_translations",
+	}
 	ResearchProjectsTable.ForeignKeys[0].RefTable = UsersTable
 	ResearchProjectsTable.Annotation = &entsql.Annotation{
 		Table: "research_projects",
@@ -1341,8 +1442,14 @@ func init() {
 	ResearchProjectDetailsTable.ForeignKeys[0].RefTable = ResearchProjectsTable
 	ResearchProjectDetailTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	ResearchProjectDetailTranslationsTable.ForeignKeys[1].RefTable = ResearchProjectDetailsTable
+	ResearchProjectDetailTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "research_project_detail_translations",
+	}
 	ResearchProjectTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	ResearchProjectTranslationsTable.ForeignKeys[1].RefTable = ResearchProjectsTable
+	ResearchProjectTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "research_project_translations",
+	}
 	SocialLinksTable.ForeignKeys[0].RefTable = PersonalInfoTable
 	SocialLinksTable.Annotation = &entsql.Annotation{
 		Table: "social_links",
@@ -1357,6 +1464,12 @@ func init() {
 	WorkExperienceDetailsTable.ForeignKeys[0].RefTable = WorkExperienceTable
 	WorkExperienceDetailTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	WorkExperienceDetailTranslationsTable.ForeignKeys[1].RefTable = WorkExperienceDetailsTable
+	WorkExperienceDetailTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "work_experience_detail_translations",
+	}
 	WorkExperienceTranslationsTable.ForeignKeys[0].RefTable = LanguagesTable
 	WorkExperienceTranslationsTable.ForeignKeys[1].RefTable = WorkExperienceTable
+	WorkExperienceTranslationsTable.Annotation = &entsql.Annotation{
+		Table: "work_experience_translations",
+	}
 }

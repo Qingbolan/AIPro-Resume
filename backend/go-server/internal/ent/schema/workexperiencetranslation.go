@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // WorkExperienceTranslation holds the schema definition for the WorkExperienceTranslation entity.
 type WorkExperienceTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the WorkExperienceTranslation schema.
+func (WorkExperienceTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "work_experience_translations"},
+	}
 }
 
 // Fields of the WorkExperienceTranslation.

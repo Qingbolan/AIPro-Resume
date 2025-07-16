@@ -69,14 +69,15 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("personal_info", PersonalInfo.Type),
-		edge.To("education", Education.Type),
-		edge.To("work_experience", WorkExperience.Type),
+		edge.To("personal_infos", PersonalInfo.Type),
+		edge.To("educations", Education.Type),
+		edge.To("work_experiences", WorkExperience.Type),
 		edge.To("projects", Project.Type),
 		edge.To("blog_posts", BlogPost.Type),
 		edge.To("ideas", Idea.Type),
 		edge.To("research_projects", ResearchProject.Type),
 		edge.To("publications", Publication.Type),
 		edge.To("awards", Award.Type),
+		edge.To("recent_updates", RecentUpdate.Type),
 	}
 }

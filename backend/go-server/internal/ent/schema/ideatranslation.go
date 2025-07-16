@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // IdeaTranslation holds the schema definition for the IdeaTranslation entity.
 type IdeaTranslation struct {
 	ent.Schema
+}
+
+// Annotations for the IdeaTranslation schema.
+func (IdeaTranslation) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "idea_translations"},
+	}
 }
 
 // Fields of the IdeaTranslation.

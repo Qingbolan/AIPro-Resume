@@ -133,20 +133,6 @@ func (pdtc *ProjectDetailTranslationCreate) SetNillableCreatedAt(t *time.Time) *
 	return pdtc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pdtc *ProjectDetailTranslationCreate) SetUpdatedAt(t time.Time) *ProjectDetailTranslationCreate {
-	pdtc.mutation.SetUpdatedAt(t)
-	return pdtc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pdtc *ProjectDetailTranslationCreate) SetNillableUpdatedAt(t *time.Time) *ProjectDetailTranslationCreate {
-	if t != nil {
-		pdtc.SetUpdatedAt(*t)
-	}
-	return pdtc
-}
-
 // SetID sets the "id" field.
 func (pdtc *ProjectDetailTranslationCreate) SetID(u uuid.UUID) *ProjectDetailTranslationCreate {
 	pdtc.mutation.SetID(u)
@@ -216,10 +202,6 @@ func (pdtc *ProjectDetailTranslationCreate) defaults() {
 		v := projectdetailtranslation.DefaultCreatedAt()
 		pdtc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := pdtc.mutation.UpdatedAt(); !ok {
-		v := projectdetailtranslation.DefaultUpdatedAt()
-		pdtc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := pdtc.mutation.ID(); !ok {
 		v := projectdetailtranslation.DefaultID()
 		pdtc.mutation.SetID(v)
@@ -241,9 +223,6 @@ func (pdtc *ProjectDetailTranslationCreate) check() error {
 	}
 	if _, ok := pdtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ProjectDetailTranslation.created_at"`)}
-	}
-	if _, ok := pdtc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ProjectDetailTranslation.updated_at"`)}
 	}
 	if len(pdtc.mutation.ProjectDetailIDs()) == 0 {
 		return &ValidationError{Name: "project_detail", err: errors.New(`ent: missing required edge "ProjectDetailTranslation.project_detail"`)}
@@ -313,10 +292,6 @@ func (pdtc *ProjectDetailTranslationCreate) createSpec() (*ProjectDetailTranslat
 	if value, ok := pdtc.mutation.CreatedAt(); ok {
 		_spec.SetField(projectdetailtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := pdtc.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := pdtc.mutation.ProjectDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

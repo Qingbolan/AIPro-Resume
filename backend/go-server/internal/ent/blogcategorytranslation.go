@@ -30,8 +30,6 @@ type BlogCategoryTranslation struct {
 	Description string `json:"description,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BlogCategoryTranslationQuery when eager-loading is set.
 	Edges        BlogCategoryTranslationEdges `json:"edges"`
@@ -78,7 +76,7 @@ func (*BlogCategoryTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case blogcategorytranslation.FieldLanguageCode, blogcategorytranslation.FieldName, blogcategorytranslation.FieldDescription:
 			values[i] = new(sql.NullString)
-		case blogcategorytranslation.FieldCreatedAt, blogcategorytranslation.FieldUpdatedAt:
+		case blogcategorytranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case blogcategorytranslation.FieldID, blogcategorytranslation.FieldBlogCategoryID:
 			values[i] = new(uuid.UUID)
@@ -132,12 +130,6 @@ func (bct *BlogCategoryTranslation) assignValues(columns []string, values []any)
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				bct.CreatedAt = value.Time
-			}
-		case blogcategorytranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				bct.UpdatedAt = value.Time
 			}
 		default:
 			bct.selectValues.Set(columns[i], values[i])
@@ -199,9 +191,6 @@ func (bct *BlogCategoryTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(bct.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(bct.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

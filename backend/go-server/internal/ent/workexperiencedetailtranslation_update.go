@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/workexperiencedetail"
 	"silan-backend/internal/ent/workexperiencedetailtranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -73,12 +72,6 @@ func (wedtu *WorkExperienceDetailTranslationUpdate) SetNillableDetailText(s *str
 	return wedtu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wedtu *WorkExperienceDetailTranslationUpdate) SetUpdatedAt(t time.Time) *WorkExperienceDetailTranslationUpdate {
-	wedtu.mutation.SetUpdatedAt(t)
-	return wedtu
-}
-
 // SetWorkExperienceDetail sets the "work_experience_detail" edge to the WorkExperienceDetail entity.
 func (wedtu *WorkExperienceDetailTranslationUpdate) SetWorkExperienceDetail(w *WorkExperienceDetail) *WorkExperienceDetailTranslationUpdate {
 	return wedtu.SetWorkExperienceDetailID(w.ID)
@@ -114,7 +107,6 @@ func (wedtu *WorkExperienceDetailTranslationUpdate) ClearLanguage() *WorkExperie
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wedtu *WorkExperienceDetailTranslationUpdate) Save(ctx context.Context) (int, error) {
-	wedtu.defaults()
 	return withHooks(ctx, wedtu.sqlSave, wedtu.mutation, wedtu.hooks)
 }
 
@@ -137,14 +129,6 @@ func (wedtu *WorkExperienceDetailTranslationUpdate) Exec(ctx context.Context) er
 func (wedtu *WorkExperienceDetailTranslationUpdate) ExecX(ctx context.Context) {
 	if err := wedtu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (wedtu *WorkExperienceDetailTranslationUpdate) defaults() {
-	if _, ok := wedtu.mutation.UpdatedAt(); !ok {
-		v := workexperiencedetailtranslation.UpdateDefaultUpdatedAt()
-		wedtu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -183,9 +167,6 @@ func (wedtu *WorkExperienceDetailTranslationUpdate) sqlSave(ctx context.Context)
 	}
 	if value, ok := wedtu.mutation.DetailText(); ok {
 		_spec.SetField(workexperiencedetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := wedtu.mutation.UpdatedAt(); ok {
-		_spec.SetField(workexperiencedetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wedtu.mutation.WorkExperienceDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -307,12 +288,6 @@ func (wedtuo *WorkExperienceDetailTranslationUpdateOne) SetNillableDetailText(s 
 	return wedtuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wedtuo *WorkExperienceDetailTranslationUpdateOne) SetUpdatedAt(t time.Time) *WorkExperienceDetailTranslationUpdateOne {
-	wedtuo.mutation.SetUpdatedAt(t)
-	return wedtuo
-}
-
 // SetWorkExperienceDetail sets the "work_experience_detail" edge to the WorkExperienceDetail entity.
 func (wedtuo *WorkExperienceDetailTranslationUpdateOne) SetWorkExperienceDetail(w *WorkExperienceDetail) *WorkExperienceDetailTranslationUpdateOne {
 	return wedtuo.SetWorkExperienceDetailID(w.ID)
@@ -361,7 +336,6 @@ func (wedtuo *WorkExperienceDetailTranslationUpdateOne) Select(field string, fie
 
 // Save executes the query and returns the updated WorkExperienceDetailTranslation entity.
 func (wedtuo *WorkExperienceDetailTranslationUpdateOne) Save(ctx context.Context) (*WorkExperienceDetailTranslation, error) {
-	wedtuo.defaults()
 	return withHooks(ctx, wedtuo.sqlSave, wedtuo.mutation, wedtuo.hooks)
 }
 
@@ -384,14 +358,6 @@ func (wedtuo *WorkExperienceDetailTranslationUpdateOne) Exec(ctx context.Context
 func (wedtuo *WorkExperienceDetailTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := wedtuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (wedtuo *WorkExperienceDetailTranslationUpdateOne) defaults() {
-	if _, ok := wedtuo.mutation.UpdatedAt(); !ok {
-		v := workexperiencedetailtranslation.UpdateDefaultUpdatedAt()
-		wedtuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -447,9 +413,6 @@ func (wedtuo *WorkExperienceDetailTranslationUpdateOne) sqlSave(ctx context.Cont
 	}
 	if value, ok := wedtuo.mutation.DetailText(); ok {
 		_spec.SetField(workexperiencedetailtranslation.FieldDetailText, field.TypeString, value)
-	}
-	if value, ok := wedtuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(workexperiencedetailtranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wedtuo.mutation.WorkExperienceDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{

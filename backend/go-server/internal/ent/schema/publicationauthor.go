@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -12,6 +14,13 @@ import (
 // PublicationAuthor holds the schema definition for the PublicationAuthor entity.
 type PublicationAuthor struct {
 	ent.Schema
+}
+
+// Annotations for the PublicationAuthor schema.
+func (PublicationAuthor) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "publication_authors"},
+	}
 }
 
 // Fields of the PublicationAuthor.

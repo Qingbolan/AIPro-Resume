@@ -55,20 +55,6 @@ func (edtc *EducationDetailTranslationCreate) SetNillableCreatedAt(t *time.Time)
 	return edtc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (edtc *EducationDetailTranslationCreate) SetUpdatedAt(t time.Time) *EducationDetailTranslationCreate {
-	edtc.mutation.SetUpdatedAt(t)
-	return edtc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (edtc *EducationDetailTranslationCreate) SetNillableUpdatedAt(t *time.Time) *EducationDetailTranslationCreate {
-	if t != nil {
-		edtc.SetUpdatedAt(*t)
-	}
-	return edtc
-}
-
 // SetID sets the "id" field.
 func (edtc *EducationDetailTranslationCreate) SetID(u uuid.UUID) *EducationDetailTranslationCreate {
 	edtc.mutation.SetID(u)
@@ -138,10 +124,6 @@ func (edtc *EducationDetailTranslationCreate) defaults() {
 		v := educationdetailtranslation.DefaultCreatedAt()
 		edtc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := edtc.mutation.UpdatedAt(); !ok {
-		v := educationdetailtranslation.DefaultUpdatedAt()
-		edtc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := edtc.mutation.ID(); !ok {
 		v := educationdetailtranslation.DefaultID()
 		edtc.mutation.SetID(v)
@@ -171,9 +153,6 @@ func (edtc *EducationDetailTranslationCreate) check() error {
 	}
 	if _, ok := edtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "EducationDetailTranslation.created_at"`)}
-	}
-	if _, ok := edtc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "EducationDetailTranslation.updated_at"`)}
 	}
 	if len(edtc.mutation.EducationDetailIDs()) == 0 {
 		return &ValidationError{Name: "education_detail", err: errors.New(`ent: missing required edge "EducationDetailTranslation.education_detail"`)}
@@ -223,10 +202,6 @@ func (edtc *EducationDetailTranslationCreate) createSpec() (*EducationDetailTran
 	if value, ok := edtc.mutation.CreatedAt(); ok {
 		_spec.SetField(educationdetailtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := edtc.mutation.UpdatedAt(); ok {
-		_spec.SetField(educationdetailtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := edtc.mutation.EducationDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

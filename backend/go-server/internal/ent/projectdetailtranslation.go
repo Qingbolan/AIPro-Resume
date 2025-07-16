@@ -38,8 +38,6 @@ type ProjectDetailTranslation struct {
 	FutureEnhancements string `json:"future_enhancements,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProjectDetailTranslationQuery when eager-loading is set.
 	Edges        ProjectDetailTranslationEdges `json:"edges"`
@@ -86,7 +84,7 @@ func (*ProjectDetailTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case projectdetailtranslation.FieldLanguageCode, projectdetailtranslation.FieldDetailedDescription, projectdetailtranslation.FieldGoals, projectdetailtranslation.FieldChallenges, projectdetailtranslation.FieldSolutions, projectdetailtranslation.FieldLessonsLearned, projectdetailtranslation.FieldFutureEnhancements:
 			values[i] = new(sql.NullString)
-		case projectdetailtranslation.FieldCreatedAt, projectdetailtranslation.FieldUpdatedAt:
+		case projectdetailtranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case projectdetailtranslation.FieldID, projectdetailtranslation.FieldProjectDetailID:
 			values[i] = new(uuid.UUID)
@@ -165,12 +163,6 @@ func (pdt *ProjectDetailTranslation) assignValues(columns []string, values []any
 			} else if value.Valid {
 				pdt.CreatedAt = value.Time
 			}
-		case projectdetailtranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pdt.UpdatedAt = value.Time
-			}
 		default:
 			pdt.selectValues.Set(columns[i], values[i])
 		}
@@ -243,9 +235,6 @@ func (pdt *ProjectDetailTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pdt.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(pdt.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

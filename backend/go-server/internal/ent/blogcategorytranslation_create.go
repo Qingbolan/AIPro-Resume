@@ -69,20 +69,6 @@ func (bctc *BlogCategoryTranslationCreate) SetNillableCreatedAt(t *time.Time) *B
 	return bctc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bctc *BlogCategoryTranslationCreate) SetUpdatedAt(t time.Time) *BlogCategoryTranslationCreate {
-	bctc.mutation.SetUpdatedAt(t)
-	return bctc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (bctc *BlogCategoryTranslationCreate) SetNillableUpdatedAt(t *time.Time) *BlogCategoryTranslationCreate {
-	if t != nil {
-		bctc.SetUpdatedAt(*t)
-	}
-	return bctc
-}
-
 // SetID sets the "id" field.
 func (bctc *BlogCategoryTranslationCreate) SetID(u uuid.UUID) *BlogCategoryTranslationCreate {
 	bctc.mutation.SetID(u)
@@ -152,10 +138,6 @@ func (bctc *BlogCategoryTranslationCreate) defaults() {
 		v := blogcategorytranslation.DefaultCreatedAt()
 		bctc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := bctc.mutation.UpdatedAt(); !ok {
-		v := blogcategorytranslation.DefaultUpdatedAt()
-		bctc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := bctc.mutation.ID(); !ok {
 		v := blogcategorytranslation.DefaultID()
 		bctc.mutation.SetID(v)
@@ -185,9 +167,6 @@ func (bctc *BlogCategoryTranslationCreate) check() error {
 	}
 	if _, ok := bctc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BlogCategoryTranslation.created_at"`)}
-	}
-	if _, ok := bctc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "BlogCategoryTranslation.updated_at"`)}
 	}
 	if len(bctc.mutation.BlogCategoryIDs()) == 0 {
 		return &ValidationError{Name: "blog_category", err: errors.New(`ent: missing required edge "BlogCategoryTranslation.blog_category"`)}
@@ -241,10 +220,6 @@ func (bctc *BlogCategoryTranslationCreate) createSpec() (*BlogCategoryTranslatio
 	if value, ok := bctc.mutation.CreatedAt(); ok {
 		_spec.SetField(blogcategorytranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := bctc.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogcategorytranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := bctc.mutation.BlogCategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

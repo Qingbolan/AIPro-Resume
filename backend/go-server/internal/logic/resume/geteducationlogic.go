@@ -29,6 +29,7 @@ func NewGetEducationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetE
 func (l *GetEducationLogic) GetEducation(req *types.ResumeRequest) (resp []types.Education, err error) {
 	educations, err := l.svcCtx.DB.Education.Query().
 		WithUser().
+		WithDetails().
 		Order(ent.Asc(education.FieldSortOrder)).
 		All(l.ctx)
 	if err != nil {
@@ -51,6 +52,14 @@ func (l *GetEducationLogic) GetEducation(req *types.ResumeRequest) (resp []types
 			userID = edu.Edges.User.ID.String()
 		}
 
+		// Get details from edge relationship
+		var details []string
+		if edu.Edges.Details != nil {
+			for _, detail := range edu.Edges.Details {
+				details = append(details, detail.DetailText)
+			}
+		}
+
 		result = append(result, types.Education{
 			ID:                 edu.ID.String(),
 			UserID:             userID,
@@ -64,6 +73,7 @@ func (l *GetEducationLogic) GetEducation(req *types.ResumeRequest) (resp []types
 			Location:           edu.Location,
 			InstitutionWebsite: edu.InstitutionWebsite,
 			InstitutionLogoURL: edu.InstitutionLogoURL,
+			Details:            details,
 			SortOrder:          edu.SortOrder,
 			CreatedAt:          edu.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:          edu.UpdatedAt.Format("2006-01-02 15:04:05"),

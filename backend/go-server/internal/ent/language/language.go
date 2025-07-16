@@ -54,6 +54,8 @@ const (
 	EdgePublicationTranslations = "publication_translations"
 	// EdgeAwardTranslations holds the string denoting the award_translations edge name in mutations.
 	EdgeAwardTranslations = "award_translations"
+	// EdgeRecentUpdateTranslations holds the string denoting the recent_update_translations edge name in mutations.
+	EdgeRecentUpdateTranslations = "recent_update_translations"
 	// PersonalInfoTranslationFieldID holds the string denoting the ID field of the PersonalInfoTranslation.
 	PersonalInfoTranslationFieldID = "id"
 	// EducationTranslationFieldID holds the string denoting the ID field of the EducationTranslation.
@@ -86,6 +88,8 @@ const (
 	PublicationTranslationFieldID = "id"
 	// AwardTranslationFieldID holds the string denoting the ID field of the AwardTranslation.
 	AwardTranslationFieldID = "id"
+	// RecentUpdateTranslationFieldID holds the string denoting the ID field of the RecentUpdateTranslation.
+	RecentUpdateTranslationFieldID = "id"
 	// Table holds the table name of the language in the database.
 	Table = "languages"
 	// PersonalInfoTranslationsTable is the table that holds the personal_info_translations relation/edge.
@@ -200,6 +204,13 @@ const (
 	AwardTranslationsInverseTable = "award_translations"
 	// AwardTranslationsColumn is the table column denoting the award_translations relation/edge.
 	AwardTranslationsColumn = "language_code"
+	// RecentUpdateTranslationsTable is the table that holds the recent_update_translations relation/edge.
+	RecentUpdateTranslationsTable = "recent_update_translations"
+	// RecentUpdateTranslationsInverseTable is the table name for the RecentUpdateTranslation entity.
+	// It exists in this package in order to avoid circular dependency with the "recentupdatetranslation" package.
+	RecentUpdateTranslationsInverseTable = "recent_update_translations"
+	// RecentUpdateTranslationsColumn is the table column denoting the recent_update_translations relation/edge.
+	RecentUpdateTranslationsColumn = "language_code"
 )
 
 // Columns holds all SQL columns for language fields.
@@ -485,6 +496,20 @@ func ByAwardTranslations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 		sqlgraph.OrderByNeighborTerms(s, newAwardTranslationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByRecentUpdateTranslationsCount orders the results by recent_update_translations count.
+func ByRecentUpdateTranslationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRecentUpdateTranslationsStep(), opts...)
+	}
+}
+
+// ByRecentUpdateTranslations orders the results by recent_update_translations terms.
+func ByRecentUpdateTranslations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRecentUpdateTranslationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPersonalInfoTranslationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -595,5 +620,12 @@ func newAwardTranslationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AwardTranslationsInverseTable, AwardTranslationFieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AwardTranslationsTable, AwardTranslationsColumn),
+	)
+}
+func newRecentUpdateTranslationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RecentUpdateTranslationsInverseTable, RecentUpdateTranslationFieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RecentUpdateTranslationsTable, RecentUpdateTranslationsColumn),
 	)
 }

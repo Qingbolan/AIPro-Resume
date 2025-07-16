@@ -55,20 +55,6 @@ func (wedtc *WorkExperienceDetailTranslationCreate) SetNillableCreatedAt(t *time
 	return wedtc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (wedtc *WorkExperienceDetailTranslationCreate) SetUpdatedAt(t time.Time) *WorkExperienceDetailTranslationCreate {
-	wedtc.mutation.SetUpdatedAt(t)
-	return wedtc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (wedtc *WorkExperienceDetailTranslationCreate) SetNillableUpdatedAt(t *time.Time) *WorkExperienceDetailTranslationCreate {
-	if t != nil {
-		wedtc.SetUpdatedAt(*t)
-	}
-	return wedtc
-}
-
 // SetID sets the "id" field.
 func (wedtc *WorkExperienceDetailTranslationCreate) SetID(u uuid.UUID) *WorkExperienceDetailTranslationCreate {
 	wedtc.mutation.SetID(u)
@@ -138,10 +124,6 @@ func (wedtc *WorkExperienceDetailTranslationCreate) defaults() {
 		v := workexperiencedetailtranslation.DefaultCreatedAt()
 		wedtc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := wedtc.mutation.UpdatedAt(); !ok {
-		v := workexperiencedetailtranslation.DefaultUpdatedAt()
-		wedtc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := wedtc.mutation.ID(); !ok {
 		v := workexperiencedetailtranslation.DefaultID()
 		wedtc.mutation.SetID(v)
@@ -171,9 +153,6 @@ func (wedtc *WorkExperienceDetailTranslationCreate) check() error {
 	}
 	if _, ok := wedtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "WorkExperienceDetailTranslation.created_at"`)}
-	}
-	if _, ok := wedtc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "WorkExperienceDetailTranslation.updated_at"`)}
 	}
 	if len(wedtc.mutation.WorkExperienceDetailIDs()) == 0 {
 		return &ValidationError{Name: "work_experience_detail", err: errors.New(`ent: missing required edge "WorkExperienceDetailTranslation.work_experience_detail"`)}
@@ -223,10 +202,6 @@ func (wedtc *WorkExperienceDetailTranslationCreate) createSpec() (*WorkExperienc
 	if value, ok := wedtc.mutation.CreatedAt(); ok {
 		_spec.SetField(workexperiencedetailtranslation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := wedtc.mutation.UpdatedAt(); ok {
-		_spec.SetField(workexperiencedetailtranslation.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := wedtc.mutation.WorkExperienceDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

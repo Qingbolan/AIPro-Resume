@@ -79,7 +79,7 @@ func (Education) Fields() []ent.Field {
 func (Education) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("education").
+			Ref("educations").
 			Field("user_id").
 			Required().
 			Unique(),

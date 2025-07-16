@@ -49,7 +49,7 @@ func (BlogPost) Fields() []ent.Field {
 		field.Text("content").
 			NotEmpty(),
 		field.Enum("content_type").
-			Values("article", "vlog", "podcast", "tutorial").
+			Values("article", "vlog", "episode").
 			Default("article"),
 		field.Enum("status").
 			Values("draft", "published", "archived").

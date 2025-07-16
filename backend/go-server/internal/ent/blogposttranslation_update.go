@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/blogposttranslation"
 	"silan-backend/internal/ent/language"
 	"silan-backend/internal/ent/predicate"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -107,12 +106,6 @@ func (bptu *BlogPostTranslationUpdate) SetNillableContent(s *string) *BlogPostTr
 	return bptu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bptu *BlogPostTranslationUpdate) SetUpdatedAt(t time.Time) *BlogPostTranslationUpdate {
-	bptu.mutation.SetUpdatedAt(t)
-	return bptu
-}
-
 // SetBlogPost sets the "blog_post" edge to the BlogPost entity.
 func (bptu *BlogPostTranslationUpdate) SetBlogPost(b *BlogPost) *BlogPostTranslationUpdate {
 	return bptu.SetBlogPostID(b.ID)
@@ -148,7 +141,6 @@ func (bptu *BlogPostTranslationUpdate) ClearLanguage() *BlogPostTranslationUpdat
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bptu *BlogPostTranslationUpdate) Save(ctx context.Context) (int, error) {
-	bptu.defaults()
 	return withHooks(ctx, bptu.sqlSave, bptu.mutation, bptu.hooks)
 }
 
@@ -171,14 +163,6 @@ func (bptu *BlogPostTranslationUpdate) Exec(ctx context.Context) error {
 func (bptu *BlogPostTranslationUpdate) ExecX(ctx context.Context) {
 	if err := bptu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bptu *BlogPostTranslationUpdate) defaults() {
-	if _, ok := bptu.mutation.UpdatedAt(); !ok {
-		v := blogposttranslation.UpdateDefaultUpdatedAt()
-		bptu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -231,9 +215,6 @@ func (bptu *BlogPostTranslationUpdate) sqlSave(ctx context.Context) (n int, err 
 	}
 	if value, ok := bptu.mutation.Content(); ok {
 		_spec.SetField(blogposttranslation.FieldContent, field.TypeString, value)
-	}
-	if value, ok := bptu.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogposttranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bptu.mutation.BlogPostCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -389,12 +370,6 @@ func (bptuo *BlogPostTranslationUpdateOne) SetNillableContent(s *string) *BlogPo
 	return bptuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (bptuo *BlogPostTranslationUpdateOne) SetUpdatedAt(t time.Time) *BlogPostTranslationUpdateOne {
-	bptuo.mutation.SetUpdatedAt(t)
-	return bptuo
-}
-
 // SetBlogPost sets the "blog_post" edge to the BlogPost entity.
 func (bptuo *BlogPostTranslationUpdateOne) SetBlogPost(b *BlogPost) *BlogPostTranslationUpdateOne {
 	return bptuo.SetBlogPostID(b.ID)
@@ -443,7 +418,6 @@ func (bptuo *BlogPostTranslationUpdateOne) Select(field string, fields ...string
 
 // Save executes the query and returns the updated BlogPostTranslation entity.
 func (bptuo *BlogPostTranslationUpdateOne) Save(ctx context.Context) (*BlogPostTranslation, error) {
-	bptuo.defaults()
 	return withHooks(ctx, bptuo.sqlSave, bptuo.mutation, bptuo.hooks)
 }
 
@@ -466,14 +440,6 @@ func (bptuo *BlogPostTranslationUpdateOne) Exec(ctx context.Context) error {
 func (bptuo *BlogPostTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := bptuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (bptuo *BlogPostTranslationUpdateOne) defaults() {
-	if _, ok := bptuo.mutation.UpdatedAt(); !ok {
-		v := blogposttranslation.UpdateDefaultUpdatedAt()
-		bptuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -543,9 +509,6 @@ func (bptuo *BlogPostTranslationUpdateOne) sqlSave(ctx context.Context) (_node *
 	}
 	if value, ok := bptuo.mutation.Content(); ok {
 		_spec.SetField(blogposttranslation.FieldContent, field.TypeString, value)
-	}
-	if value, ok := bptuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(blogposttranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if bptuo.mutation.BlogPostCleared() {
 		edge := &sqlgraph.EdgeSpec{

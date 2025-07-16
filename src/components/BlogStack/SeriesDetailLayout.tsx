@@ -9,6 +9,7 @@ import {
   User,
   Calendar,
   ChevronRight,
+  ChevronLeft,
   Eye,
   Heart,
   Share2,
@@ -217,14 +218,22 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
   // Load series data
   useEffect(() => {
     const loadSeriesData = async () => {
-      if (!post.seriesId) return;
+      console.log('🔍 SeriesDetailLayout - post object:', post);
+      console.log('🔍 SeriesDetailLayout - post.seriesId:', post.seriesId);
+      
+      if (!post.seriesId) {
+        console.log('❌ No seriesId found, skipping series data load');
+        return;
+      }
 
       try {
+        console.log('🚀 Loading series data for seriesId:', post.seriesId);
         setLoading(true);
         const data = await fetchSeriesData(post.seriesId, language as 'en' | 'zh');
+        console.log('✅ Series data loaded:', data);
         setSeriesData(data);
       } catch (error) {
-        console.error('Failed to load series data:', error);
+        console.error('❌ Failed to load series data:', error);
       } finally {
         setLoading(false);
       }
@@ -303,14 +312,23 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
     if (!post.seriesId) return;
 
     try {
-      const updatedSeries = await setCurrentEpisode(post.seriesId, episodeId, language as 'en' | 'zh');
-      setSeriesData(updatedSeries);
-
-      // Navigate to the episode (in a real app, this would change the route)
-      // For now, we'll just update the current episode display
-      console.log(`Navigating to episode: ${episodeId}`);
+      // Navigate to the episode page
+      navigate(`/blog/${episodeId}`);
+      
+      // Optionally update series data to reflect the new current episode
+      // This is primarily for UI feedback, the actual navigation will load the new page
+      if (seriesData) {
+        const updatedEpisodes = seriesData.episodes.map(ep => ({
+          ...ep,
+          current: ep.id === episodeId
+        }));
+        setSeriesData({
+          ...seriesData,
+          episodes: updatedEpisodes
+        });
+      }
     } catch (error) {
-      console.error('Failed to switch episode:', error);
+      console.error('Failed to navigate to episode:', error);
     }
   };
 
@@ -613,6 +631,71 @@ const SeriesDetailLayout: React.FC<SeriesDetailLayoutProps> = ({
                 onCancelAnnotation={onCancelAnnotation}
               />
             </div>
+
+            {/* Series Navigation */}
+            {seriesData && seriesData.episodes.length > 1 && (
+              <div className="mt-12 pt-8 border-t border-theme-border">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    {(() => {
+                      const currentIndex = seriesData.episodes.findIndex(ep => ep.id === post.id);
+                      const previousEpisode = currentIndex > 0 ? seriesData.episodes[currentIndex - 1] : null;
+                      
+                      return previousEpisode ? (
+                        <motion.button
+                          onClick={() => handleEpisodeClick(previousEpisode.id)}
+                          className="flex items-center gap-3 p-4 bg-theme-surface rounded-lg border border-theme-border hover:border-theme-primary transition-colors text-left group"
+                          whileHover={{ x: -2 }}
+                        >
+                          <ChevronLeft size={20} className="text-theme-secondary group-hover:text-theme-primary flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm text-theme-secondary mb-1">
+                              {language === 'en' ? 'Previous Episode' : '上一集'}
+                            </p>
+                            <p className="font-medium text-theme-primary truncate">
+                              {previousEpisode.title}
+                            </p>
+                            <p className="text-xs text-theme-secondary mt-1">
+                              {language === 'en' ? `Episode ${previousEpisode.order}` : `第${previousEpisode.order}集`}
+                              {previousEpisode.duration && ` • ${previousEpisode.duration}`}
+                            </p>
+                          </div>
+                        </motion.button>
+                      ) : null;
+                    })()}
+                  </div>
+
+                  <div className="flex-1 flex justify-end">
+                    {(() => {
+                      const currentIndex = seriesData.episodes.findIndex(ep => ep.id === post.id);
+                      const nextEpisode = currentIndex < seriesData.episodes.length - 1 ? seriesData.episodes[currentIndex + 1] : null;
+                      
+                      return nextEpisode ? (
+                        <motion.button
+                          onClick={() => handleEpisodeClick(nextEpisode.id)}
+                          className="flex items-center gap-3 p-4 bg-theme-surface rounded-lg border border-theme-border hover:border-theme-primary transition-colors text-right group"
+                          whileHover={{ x: 2 }}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm text-theme-secondary mb-1">
+                              {language === 'en' ? 'Next Episode' : '下一集'}
+                            </p>
+                            <p className="font-medium text-theme-primary truncate">
+                              {nextEpisode.title}
+                            </p>
+                            <p className="text-xs text-theme-secondary mt-1">
+                              {language === 'en' ? `Episode ${nextEpisode.order}` : `第${nextEpisode.order}集`}
+                              {nextEpisode.duration && ` • ${nextEpisode.duration}`}
+                            </p>
+                          </div>
+                          <ChevronRight size={20} className="text-theme-secondary group-hover:text-theme-primary flex-shrink-0" />
+                        </motion.button>
+                      ) : null;
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

@@ -29,6 +29,7 @@ func NewGetWorkExperienceLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *GetWorkExperienceLogic) GetWorkExperience(req *types.ResumeRequest) (resp []types.WorkExperience, err error) {
 	workExperiences, err := l.svcCtx.DB.WorkExperience.Query().
 		WithUser().
+		WithDetails().
 		Order(ent.Asc(workexperience.FieldSortOrder)).
 		All(l.ctx)
 	if err != nil {
@@ -51,6 +52,14 @@ func (l *GetWorkExperienceLogic) GetWorkExperience(req *types.ResumeRequest) (re
 			userID = we.Edges.User.ID.String()
 		}
 
+		// Get details from edge relationship
+		var details []string
+		if we.Edges.Details != nil {
+			for _, detail := range we.Edges.Details {
+				details = append(details, detail.DetailText)
+			}
+		}
+
 		result = append(result, types.WorkExperience{
 			ID:             we.ID.String(),
 			UserID:         userID,
@@ -62,6 +71,7 @@ func (l *GetWorkExperienceLogic) GetWorkExperience(req *types.ResumeRequest) (re
 			Location:       we.Location,
 			CompanyWebsite: we.CompanyWebsite,
 			CompanyLogoURL: we.CompanyLogoURL,
+			Details:        details,
 			SortOrder:      we.SortOrder,
 			CreatedAt:      we.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:      we.UpdatedAt.Format("2006-01-02 15:04:05"),

@@ -54,20 +54,6 @@ func (prc *ProjectRelationshipCreate) SetNillableCreatedAt(t *time.Time) *Projec
 	return prc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (prc *ProjectRelationshipCreate) SetUpdatedAt(t time.Time) *ProjectRelationshipCreate {
-	prc.mutation.SetUpdatedAt(t)
-	return prc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (prc *ProjectRelationshipCreate) SetNillableUpdatedAt(t *time.Time) *ProjectRelationshipCreate {
-	if t != nil {
-		prc.SetUpdatedAt(*t)
-	}
-	return prc
-}
-
 // SetID sets the "id" field.
 func (prc *ProjectRelationshipCreate) SetID(u uuid.UUID) *ProjectRelationshipCreate {
 	prc.mutation.SetID(u)
@@ -131,10 +117,6 @@ func (prc *ProjectRelationshipCreate) defaults() {
 		v := projectrelationship.DefaultCreatedAt()
 		prc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := prc.mutation.UpdatedAt(); !ok {
-		v := projectrelationship.DefaultUpdatedAt()
-		prc.mutation.SetUpdatedAt(v)
-	}
 	if _, ok := prc.mutation.ID(); !ok {
 		v := projectrelationship.DefaultID()
 		prc.mutation.SetID(v)
@@ -159,9 +141,6 @@ func (prc *ProjectRelationshipCreate) check() error {
 	}
 	if _, ok := prc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ProjectRelationship.created_at"`)}
-	}
-	if _, ok := prc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ProjectRelationship.updated_at"`)}
 	}
 	if len(prc.mutation.SourceProjectIDs()) == 0 {
 		return &ValidationError{Name: "source_project", err: errors.New(`ent: missing required edge "ProjectRelationship.source_project"`)}
@@ -211,10 +190,6 @@ func (prc *ProjectRelationshipCreate) createSpec() (*ProjectRelationship, *sqlgr
 	if value, ok := prc.mutation.CreatedAt(); ok {
 		_spec.SetField(projectrelationship.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := prc.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectrelationship.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := prc.mutation.SourceProjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

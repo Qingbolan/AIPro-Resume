@@ -10,7 +10,6 @@ import (
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/projectimage"
 	"silan-backend/internal/ent/projectimagetranslation"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -99,12 +98,6 @@ func (pitu *ProjectImageTranslationUpdate) ClearCaption() *ProjectImageTranslati
 	return pitu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pitu *ProjectImageTranslationUpdate) SetUpdatedAt(t time.Time) *ProjectImageTranslationUpdate {
-	pitu.mutation.SetUpdatedAt(t)
-	return pitu
-}
-
 // SetProjectImage sets the "project_image" edge to the ProjectImage entity.
 func (pitu *ProjectImageTranslationUpdate) SetProjectImage(p *ProjectImage) *ProjectImageTranslationUpdate {
 	return pitu.SetProjectImageID(p.ID)
@@ -140,7 +133,6 @@ func (pitu *ProjectImageTranslationUpdate) ClearLanguage() *ProjectImageTranslat
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pitu *ProjectImageTranslationUpdate) Save(ctx context.Context) (int, error) {
-	pitu.defaults()
 	return withHooks(ctx, pitu.sqlSave, pitu.mutation, pitu.hooks)
 }
 
@@ -163,14 +155,6 @@ func (pitu *ProjectImageTranslationUpdate) Exec(ctx context.Context) error {
 func (pitu *ProjectImageTranslationUpdate) ExecX(ctx context.Context) {
 	if err := pitu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pitu *ProjectImageTranslationUpdate) defaults() {
-	if _, ok := pitu.mutation.UpdatedAt(); !ok {
-		v := projectimagetranslation.UpdateDefaultUpdatedAt()
-		pitu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -218,9 +202,6 @@ func (pitu *ProjectImageTranslationUpdate) sqlSave(ctx context.Context) (n int, 
 	}
 	if pitu.mutation.CaptionCleared() {
 		_spec.ClearField(projectimagetranslation.FieldCaption, field.TypeString)
-	}
-	if value, ok := pitu.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectimagetranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pitu.mutation.ProjectImageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -368,12 +349,6 @@ func (pituo *ProjectImageTranslationUpdateOne) ClearCaption() *ProjectImageTrans
 	return pituo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (pituo *ProjectImageTranslationUpdateOne) SetUpdatedAt(t time.Time) *ProjectImageTranslationUpdateOne {
-	pituo.mutation.SetUpdatedAt(t)
-	return pituo
-}
-
 // SetProjectImage sets the "project_image" edge to the ProjectImage entity.
 func (pituo *ProjectImageTranslationUpdateOne) SetProjectImage(p *ProjectImage) *ProjectImageTranslationUpdateOne {
 	return pituo.SetProjectImageID(p.ID)
@@ -422,7 +397,6 @@ func (pituo *ProjectImageTranslationUpdateOne) Select(field string, fields ...st
 
 // Save executes the query and returns the updated ProjectImageTranslation entity.
 func (pituo *ProjectImageTranslationUpdateOne) Save(ctx context.Context) (*ProjectImageTranslation, error) {
-	pituo.defaults()
 	return withHooks(ctx, pituo.sqlSave, pituo.mutation, pituo.hooks)
 }
 
@@ -445,14 +419,6 @@ func (pituo *ProjectImageTranslationUpdateOne) Exec(ctx context.Context) error {
 func (pituo *ProjectImageTranslationUpdateOne) ExecX(ctx context.Context) {
 	if err := pituo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (pituo *ProjectImageTranslationUpdateOne) defaults() {
-	if _, ok := pituo.mutation.UpdatedAt(); !ok {
-		v := projectimagetranslation.UpdateDefaultUpdatedAt()
-		pituo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -517,9 +483,6 @@ func (pituo *ProjectImageTranslationUpdateOne) sqlSave(ctx context.Context) (_no
 	}
 	if pituo.mutation.CaptionCleared() {
 		_spec.ClearField(projectimagetranslation.FieldCaption, field.TypeString)
-	}
-	if value, ok := pituo.mutation.UpdatedAt(); ok {
-		_spec.SetField(projectimagetranslation.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pituo.mutation.ProjectImageCleared() {
 		edge := &sqlgraph.EdgeSpec{

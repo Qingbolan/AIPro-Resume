@@ -17,6 +17,16 @@ export {
   fetchProjectsWithPlans
 } from './plans/planApi';
 
+// Export API configuration and utilities
+export { API_CONFIG } from './config';
+export { 
+  get, 
+  post, 
+  put, 
+  del, 
+  formatLanguage 
+} from './utils';
+
 // Re-export types for convenience
 export type {
   ResumeData,
@@ -35,4 +45,12 @@ export type {
   ProjectDetail,
   AnnualPlan,
   GraphData
-} from '../types/api'; 
+} from '../types/api';
+
+// Export API configuration types
+export type {
+  BaseRequest,
+  PaginationRequest,
+  SearchRequest,
+  ListResponse
+} from './config'; 

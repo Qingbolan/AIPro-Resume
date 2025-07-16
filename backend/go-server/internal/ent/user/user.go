@@ -39,12 +39,12 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgePersonalInfo holds the string denoting the personal_info edge name in mutations.
-	EdgePersonalInfo = "personal_info"
-	// EdgeEducation holds the string denoting the education edge name in mutations.
-	EdgeEducation = "education"
-	// EdgeWorkExperience holds the string denoting the work_experience edge name in mutations.
-	EdgeWorkExperience = "work_experience"
+	// EdgePersonalInfos holds the string denoting the personal_infos edge name in mutations.
+	EdgePersonalInfos = "personal_infos"
+	// EdgeEducations holds the string denoting the educations edge name in mutations.
+	EdgeEducations = "educations"
+	// EdgeWorkExperiences holds the string denoting the work_experiences edge name in mutations.
+	EdgeWorkExperiences = "work_experiences"
 	// EdgeProjects holds the string denoting the projects edge name in mutations.
 	EdgeProjects = "projects"
 	// EdgeBlogPosts holds the string denoting the blog_posts edge name in mutations.
@@ -57,29 +57,31 @@ const (
 	EdgePublications = "publications"
 	// EdgeAwards holds the string denoting the awards edge name in mutations.
 	EdgeAwards = "awards"
+	// EdgeRecentUpdates holds the string denoting the recent_updates edge name in mutations.
+	EdgeRecentUpdates = "recent_updates"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PersonalInfoTable is the table that holds the personal_info relation/edge.
-	PersonalInfoTable = "personal_info"
-	// PersonalInfoInverseTable is the table name for the PersonalInfo entity.
+	// PersonalInfosTable is the table that holds the personal_infos relation/edge.
+	PersonalInfosTable = "personal_info"
+	// PersonalInfosInverseTable is the table name for the PersonalInfo entity.
 	// It exists in this package in order to avoid circular dependency with the "personalinfo" package.
-	PersonalInfoInverseTable = "personal_info"
-	// PersonalInfoColumn is the table column denoting the personal_info relation/edge.
-	PersonalInfoColumn = "user_id"
-	// EducationTable is the table that holds the education relation/edge.
-	EducationTable = "education"
-	// EducationInverseTable is the table name for the Education entity.
+	PersonalInfosInverseTable = "personal_info"
+	// PersonalInfosColumn is the table column denoting the personal_infos relation/edge.
+	PersonalInfosColumn = "user_id"
+	// EducationsTable is the table that holds the educations relation/edge.
+	EducationsTable = "education"
+	// EducationsInverseTable is the table name for the Education entity.
 	// It exists in this package in order to avoid circular dependency with the "education" package.
-	EducationInverseTable = "education"
-	// EducationColumn is the table column denoting the education relation/edge.
-	EducationColumn = "user_id"
-	// WorkExperienceTable is the table that holds the work_experience relation/edge.
-	WorkExperienceTable = "work_experience"
-	// WorkExperienceInverseTable is the table name for the WorkExperience entity.
+	EducationsInverseTable = "education"
+	// EducationsColumn is the table column denoting the educations relation/edge.
+	EducationsColumn = "user_id"
+	// WorkExperiencesTable is the table that holds the work_experiences relation/edge.
+	WorkExperiencesTable = "work_experience"
+	// WorkExperiencesInverseTable is the table name for the WorkExperience entity.
 	// It exists in this package in order to avoid circular dependency with the "workexperience" package.
-	WorkExperienceInverseTable = "work_experience"
-	// WorkExperienceColumn is the table column denoting the work_experience relation/edge.
-	WorkExperienceColumn = "user_id"
+	WorkExperiencesInverseTable = "work_experience"
+	// WorkExperiencesColumn is the table column denoting the work_experiences relation/edge.
+	WorkExperiencesColumn = "user_id"
 	// ProjectsTable is the table that holds the projects relation/edge.
 	ProjectsTable = "projects"
 	// ProjectsInverseTable is the table name for the Project entity.
@@ -122,6 +124,13 @@ const (
 	AwardsInverseTable = "awards"
 	// AwardsColumn is the table column denoting the awards relation/edge.
 	AwardsColumn = "user_id"
+	// RecentUpdatesTable is the table that holds the recent_updates relation/edge.
+	RecentUpdatesTable = "recent_updates"
+	// RecentUpdatesInverseTable is the table name for the RecentUpdate entity.
+	// It exists in this package in order to avoid circular dependency with the "recentupdate" package.
+	RecentUpdatesInverseTable = "recent_updates"
+	// RecentUpdatesColumn is the table column denoting the recent_updates relation/edge.
+	RecentUpdatesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -246,45 +255,45 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByPersonalInfoCount orders the results by personal_info count.
-func ByPersonalInfoCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPersonalInfosCount orders the results by personal_infos count.
+func ByPersonalInfosCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPersonalInfoStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPersonalInfosStep(), opts...)
 	}
 }
 
-// ByPersonalInfo orders the results by personal_info terms.
-func ByPersonalInfo(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPersonalInfos orders the results by personal_infos terms.
+func ByPersonalInfos(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPersonalInfoStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPersonalInfosStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByEducationCount orders the results by education count.
-func ByEducationCount(opts ...sql.OrderTermOption) OrderOption {
+// ByEducationsCount orders the results by educations count.
+func ByEducationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newEducationStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newEducationsStep(), opts...)
 	}
 }
 
-// ByEducation orders the results by education terms.
-func ByEducation(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByEducations orders the results by educations terms.
+func ByEducations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newEducationStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newEducationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByWorkExperienceCount orders the results by work_experience count.
-func ByWorkExperienceCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkExperiencesCount orders the results by work_experiences count.
+func ByWorkExperiencesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newWorkExperienceStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkExperiencesStep(), opts...)
 	}
 }
 
-// ByWorkExperience orders the results by work_experience terms.
-func ByWorkExperience(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkExperiences orders the results by work_experiences terms.
+func ByWorkExperiences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkExperienceStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkExperiencesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -371,25 +380,39 @@ func ByAwards(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAwardsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newPersonalInfoStep() *sqlgraph.Step {
+
+// ByRecentUpdatesCount orders the results by recent_updates count.
+func ByRecentUpdatesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRecentUpdatesStep(), opts...)
+	}
+}
+
+// ByRecentUpdates orders the results by recent_updates terms.
+func ByRecentUpdates(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRecentUpdatesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newPersonalInfosStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PersonalInfoInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PersonalInfoTable, PersonalInfoColumn),
+		sqlgraph.To(PersonalInfosInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PersonalInfosTable, PersonalInfosColumn),
 	)
 }
-func newEducationStep() *sqlgraph.Step {
+func newEducationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(EducationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, EducationTable, EducationColumn),
+		sqlgraph.To(EducationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, EducationsTable, EducationsColumn),
 	)
 }
-func newWorkExperienceStep() *sqlgraph.Step {
+func newWorkExperiencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkExperienceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WorkExperienceTable, WorkExperienceColumn),
+		sqlgraph.To(WorkExperiencesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkExperiencesTable, WorkExperiencesColumn),
 	)
 }
 func newProjectsStep() *sqlgraph.Step {
@@ -432,5 +455,12 @@ func newAwardsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AwardsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AwardsTable, AwardsColumn),
+	)
+}
+func newRecentUpdatesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RecentUpdatesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RecentUpdatesTable, RecentUpdatesColumn),
 	)
 }

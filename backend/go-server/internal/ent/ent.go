@@ -38,6 +38,8 @@ import (
 	"silan-backend/internal/ent/publication"
 	"silan-backend/internal/ent/publicationauthor"
 	"silan-backend/internal/ent/publicationtranslation"
+	"silan-backend/internal/ent/recentupdate"
+	"silan-backend/internal/ent/recentupdatetranslation"
 	"silan-backend/internal/ent/researchproject"
 	"silan-backend/internal/ent/researchprojectdetail"
 	"silan-backend/internal/ent/researchprojectdetailtranslation"
@@ -144,6 +146,8 @@ func checkColumn(table, column string) error {
 			publication.Table:                      publication.ValidColumn,
 			publicationauthor.Table:                publicationauthor.ValidColumn,
 			publicationtranslation.Table:           publicationtranslation.ValidColumn,
+			recentupdate.Table:                     recentupdate.ValidColumn,
+			recentupdatetranslation.Table:          recentupdatetranslation.ValidColumn,
 			researchproject.Table:                  researchproject.ValidColumn,
 			researchprojectdetail.Table:            researchprojectdetail.ValidColumn,
 			researchprojectdetailtranslation.Table: researchprojectdetailtranslation.ValidColumn,

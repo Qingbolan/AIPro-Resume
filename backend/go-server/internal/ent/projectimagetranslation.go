@@ -30,8 +30,6 @@ type ProjectImageTranslation struct {
 	Caption string `json:"caption,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProjectImageTranslationQuery when eager-loading is set.
 	Edges        ProjectImageTranslationEdges `json:"edges"`
@@ -78,7 +76,7 @@ func (*ProjectImageTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case projectimagetranslation.FieldLanguageCode, projectimagetranslation.FieldAltText, projectimagetranslation.FieldCaption:
 			values[i] = new(sql.NullString)
-		case projectimagetranslation.FieldCreatedAt, projectimagetranslation.FieldUpdatedAt:
+		case projectimagetranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case projectimagetranslation.FieldID, projectimagetranslation.FieldProjectImageID:
 			values[i] = new(uuid.UUID)
@@ -132,12 +130,6 @@ func (pit *ProjectImageTranslation) assignValues(columns []string, values []any)
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				pit.CreatedAt = value.Time
-			}
-		case projectimagetranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pit.UpdatedAt = value.Time
 			}
 		default:
 			pit.selectValues.Set(columns[i], values[i])
@@ -199,9 +191,6 @@ func (pit *ProjectImageTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pit.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(pit.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

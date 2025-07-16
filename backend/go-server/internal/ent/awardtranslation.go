@@ -34,8 +34,6 @@ type AwardTranslation struct {
 	Description string `json:"description,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AwardTranslationQuery when eager-loading is set.
 	Edges        AwardTranslationEdges `json:"edges"`
@@ -82,7 +80,7 @@ func (*AwardTranslation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case awardtranslation.FieldLanguageCode, awardtranslation.FieldTitle, awardtranslation.FieldAwardingOrganization, awardtranslation.FieldAwardType, awardtranslation.FieldDescription:
 			values[i] = new(sql.NullString)
-		case awardtranslation.FieldCreatedAt, awardtranslation.FieldUpdatedAt:
+		case awardtranslation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case awardtranslation.FieldID, awardtranslation.FieldAwardID:
 			values[i] = new(uuid.UUID)
@@ -148,12 +146,6 @@ func (at *AwardTranslation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				at.CreatedAt = value.Time
-			}
-		case awardtranslation.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				at.UpdatedAt = value.Time
 			}
 		default:
 			at.selectValues.Set(columns[i], values[i])
@@ -221,9 +213,6 @@ func (at *AwardTranslation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(at.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(at.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -52,8 +52,8 @@ const BlogDetail: React.FC = () => {
     navigate('/blog');
   };
 
-  // Use series layout for series type blogs
-  if (blog.type === 'series') {
+  // Use series layout if blog post belongs to a series
+  if (blog.seriesId) {
     return (
       <SeriesDetailLayout 
         post={blog} 

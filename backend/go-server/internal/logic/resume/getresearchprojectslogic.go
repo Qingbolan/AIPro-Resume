@@ -29,6 +29,7 @@ func NewGetResearchProjectsLogic(ctx context.Context, svcCtx *svc.ServiceContext
 func (l *GetResearchProjectsLogic) GetResearchProjects(req *types.ResumeRequest) (resp []types.ResearchProject, err error) {
 	researchProjects, err := l.svcCtx.DB.ResearchProject.Query().
 		WithUser().
+		WithDetails().
 		Order(ent.Asc(researchproject.FieldSortOrder)).
 		All(l.ctx)
 	if err != nil {
@@ -51,6 +52,14 @@ func (l *GetResearchProjectsLogic) GetResearchProjects(req *types.ResumeRequest)
 			userID = rp.Edges.User.ID.String()
 		}
 
+		// Get details from edge relationship
+		var details []string
+		if rp.Edges.Details != nil {
+			for _, detail := range rp.Edges.Details {
+				details = append(details, detail.DetailText)
+			}
+		}
+
 		result = append(result, types.ResearchProject{
 			ID:          rp.ID.String(),
 			UserID:      userID,
@@ -59,7 +68,7 @@ func (l *GetResearchProjectsLogic) GetResearchProjects(req *types.ResumeRequest)
 			Location:    rp.Location,
 			StartDate:   startDate,
 			EndDate:     endDate,
-			Details:     []string{}, // Details field not in schema
+			Details:     details,
 			SortOrder:   rp.SortOrder,
 			CreatedAt:   rp.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:   rp.UpdatedAt.Format("2006-01-02 15:04:05"),
