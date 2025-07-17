@@ -12,6 +12,7 @@ import (
 	"silan-backend/internal/ent/blogposttranslation"
 	"silan-backend/internal/ent/blogseries"
 	"silan-backend/internal/ent/blogtag"
+	"silan-backend/internal/ent/idea"
 	"silan-backend/internal/ent/predicate"
 	"silan-backend/internal/ent/user"
 	"time"
@@ -86,6 +87,26 @@ func (bpu *BlogPostUpdate) SetNillableSeriesID(u *uuid.UUID) *BlogPostUpdate {
 // ClearSeriesID clears the value of the "series_id" field.
 func (bpu *BlogPostUpdate) ClearSeriesID() *BlogPostUpdate {
 	bpu.mutation.ClearSeriesID()
+	return bpu
+}
+
+// SetIdeasID sets the "ideas_id" field.
+func (bpu *BlogPostUpdate) SetIdeasID(u uuid.UUID) *BlogPostUpdate {
+	bpu.mutation.SetIdeasID(u)
+	return bpu
+}
+
+// SetNillableIdeasID sets the "ideas_id" field if the given value is not nil.
+func (bpu *BlogPostUpdate) SetNillableIdeasID(u *uuid.UUID) *BlogPostUpdate {
+	if u != nil {
+		bpu.SetIdeasID(*u)
+	}
+	return bpu
+}
+
+// ClearIdeasID clears the value of the "ideas_id" field.
+func (bpu *BlogPostUpdate) ClearIdeasID() *BlogPostUpdate {
+	bpu.mutation.ClearIdeasID()
 	return bpu
 }
 
@@ -371,6 +392,11 @@ func (bpu *BlogPostUpdate) SetSeries(b *BlogSeries) *BlogPostUpdate {
 	return bpu.SetSeriesID(b.ID)
 }
 
+// SetIdeas sets the "ideas" edge to the Idea entity.
+func (bpu *BlogPostUpdate) SetIdeas(i *Idea) *BlogPostUpdate {
+	return bpu.SetIdeasID(i.ID)
+}
+
 // AddTagIDs adds the "tags" edge to the BlogTag entity by IDs.
 func (bpu *BlogPostUpdate) AddTagIDs(ids ...uuid.UUID) *BlogPostUpdate {
 	bpu.mutation.AddTagIDs(ids...)
@@ -436,6 +462,12 @@ func (bpu *BlogPostUpdate) ClearCategory() *BlogPostUpdate {
 // ClearSeries clears the "series" edge to the BlogSeries entity.
 func (bpu *BlogPostUpdate) ClearSeries() *BlogPostUpdate {
 	bpu.mutation.ClearSeries()
+	return bpu
+}
+
+// ClearIdeas clears the "ideas" edge to the Idea entity.
+func (bpu *BlogPostUpdate) ClearIdeas() *BlogPostUpdate {
+	bpu.mutation.ClearIdeas()
 	return bpu
 }
 
@@ -750,6 +782,35 @@ func (bpu *BlogPostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if bpu.mutation.IdeasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   blogpost.IdeasTable,
+			Columns: []string{blogpost.IdeasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(idea.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bpu.mutation.IdeasIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   blogpost.IdeasTable,
+			Columns: []string{blogpost.IdeasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(idea.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if bpu.mutation.TagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -968,6 +1029,26 @@ func (bpuo *BlogPostUpdateOne) SetNillableSeriesID(u *uuid.UUID) *BlogPostUpdate
 // ClearSeriesID clears the value of the "series_id" field.
 func (bpuo *BlogPostUpdateOne) ClearSeriesID() *BlogPostUpdateOne {
 	bpuo.mutation.ClearSeriesID()
+	return bpuo
+}
+
+// SetIdeasID sets the "ideas_id" field.
+func (bpuo *BlogPostUpdateOne) SetIdeasID(u uuid.UUID) *BlogPostUpdateOne {
+	bpuo.mutation.SetIdeasID(u)
+	return bpuo
+}
+
+// SetNillableIdeasID sets the "ideas_id" field if the given value is not nil.
+func (bpuo *BlogPostUpdateOne) SetNillableIdeasID(u *uuid.UUID) *BlogPostUpdateOne {
+	if u != nil {
+		bpuo.SetIdeasID(*u)
+	}
+	return bpuo
+}
+
+// ClearIdeasID clears the value of the "ideas_id" field.
+func (bpuo *BlogPostUpdateOne) ClearIdeasID() *BlogPostUpdateOne {
+	bpuo.mutation.ClearIdeasID()
 	return bpuo
 }
 
@@ -1253,6 +1334,11 @@ func (bpuo *BlogPostUpdateOne) SetSeries(b *BlogSeries) *BlogPostUpdateOne {
 	return bpuo.SetSeriesID(b.ID)
 }
 
+// SetIdeas sets the "ideas" edge to the Idea entity.
+func (bpuo *BlogPostUpdateOne) SetIdeas(i *Idea) *BlogPostUpdateOne {
+	return bpuo.SetIdeasID(i.ID)
+}
+
 // AddTagIDs adds the "tags" edge to the BlogTag entity by IDs.
 func (bpuo *BlogPostUpdateOne) AddTagIDs(ids ...uuid.UUID) *BlogPostUpdateOne {
 	bpuo.mutation.AddTagIDs(ids...)
@@ -1318,6 +1404,12 @@ func (bpuo *BlogPostUpdateOne) ClearCategory() *BlogPostUpdateOne {
 // ClearSeries clears the "series" edge to the BlogSeries entity.
 func (bpuo *BlogPostUpdateOne) ClearSeries() *BlogPostUpdateOne {
 	bpuo.mutation.ClearSeries()
+	return bpuo
+}
+
+// ClearIdeas clears the "ideas" edge to the Idea entity.
+func (bpuo *BlogPostUpdateOne) ClearIdeas() *BlogPostUpdateOne {
+	bpuo.mutation.ClearIdeas()
 	return bpuo
 }
 
@@ -1655,6 +1747,35 @@ func (bpuo *BlogPostUpdateOne) sqlSave(ctx context.Context) (_node *BlogPost, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(blogseries.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bpuo.mutation.IdeasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   blogpost.IdeasTable,
+			Columns: []string{blogpost.IdeasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(idea.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bpuo.mutation.IdeasIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   blogpost.IdeasTable,
+			Columns: []string{blogpost.IdeasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(idea.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

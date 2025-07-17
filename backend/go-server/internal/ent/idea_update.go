@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"silan-backend/internal/ent/blogpost"
 	"silan-backend/internal/ent/idea"
 	"silan-backend/internal/ent/ideatranslation"
 	"silan-backend/internal/ent/predicate"
@@ -365,6 +366,21 @@ func (iu *IdeaUpdate) AddTranslations(i ...*IdeaTranslation) *IdeaUpdate {
 	return iu.AddTranslationIDs(ids...)
 }
 
+// AddBlogPostIDs adds the "blog_posts" edge to the BlogPost entity by IDs.
+func (iu *IdeaUpdate) AddBlogPostIDs(ids ...uuid.UUID) *IdeaUpdate {
+	iu.mutation.AddBlogPostIDs(ids...)
+	return iu
+}
+
+// AddBlogPosts adds the "blog_posts" edges to the BlogPost entity.
+func (iu *IdeaUpdate) AddBlogPosts(b ...*BlogPost) *IdeaUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return iu.AddBlogPostIDs(ids...)
+}
+
 // Mutation returns the IdeaMutation object of the builder.
 func (iu *IdeaUpdate) Mutation() *IdeaMutation {
 	return iu.mutation
@@ -395,6 +411,27 @@ func (iu *IdeaUpdate) RemoveTranslations(i ...*IdeaTranslation) *IdeaUpdate {
 		ids[j] = i[j].ID
 	}
 	return iu.RemoveTranslationIDs(ids...)
+}
+
+// ClearBlogPosts clears all "blog_posts" edges to the BlogPost entity.
+func (iu *IdeaUpdate) ClearBlogPosts() *IdeaUpdate {
+	iu.mutation.ClearBlogPosts()
+	return iu
+}
+
+// RemoveBlogPostIDs removes the "blog_posts" edge to BlogPost entities by IDs.
+func (iu *IdeaUpdate) RemoveBlogPostIDs(ids ...uuid.UUID) *IdeaUpdate {
+	iu.mutation.RemoveBlogPostIDs(ids...)
+	return iu
+}
+
+// RemoveBlogPosts removes "blog_posts" edges to BlogPost entities.
+func (iu *IdeaUpdate) RemoveBlogPosts(b ...*BlogPost) *IdeaUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return iu.RemoveBlogPostIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -624,6 +661,51 @@ func (iu *IdeaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ideatranslation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iu.mutation.BlogPostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.RemovedBlogPostsIDs(); len(nodes) > 0 && !iu.mutation.BlogPostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.BlogPostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -985,6 +1067,21 @@ func (iuo *IdeaUpdateOne) AddTranslations(i ...*IdeaTranslation) *IdeaUpdateOne 
 	return iuo.AddTranslationIDs(ids...)
 }
 
+// AddBlogPostIDs adds the "blog_posts" edge to the BlogPost entity by IDs.
+func (iuo *IdeaUpdateOne) AddBlogPostIDs(ids ...uuid.UUID) *IdeaUpdateOne {
+	iuo.mutation.AddBlogPostIDs(ids...)
+	return iuo
+}
+
+// AddBlogPosts adds the "blog_posts" edges to the BlogPost entity.
+func (iuo *IdeaUpdateOne) AddBlogPosts(b ...*BlogPost) *IdeaUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return iuo.AddBlogPostIDs(ids...)
+}
+
 // Mutation returns the IdeaMutation object of the builder.
 func (iuo *IdeaUpdateOne) Mutation() *IdeaMutation {
 	return iuo.mutation
@@ -1015,6 +1112,27 @@ func (iuo *IdeaUpdateOne) RemoveTranslations(i ...*IdeaTranslation) *IdeaUpdateO
 		ids[j] = i[j].ID
 	}
 	return iuo.RemoveTranslationIDs(ids...)
+}
+
+// ClearBlogPosts clears all "blog_posts" edges to the BlogPost entity.
+func (iuo *IdeaUpdateOne) ClearBlogPosts() *IdeaUpdateOne {
+	iuo.mutation.ClearBlogPosts()
+	return iuo
+}
+
+// RemoveBlogPostIDs removes the "blog_posts" edge to BlogPost entities by IDs.
+func (iuo *IdeaUpdateOne) RemoveBlogPostIDs(ids ...uuid.UUID) *IdeaUpdateOne {
+	iuo.mutation.RemoveBlogPostIDs(ids...)
+	return iuo
+}
+
+// RemoveBlogPosts removes "blog_posts" edges to BlogPost entities.
+func (iuo *IdeaUpdateOne) RemoveBlogPosts(b ...*BlogPost) *IdeaUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return iuo.RemoveBlogPostIDs(ids...)
 }
 
 // Where appends a list predicates to the IdeaUpdate builder.
@@ -1274,6 +1392,51 @@ func (iuo *IdeaUpdateOne) sqlSave(ctx context.Context) (_node *Idea, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ideatranslation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iuo.mutation.BlogPostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.RemovedBlogPostsIDs(); len(nodes) > 0 && !iuo.mutation.BlogPostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.BlogPostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

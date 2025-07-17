@@ -37,6 +37,9 @@ func (BlogPost) Fields() []ent.Field {
 		field.UUID("series_id", uuid.UUID{}).
 			Optional().
 			StorageKey("series_id"),
+		field.UUID("ideas_id", uuid.UUID{}).
+			Optional().
+			StorageKey("ideas_id"),
 		field.String("title").
 			MaxLen(500).
 			NotEmpty(),
@@ -95,6 +98,10 @@ func (BlogPost) Edges() []ent.Edge {
 		edge.From("series", BlogSeries.Type).
 			Ref("blog_posts").
 			Field("series_id").
+			Unique(),
+		edge.From("ideas", Idea.Type).
+			Ref("blog_posts").
+			Field("ideas_id").
 			Unique(),
 		edge.To("tags", BlogTag.Type).
 			Through("blog_post_tags", BlogPostTag.Type),

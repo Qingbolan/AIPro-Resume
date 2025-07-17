@@ -1,0 +1,21 @@
+{
+  "database": {
+    "type": "sqlite",
+    "sqlite": {
+      "path": "portfolio.db"
+    },
+    "settings": {
+      "create_tables": true,
+      "backup_before_sync": true,
+      "auto_migrate": true
+    }
+  },
+  "sync_options": {
+    "dry_run": false,
+    "create_tables": false,
+    "start_backend": false
+  },
+  "last_sync_time": "2025-07-17T09:46:57.867523",
+  "sync_count": 47,
+  "version": "1.0"
+}

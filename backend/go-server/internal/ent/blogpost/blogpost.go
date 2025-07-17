@@ -22,6 +22,8 @@ const (
 	FieldCategoryID = "category_id"
 	// FieldSeriesID holds the string denoting the series_id field in the database.
 	FieldSeriesID = "series_id"
+	// FieldIdeasID holds the string denoting the ideas_id field in the database.
+	FieldIdeasID = "ideas_id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldSlug holds the string denoting the slug field in the database.
@@ -60,6 +62,8 @@ const (
 	EdgeCategory = "category"
 	// EdgeSeries holds the string denoting the series edge name in mutations.
 	EdgeSeries = "series"
+	// EdgeIdeas holds the string denoting the ideas edge name in mutations.
+	EdgeIdeas = "ideas"
 	// EdgeTags holds the string denoting the tags edge name in mutations.
 	EdgeTags = "tags"
 	// EdgeTranslations holds the string denoting the translations edge name in mutations.
@@ -91,6 +95,13 @@ const (
 	SeriesInverseTable = "blog_series"
 	// SeriesColumn is the table column denoting the series relation/edge.
 	SeriesColumn = "series_id"
+	// IdeasTable is the table that holds the ideas relation/edge.
+	IdeasTable = "blog_posts"
+	// IdeasInverseTable is the table name for the Idea entity.
+	// It exists in this package in order to avoid circular dependency with the "idea" package.
+	IdeasInverseTable = "ideas"
+	// IdeasColumn is the table column denoting the ideas relation/edge.
+	IdeasColumn = "ideas_id"
 	// TagsTable is the table that holds the tags relation/edge. The primary key declared below.
 	TagsTable = "blog_post_tags"
 	// TagsInverseTable is the table name for the BlogTag entity.
@@ -125,6 +136,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldCategoryID,
 	FieldSeriesID,
+	FieldIdeasID,
 	FieldTitle,
 	FieldSlug,
 	FieldExcerpt,
@@ -263,6 +275,11 @@ func BySeriesID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSeriesID, opts...).ToFunc()
 }
 
+// ByIdeasID orders the results by the ideas_id field.
+func ByIdeasID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdeasID, opts...).ToFunc()
+}
+
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
@@ -364,6 +381,13 @@ func BySeriesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByIdeasField orders the results by ideas field.
+func ByIdeasField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIdeasStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByTagsCount orders the results by tags count.
 func ByTagsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -438,6 +462,13 @@ func newSeriesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SeriesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, SeriesTable, SeriesColumn),
+	)
+}
+func newIdeasStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IdeasInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, IdeasTable, IdeasColumn),
 	)
 }
 func newTagsStep() *sqlgraph.Step {

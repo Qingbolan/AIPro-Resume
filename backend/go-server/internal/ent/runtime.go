@@ -341,7 +341,7 @@ func init() {
 	blogpostFields := schema.BlogPost{}.Fields()
 	_ = blogpostFields
 	// blogpostDescTitle is the schema descriptor for title field.
-	blogpostDescTitle := blogpostFields[4].Descriptor()
+	blogpostDescTitle := blogpostFields[5].Descriptor()
 	// blogpost.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	blogpost.TitleValidator = func() func(string) error {
 		validators := blogpostDescTitle.Validators
@@ -359,7 +359,7 @@ func init() {
 		}
 	}()
 	// blogpostDescSlug is the schema descriptor for slug field.
-	blogpostDescSlug := blogpostFields[5].Descriptor()
+	blogpostDescSlug := blogpostFields[6].Descriptor()
 	// blogpost.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	blogpost.SlugValidator = func() func(string) error {
 		validators := blogpostDescSlug.Validators
@@ -377,35 +377,35 @@ func init() {
 		}
 	}()
 	// blogpostDescContent is the schema descriptor for content field.
-	blogpostDescContent := blogpostFields[7].Descriptor()
+	blogpostDescContent := blogpostFields[8].Descriptor()
 	// blogpost.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	blogpost.ContentValidator = blogpostDescContent.Validators[0].(func(string) error)
 	// blogpostDescIsFeatured is the schema descriptor for is_featured field.
-	blogpostDescIsFeatured := blogpostFields[10].Descriptor()
+	blogpostDescIsFeatured := blogpostFields[11].Descriptor()
 	// blogpost.DefaultIsFeatured holds the default value on creation for the is_featured field.
 	blogpost.DefaultIsFeatured = blogpostDescIsFeatured.Default.(bool)
 	// blogpostDescFeaturedImageURL is the schema descriptor for featured_image_url field.
-	blogpostDescFeaturedImageURL := blogpostFields[11].Descriptor()
+	blogpostDescFeaturedImageURL := blogpostFields[12].Descriptor()
 	// blogpost.FeaturedImageURLValidator is a validator for the "featured_image_url" field. It is called by the builders before save.
 	blogpost.FeaturedImageURLValidator = blogpostDescFeaturedImageURL.Validators[0].(func(string) error)
 	// blogpostDescViewCount is the schema descriptor for view_count field.
-	blogpostDescViewCount := blogpostFields[13].Descriptor()
+	blogpostDescViewCount := blogpostFields[14].Descriptor()
 	// blogpost.DefaultViewCount holds the default value on creation for the view_count field.
 	blogpost.DefaultViewCount = blogpostDescViewCount.Default.(int)
 	// blogpostDescLikeCount is the schema descriptor for like_count field.
-	blogpostDescLikeCount := blogpostFields[14].Descriptor()
+	blogpostDescLikeCount := blogpostFields[15].Descriptor()
 	// blogpost.DefaultLikeCount holds the default value on creation for the like_count field.
 	blogpost.DefaultLikeCount = blogpostDescLikeCount.Default.(int)
 	// blogpostDescCommentCount is the schema descriptor for comment_count field.
-	blogpostDescCommentCount := blogpostFields[15].Descriptor()
+	blogpostDescCommentCount := blogpostFields[16].Descriptor()
 	// blogpost.DefaultCommentCount holds the default value on creation for the comment_count field.
 	blogpost.DefaultCommentCount = blogpostDescCommentCount.Default.(int)
 	// blogpostDescCreatedAt is the schema descriptor for created_at field.
-	blogpostDescCreatedAt := blogpostFields[18].Descriptor()
+	blogpostDescCreatedAt := blogpostFields[19].Descriptor()
 	// blogpost.DefaultCreatedAt holds the default value on creation for the created_at field.
 	blogpost.DefaultCreatedAt = blogpostDescCreatedAt.Default.(func() time.Time)
 	// blogpostDescUpdatedAt is the schema descriptor for updated_at field.
-	blogpostDescUpdatedAt := blogpostFields[19].Descriptor()
+	blogpostDescUpdatedAt := blogpostFields[20].Descriptor()
 	// blogpost.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	blogpost.DefaultUpdatedAt = blogpostDescUpdatedAt.Default.(func() time.Time)
 	// blogpost.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

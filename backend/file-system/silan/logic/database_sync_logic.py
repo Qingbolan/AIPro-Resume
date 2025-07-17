@@ -1554,7 +1554,7 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                         with open(english_file, 'r', encoding='utf-8') as f:
                             english_post = fm.load(f)
                             english_title = english_post.metadata.get('title', '')
-                            english_slug = english_post.metadata.get('slug', self._generate_slug(english_title))
+                            english_slug = english_post.metadata.get('slug', self._generate_slug(str(english_title)))
                             
                             # Find the English blog post
                             english_blog_post = session.query(BlogPost).filter_by(slug=english_slug).first()

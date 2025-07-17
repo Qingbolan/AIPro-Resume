@@ -10,6 +10,7 @@ from .base import Base, TimestampMixin, UUID, generate_uuid
 
 if TYPE_CHECKING:
     from .user import User, Language
+    from .blog import BlogPost
 
 
 class IdeaStatus(enum.Enum):
@@ -55,7 +56,7 @@ class Idea(Base, TimestampMixin):
     # Relationships - matching Go schema edges
     user: Mapped["User"] = relationship(back_populates="ideas")
     translations: Mapped[List["IdeaTranslation"]] = relationship(back_populates="idea", cascade="all, delete-orphan")
-
+    blog_posts: Mapped[List["BlogPost"]] = relationship(back_populates="ideas")
 
 class IdeaTranslation(Base):
     __tablename__ = "idea_translations"

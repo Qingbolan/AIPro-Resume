@@ -171,6 +171,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "category_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "series_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "ideas_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// BlogPostsTable holds the schema information for the "blog_posts" table.
@@ -192,8 +193,14 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "blog_posts_users_blog_posts",
+				Symbol:     "blog_posts_ideas_blog_posts",
 				Columns:    []*schema.Column{BlogPostsColumns[19]},
+				RefColumns: []*schema.Column{IdeasColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "blog_posts_users_blog_posts",
+				Columns:    []*schema.Column{BlogPostsColumns[20]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1313,7 +1320,8 @@ func init() {
 	}
 	BlogPostsTable.ForeignKeys[0].RefTable = BlogCategoriesTable
 	BlogPostsTable.ForeignKeys[1].RefTable = BlogSeriesTable
-	BlogPostsTable.ForeignKeys[2].RefTable = UsersTable
+	BlogPostsTable.ForeignKeys[2].RefTable = IdeasTable
+	BlogPostsTable.ForeignKeys[3].RefTable = UsersTable
 	BlogPostsTable.Annotation = &entsql.Annotation{
 		Table: "blog_posts",
 	}
