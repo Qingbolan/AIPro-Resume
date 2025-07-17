@@ -10,8 +10,8 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from ..core.exceptions import DatabaseError, ValidationError
 from ..models import (
-    Base, User, BlogPost, BlogTag, BlogPostTag, 
-    BlogCategory, Project, ProjectTechnology,
+    Base, User, BlogPost, BlogTag, BlogPostTag, BlogPostTranslation,
+    BlogCategory, BlogSeries, BlogSeriesTranslation, Project, ProjectTechnology,
     ProjectDetail, Idea, RecentUpdate, PersonalInfo,
     Education, EducationDetail, WorkExperience, WorkExperienceDetail, Award, Publication, PublicationAuthor,
     ResearchProject, ResearchProjectDetail, SocialLink
@@ -340,7 +340,16 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
                 
                 # Sync based on content type
                 if content_type == 'blog':
-                    self._sync_blog_post(session, content_data, item)
+                    # Check if this is a translation (non-English content)
+                    frontmatter = content_data.get('frontmatter', content_data)
+                    language = frontmatter.get('language', 'en')
+                    
+                    if language != 'en':
+                        # This is translation content, find the main English post and add translation
+                        self._sync_blog_translation_only(session, content_data, item)
+                    else:
+                        # This is main English content, create/update the blog post
+                        self._sync_blog_post(session, content_data, item)
                 elif content_type == 'projects':
                     self._sync_project(session, content_data, item)
                 elif content_type == 'ideas':
@@ -468,6 +477,9 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
             
             if series_to_sync:
                 self._sync_blog_series(session, blog_post, series_to_sync)
+            
+            # Handle translations - check if this content has language variants
+            self._sync_blog_translations(session, blog_post, content_data, item)
             
         except Exception as e:
             raise DatabaseError(f"Failed to sync blog post: {e}")
@@ -1454,6 +1466,139 @@ class DatabaseSyncLogic(DatabaseSyncLogger):
         except Exception as e:
             self.error(f"Failed to display sync results: {e}")
     
+    def _sync_blog_translations(self, session: Session, blog_post: BlogPost, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
+        """Sync blog post translations for multi-language support"""
+        try:
+            # Check if this content has language information
+            frontmatter = content_data.get('frontmatter', content_data)
+            language = frontmatter.get('language', 'en')
+            
+            # If this is non-English content, handle it as a translation
+            if language != 'en':
+                # Import models
+                from ..models.blog import BlogPostTranslation
+                
+                # Extract translation data
+                title = frontmatter.get('title', '')
+                excerpt = frontmatter.get('excerpt', frontmatter.get('summary', frontmatter.get('description', '')))
+                content = content_data.get('content', '')
+                
+                if not title or not content:
+                    return
+                
+                # Check if translation already exists
+                existing_translation = session.query(BlogPostTranslation).filter_by(
+                    blog_post_id=blog_post.id,
+                    language_code=language
+                ).first()
+                
+                if existing_translation:
+                    # Update existing translation
+                    existing_translation.title = title
+                    existing_translation.excerpt = excerpt
+                    existing_translation.content = content
+                    self.debug(f"Updated {language} translation for blog post: {blog_post.slug}")
+                else:
+                    # Create new translation
+                    translation = BlogPostTranslation(
+                        blog_post_id=blog_post.id,
+                        language_code=language,
+                        title=title,
+                        excerpt=excerpt,
+                        content=content
+                    )
+                    session.add(translation)
+                    self.debug(f"Created {language} translation for blog post: {blog_post.slug}")
+                    
+        except Exception as e:
+            self.warning(f"Failed to sync translations for blog post {blog_post.slug}: {e}")
+
+    def _sync_blog_translation_only(self, session: Session, content_data: Dict[str, Any], item: Dict[str, Any]) -> None:
+        """Sync only translation for a blog post (find corresponding English post)"""
+        try:
+            # Import models
+            from ..models.blog import BlogPostTranslation
+            
+            frontmatter = content_data.get('frontmatter', content_data)
+            language = frontmatter.get('language', 'en')
+            
+            if language == 'en':
+                return  # This should not happen, but safety check
+            
+            # Extract the base name to find the corresponding English post
+            # Example: "vlog.ai-coding-tutorial-zh" -> "vlog.ai-coding-tutorial-en"
+            item_name = item.get('name', '')
+            if language in item_name:
+                # Remove language suffix and find English version
+                base_name = item_name.replace(f'-{language}', '-en')
+                
+                # Try to find the English blog post by matching name pattern
+                # We need to find a blog post that was created from the English version
+                # Since we don't have direct slug mapping, we'll try to match by similar titles/content
+                
+                # Get base title by removing language-specific parts
+                base_title = frontmatter.get('title', '').replace('Silan 个人网站：实时演示与教程', 'Silan Personal Website: Live Usage Demo and Tutorial')
+                
+                # Try to find English post by matching folder pattern
+                content_path = item.get('path', '')
+                if content_path:
+                    # Extract folder path and find English file
+                    from pathlib import Path
+                    path_obj = Path(content_path)
+                    folder_path = path_obj.parent
+                    english_file = folder_path / 'en.md'
+                    
+                    if english_file.exists():
+                        # Read English file to get its title for matching
+                        import frontmatter as fm
+                        with open(english_file, 'r', encoding='utf-8') as f:
+                            english_post = fm.load(f)
+                            english_title = english_post.metadata.get('title', '')
+                            english_slug = english_post.metadata.get('slug', self._generate_slug(str(english_title)))
+                            
+                            # Find the English blog post
+                            english_blog_post = session.query(BlogPost).filter_by(slug=english_slug).first()
+                            if not english_blog_post:
+                                # Try to find by title
+                                english_blog_post = session.query(BlogPost).filter_by(title=english_title).first()
+                            
+                            if english_blog_post:
+                                # Create or update translation
+                                title = frontmatter.get('title', '')
+                                excerpt = frontmatter.get('excerpt', frontmatter.get('summary', frontmatter.get('description', '')))
+                                content = content_data.get('content', '')
+                                
+                                existing_translation = session.query(BlogPostTranslation).filter_by(
+                                    blog_post_id=english_blog_post.id,
+                                    language_code=language
+                                ).first()
+                                
+                                if existing_translation:
+                                    # Update existing translation
+                                    existing_translation.title = title
+                                    existing_translation.excerpt = excerpt
+                                    existing_translation.content = content
+                                    self.debug(f"Updated {language} translation for blog post: {english_blog_post.slug}")
+                                else:
+                                    # Create new translation
+                                    translation = BlogPostTranslation(
+                                        blog_post_id=english_blog_post.id,
+                                        language_code=language,
+                                        title=title,
+                                        excerpt=excerpt,
+                                        content=content
+                                    )
+                                    session.add(translation)
+                                    self.debug(f"Created {language} translation for blog post: {english_blog_post.slug}")
+                                    
+                                session.commit()
+                                return
+                
+                self.warning(f"Could not find corresponding English blog post for {language} translation: {item_name}")
+            
+        except Exception as e:
+            self.warning(f"Failed to sync blog translation {item.get('name', '')}: {e}")
+
     def _cleanup_database(self) -> None:
         """Clean up database resources"""
         try:

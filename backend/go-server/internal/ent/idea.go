@@ -69,9 +69,11 @@ type IdeaEdges struct {
 	User *User `json:"user,omitempty"`
 	// Translations holds the value of the translations edge.
 	Translations []*IdeaTranslation `json:"translations,omitempty"`
+	// BlogPosts holds the value of the blog_posts edge.
+	BlogPosts []*BlogPost `json:"blog_posts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -92,6 +94,15 @@ func (e IdeaEdges) TranslationsOrErr() ([]*IdeaTranslation, error) {
 		return e.Translations, nil
 	}
 	return nil, &NotLoadedError{edge: "translations"}
+}
+
+// BlogPostsOrErr returns the BlogPosts value or an error if the edge
+// was not loaded in eager-loading.
+func (e IdeaEdges) BlogPostsOrErr() ([]*BlogPost, error) {
+	if e.loadedTypes[2] {
+		return e.BlogPosts, nil
+	}
+	return nil, &NotLoadedError{edge: "blog_posts"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -267,6 +278,11 @@ func (i *Idea) QueryUser() *UserQuery {
 // QueryTranslations queries the "translations" edge of the Idea entity.
 func (i *Idea) QueryTranslations() *IdeaTranslationQuery {
 	return NewIdeaClient(i.config).QueryTranslations(i)
+}
+
+// QueryBlogPosts queries the "blog_posts" edge of the Idea entity.
+func (i *Idea) QueryBlogPosts() *BlogPostQuery {
+	return NewIdeaClient(i.config).QueryBlogPosts(i)
 }
 
 // Update returns a builder for updating this Idea.

@@ -86,5 +86,6 @@ func (Idea) Edges() []ent.Edge {
 			Required().
 			Unique(),
 		edge.To("translations", IdeaTranslation.Type),
+		edge.To("blog_posts", BlogPost.Type),
 	}
 }

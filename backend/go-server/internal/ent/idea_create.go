@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"silan-backend/internal/ent/blogpost"
 	"silan-backend/internal/ent/idea"
 	"silan-backend/internal/ent/ideatranslation"
 	"silan-backend/internal/ent/user"
@@ -299,6 +300,21 @@ func (ic *IdeaCreate) AddTranslations(i ...*IdeaTranslation) *IdeaCreate {
 	return ic.AddTranslationIDs(ids...)
 }
 
+// AddBlogPostIDs adds the "blog_posts" edge to the BlogPost entity by IDs.
+func (ic *IdeaCreate) AddBlogPostIDs(ids ...uuid.UUID) *IdeaCreate {
+	ic.mutation.AddBlogPostIDs(ids...)
+	return ic
+}
+
+// AddBlogPosts adds the "blog_posts" edges to the BlogPost entity.
+func (ic *IdeaCreate) AddBlogPosts(b ...*BlogPost) *IdeaCreate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ic.AddBlogPostIDs(ids...)
+}
+
 // Mutation returns the IdeaMutation object of the builder.
 func (ic *IdeaCreate) Mutation() *IdeaMutation {
 	return ic.mutation
@@ -570,6 +586,22 @@ func (ic *IdeaCreate) createSpec() (*Idea, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ideatranslation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ic.mutation.BlogPostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   idea.BlogPostsTable,
+			Columns: []string{idea.BlogPostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blogpost.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

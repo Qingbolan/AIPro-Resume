@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"silan-backend/internal/ent"
 	"silan-backend/internal/ent/blogseries"
 	"silan-backend/internal/svc"
 	"silan-backend/internal/types"
@@ -36,7 +37,10 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 
 	series, err := l.svcCtx.DB.BlogSeries.Query().
 		Where(blogseries.ID(seriesUUID)).
-		WithBlogPosts().
+		WithBlogPosts(func(bpq *ent.BlogPostQuery) {
+			bpq.WithTranslations()
+		}).
+		WithTranslations().
 		First(l.ctx)
 	if err != nil {
 		return nil, err
@@ -71,6 +75,19 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 			totalDurationMinutes += post.ReadingTimeMinutes
 		}
 
+		// Handle language-specific content for episodes
+		title := post.Title
+		
+		// If requesting non-English content, look for translations
+		if req.Language != "en" && post.Edges.Translations != nil {
+			for _, translation := range post.Edges.Translations {
+				if translation.LanguageCode == req.Language {
+					title = translation.Title
+					break
+				}
+			}
+		}
+
 		// TODO: In a real application, you'd track completion per user
 		// For now, we'll mark as completed if it's not the latest episode
 		isCompleted := i < len(posts)-1
@@ -86,10 +103,10 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 
 		episodes = append(episodes, types.SeriesEpisode{
 			ID:        post.ID.String(),
-			Title:     post.Title,
+			Title:     title,
 			Duration:  duration,
 			Completed: isCompleted,
-			Current:   i == len(posts)-1, // Latest episode as current
+			Current:   i == 0, // Latest episode as current
 			Order:     episodeOrder,
 		})
 	}
@@ -106,10 +123,25 @@ func (l *GetBlogSeriesLogic) GetBlogSeries(req *types.BlogSeriesRequest) (resp *
 		}
 	}
 
+	// Handle language-specific content for series
+	seriesTitle := series.Title
+	seriesDescription := series.Description
+	
+	// If requesting non-English content, look for translations
+	if req.Language != "en" && series.Edges.Translations != nil {
+		for _, translation := range series.Edges.Translations {
+			if translation.LanguageCode == req.Language {
+				seriesTitle = translation.Title
+				seriesDescription = translation.Description
+				break
+			}
+		}
+	}
+
 	return &types.BlogSeries{
 		ID:             series.ID.String(),
-		Title:          series.Title,
-		Description:    series.Description,
+		Title:          seriesTitle,
+		Description:    seriesDescription,
 		ThumbnailURL:   series.ThumbnailURL,
 		Episodes:       episodes,
 		TotalDuration:  totalDuration,

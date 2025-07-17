@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-07-17T01:46:58.055655",
+  "stats": {
+    "total_items": 13,
+    "processed_items": 13,
+    "success_count": 13,
+    "error_count": 0,
+    "skipped_count": 0,
+    "created_count": 66,
+    "updated_count": 0,
+    "deleted_count": 0,
+    "sync_errors": [],
+    "sync_warnings": []
+  },
+  "database_config": {
+    "type": "sqlite",
+    "sqlite": {
+      "path": "portfolio.db"
+    },
+    "settings": {
+      "create_tables": true,
+      "backup_before_sync": true,
+      "auto_migrate": true
+    },
+    "path": "portfolio.db"
+  },
+  "dry_run": false
+}

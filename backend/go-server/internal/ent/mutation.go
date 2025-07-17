@@ -4863,6 +4863,8 @@ type BlogPostMutation struct {
 	clearedcategory         bool
 	series                  *uuid.UUID
 	clearedseries           bool
+	ideas                   *uuid.UUID
+	clearedideas            bool
 	tags                    map[uuid.UUID]struct{}
 	removedtags             map[uuid.UUID]struct{}
 	clearedtags             bool
@@ -5113,6 +5115,55 @@ func (m *BlogPostMutation) SeriesIDCleared() bool {
 func (m *BlogPostMutation) ResetSeriesID() {
 	m.series = nil
 	delete(m.clearedFields, blogpost.FieldSeriesID)
+}
+
+// SetIdeasID sets the "ideas_id" field.
+func (m *BlogPostMutation) SetIdeasID(u uuid.UUID) {
+	m.ideas = &u
+}
+
+// IdeasID returns the value of the "ideas_id" field in the mutation.
+func (m *BlogPostMutation) IdeasID() (r uuid.UUID, exists bool) {
+	v := m.ideas
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdeasID returns the old "ideas_id" field's value of the BlogPost entity.
+// If the BlogPost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlogPostMutation) OldIdeasID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdeasID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdeasID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdeasID: %w", err)
+	}
+	return oldValue.IdeasID, nil
+}
+
+// ClearIdeasID clears the value of the "ideas_id" field.
+func (m *BlogPostMutation) ClearIdeasID() {
+	m.ideas = nil
+	m.clearedFields[blogpost.FieldIdeasID] = struct{}{}
+}
+
+// IdeasIDCleared returns if the "ideas_id" field was cleared in this mutation.
+func (m *BlogPostMutation) IdeasIDCleared() bool {
+	_, ok := m.clearedFields[blogpost.FieldIdeasID]
+	return ok
+}
+
+// ResetIdeasID resets all changes to the "ideas_id" field.
+func (m *BlogPostMutation) ResetIdeasID() {
+	m.ideas = nil
+	delete(m.clearedFields, blogpost.FieldIdeasID)
 }
 
 // SetTitle sets the "title" field.
@@ -5939,6 +5990,33 @@ func (m *BlogPostMutation) ResetSeries() {
 	m.clearedseries = false
 }
 
+// ClearIdeas clears the "ideas" edge to the Idea entity.
+func (m *BlogPostMutation) ClearIdeas() {
+	m.clearedideas = true
+	m.clearedFields[blogpost.FieldIdeasID] = struct{}{}
+}
+
+// IdeasCleared reports if the "ideas" edge to the Idea entity was cleared.
+func (m *BlogPostMutation) IdeasCleared() bool {
+	return m.IdeasIDCleared() || m.clearedideas
+}
+
+// IdeasIDs returns the "ideas" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// IdeasID instead. It exists only for internal usage by the builders.
+func (m *BlogPostMutation) IdeasIDs() (ids []uuid.UUID) {
+	if id := m.ideas; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetIdeas resets all changes to the "ideas" edge.
+func (m *BlogPostMutation) ResetIdeas() {
+	m.ideas = nil
+	m.clearedideas = false
+}
+
 // AddTagIDs adds the "tags" edge to the BlogTag entity by ids.
 func (m *BlogPostMutation) AddTagIDs(ids ...uuid.UUID) {
 	if m.tags == nil {
@@ -6135,7 +6213,7 @@ func (m *BlogPostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlogPostMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.user != nil {
 		fields = append(fields, blogpost.FieldUserID)
 	}
@@ -6144,6 +6222,9 @@ func (m *BlogPostMutation) Fields() []string {
 	}
 	if m.series != nil {
 		fields = append(fields, blogpost.FieldSeriesID)
+	}
+	if m.ideas != nil {
+		fields = append(fields, blogpost.FieldIdeasID)
 	}
 	if m.title != nil {
 		fields = append(fields, blogpost.FieldTitle)
@@ -6207,6 +6288,8 @@ func (m *BlogPostMutation) Field(name string) (ent.Value, bool) {
 		return m.CategoryID()
 	case blogpost.FieldSeriesID:
 		return m.SeriesID()
+	case blogpost.FieldIdeasID:
+		return m.IdeasID()
 	case blogpost.FieldTitle:
 		return m.Title()
 	case blogpost.FieldSlug:
@@ -6254,6 +6337,8 @@ func (m *BlogPostMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCategoryID(ctx)
 	case blogpost.FieldSeriesID:
 		return m.OldSeriesID(ctx)
+	case blogpost.FieldIdeasID:
+		return m.OldIdeasID(ctx)
 	case blogpost.FieldTitle:
 		return m.OldTitle(ctx)
 	case blogpost.FieldSlug:
@@ -6315,6 +6400,13 @@ func (m *BlogPostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSeriesID(v)
+		return nil
+	case blogpost.FieldIdeasID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdeasID(v)
 		return nil
 	case blogpost.FieldTitle:
 		v, ok := value.(string)
@@ -6527,6 +6619,9 @@ func (m *BlogPostMutation) ClearedFields() []string {
 	if m.FieldCleared(blogpost.FieldSeriesID) {
 		fields = append(fields, blogpost.FieldSeriesID)
 	}
+	if m.FieldCleared(blogpost.FieldIdeasID) {
+		fields = append(fields, blogpost.FieldIdeasID)
+	}
 	if m.FieldCleared(blogpost.FieldExcerpt) {
 		fields = append(fields, blogpost.FieldExcerpt)
 	}
@@ -6562,6 +6657,9 @@ func (m *BlogPostMutation) ClearField(name string) error {
 	case blogpost.FieldSeriesID:
 		m.ClearSeriesID()
 		return nil
+	case blogpost.FieldIdeasID:
+		m.ClearIdeasID()
+		return nil
 	case blogpost.FieldExcerpt:
 		m.ClearExcerpt()
 		return nil
@@ -6593,6 +6691,9 @@ func (m *BlogPostMutation) ResetField(name string) error {
 		return nil
 	case blogpost.FieldSeriesID:
 		m.ResetSeriesID()
+		return nil
+	case blogpost.FieldIdeasID:
+		m.ResetIdeasID()
 		return nil
 	case blogpost.FieldTitle:
 		m.ResetTitle()
@@ -6648,7 +6749,7 @@ func (m *BlogPostMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *BlogPostMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.user != nil {
 		edges = append(edges, blogpost.EdgeUser)
 	}
@@ -6657,6 +6758,9 @@ func (m *BlogPostMutation) AddedEdges() []string {
 	}
 	if m.series != nil {
 		edges = append(edges, blogpost.EdgeSeries)
+	}
+	if m.ideas != nil {
+		edges = append(edges, blogpost.EdgeIdeas)
 	}
 	if m.tags != nil {
 		edges = append(edges, blogpost.EdgeTags)
@@ -6686,6 +6790,10 @@ func (m *BlogPostMutation) AddedIDs(name string) []ent.Value {
 		if id := m.series; id != nil {
 			return []ent.Value{*id}
 		}
+	case blogpost.EdgeIdeas:
+		if id := m.ideas; id != nil {
+			return []ent.Value{*id}
+		}
 	case blogpost.EdgeTags:
 		ids := make([]ent.Value, 0, len(m.tags))
 		for id := range m.tags {
@@ -6710,7 +6818,7 @@ func (m *BlogPostMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *BlogPostMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedtags != nil {
 		edges = append(edges, blogpost.EdgeTags)
 	}
@@ -6751,7 +6859,7 @@ func (m *BlogPostMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *BlogPostMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.cleareduser {
 		edges = append(edges, blogpost.EdgeUser)
 	}
@@ -6760,6 +6868,9 @@ func (m *BlogPostMutation) ClearedEdges() []string {
 	}
 	if m.clearedseries {
 		edges = append(edges, blogpost.EdgeSeries)
+	}
+	if m.clearedideas {
+		edges = append(edges, blogpost.EdgeIdeas)
 	}
 	if m.clearedtags {
 		edges = append(edges, blogpost.EdgeTags)
@@ -6783,6 +6894,8 @@ func (m *BlogPostMutation) EdgeCleared(name string) bool {
 		return m.clearedcategory
 	case blogpost.EdgeSeries:
 		return m.clearedseries
+	case blogpost.EdgeIdeas:
+		return m.clearedideas
 	case blogpost.EdgeTags:
 		return m.clearedtags
 	case blogpost.EdgeTranslations:
@@ -6806,6 +6919,9 @@ func (m *BlogPostMutation) ClearEdge(name string) error {
 	case blogpost.EdgeSeries:
 		m.ClearSeries()
 		return nil
+	case blogpost.EdgeIdeas:
+		m.ClearIdeas()
+		return nil
 	}
 	return fmt.Errorf("unknown BlogPost unique edge %s", name)
 }
@@ -6822,6 +6938,9 @@ func (m *BlogPostMutation) ResetEdge(name string) error {
 		return nil
 	case blogpost.EdgeSeries:
 		m.ResetSeries()
+		return nil
+	case blogpost.EdgeIdeas:
+		m.ResetIdeas()
 		return nil
 	case blogpost.EdgeTags:
 		m.ResetTags()
@@ -13896,6 +14015,9 @@ type IdeaMutation struct {
 	translations                 map[uuid.UUID]struct{}
 	removedtranslations          map[uuid.UUID]struct{}
 	clearedtranslations          bool
+	blog_posts                   map[uuid.UUID]struct{}
+	removedblog_posts            map[uuid.UUID]struct{}
+	clearedblog_posts            bool
 	done                         bool
 	oldValue                     func(context.Context) (*Idea, error)
 	predicates                   []predicate.Idea
@@ -14943,6 +15065,60 @@ func (m *IdeaMutation) ResetTranslations() {
 	m.removedtranslations = nil
 }
 
+// AddBlogPostIDs adds the "blog_posts" edge to the BlogPost entity by ids.
+func (m *IdeaMutation) AddBlogPostIDs(ids ...uuid.UUID) {
+	if m.blog_posts == nil {
+		m.blog_posts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.blog_posts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBlogPosts clears the "blog_posts" edge to the BlogPost entity.
+func (m *IdeaMutation) ClearBlogPosts() {
+	m.clearedblog_posts = true
+}
+
+// BlogPostsCleared reports if the "blog_posts" edge to the BlogPost entity was cleared.
+func (m *IdeaMutation) BlogPostsCleared() bool {
+	return m.clearedblog_posts
+}
+
+// RemoveBlogPostIDs removes the "blog_posts" edge to the BlogPost entity by IDs.
+func (m *IdeaMutation) RemoveBlogPostIDs(ids ...uuid.UUID) {
+	if m.removedblog_posts == nil {
+		m.removedblog_posts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.blog_posts, ids[i])
+		m.removedblog_posts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBlogPosts returns the removed IDs of the "blog_posts" edge to the BlogPost entity.
+func (m *IdeaMutation) RemovedBlogPostsIDs() (ids []uuid.UUID) {
+	for id := range m.removedblog_posts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BlogPostsIDs returns the "blog_posts" edge IDs in the mutation.
+func (m *IdeaMutation) BlogPostsIDs() (ids []uuid.UUID) {
+	for id := range m.blog_posts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBlogPosts resets all changes to the "blog_posts" edge.
+func (m *IdeaMutation) ResetBlogPosts() {
+	m.blog_posts = nil
+	m.clearedblog_posts = false
+	m.removedblog_posts = nil
+}
+
 // Where appends a list predicates to the IdeaMutation builder.
 func (m *IdeaMutation) Where(ps ...predicate.Idea) {
 	m.predicates = append(m.predicates, ps...)
@@ -15478,12 +15654,15 @@ func (m *IdeaMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *IdeaMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, idea.EdgeUser)
 	}
 	if m.translations != nil {
 		edges = append(edges, idea.EdgeTranslations)
+	}
+	if m.blog_posts != nil {
+		edges = append(edges, idea.EdgeBlogPosts)
 	}
 	return edges
 }
@@ -15502,15 +15681,24 @@ func (m *IdeaMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case idea.EdgeBlogPosts:
+		ids := make([]ent.Value, 0, len(m.blog_posts))
+		for id := range m.blog_posts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IdeaMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedtranslations != nil {
 		edges = append(edges, idea.EdgeTranslations)
+	}
+	if m.removedblog_posts != nil {
+		edges = append(edges, idea.EdgeBlogPosts)
 	}
 	return edges
 }
@@ -15525,18 +15713,27 @@ func (m *IdeaMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case idea.EdgeBlogPosts:
+		ids := make([]ent.Value, 0, len(m.removedblog_posts))
+		for id := range m.removedblog_posts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *IdeaMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, idea.EdgeUser)
 	}
 	if m.clearedtranslations {
 		edges = append(edges, idea.EdgeTranslations)
+	}
+	if m.clearedblog_posts {
+		edges = append(edges, idea.EdgeBlogPosts)
 	}
 	return edges
 }
@@ -15549,6 +15746,8 @@ func (m *IdeaMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case idea.EdgeTranslations:
 		return m.clearedtranslations
+	case idea.EdgeBlogPosts:
+		return m.clearedblog_posts
 	}
 	return false
 }
@@ -15573,6 +15772,9 @@ func (m *IdeaMutation) ResetEdge(name string) error {
 		return nil
 	case idea.EdgeTranslations:
 		m.ResetTranslations()
+		return nil
+	case idea.EdgeBlogPosts:
+		m.ResetBlogPosts()
 		return nil
 	}
 	return fmt.Errorf("unknown Idea edge %s", name)

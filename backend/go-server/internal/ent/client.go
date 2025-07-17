@@ -1564,6 +1564,22 @@ func (c *BlogPostClient) QuerySeries(bp *BlogPost) *BlogSeriesQuery {
 	return query
 }
 
+// QueryIdeas queries the ideas edge of a BlogPost.
+func (c *BlogPostClient) QueryIdeas(bp *BlogPost) *IdeaQuery {
+	query := (&IdeaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blogpost.Table, blogpost.FieldID, id),
+			sqlgraph.To(idea.Table, idea.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, blogpost.IdeasTable, blogpost.IdeasColumn),
+		)
+		fromV = sqlgraph.Neighbors(bp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryTags queries the tags edge of a BlogPost.
 func (c *BlogPostClient) QueryTags(bp *BlogPost) *BlogTagQuery {
 	query := (&BlogTagClient{config: c.config}).Query()
@@ -3238,6 +3254,22 @@ func (c *IdeaClient) QueryTranslations(i *Idea) *IdeaTranslationQuery {
 			sqlgraph.From(idea.Table, idea.FieldID, id),
 			sqlgraph.To(ideatranslation.Table, ideatranslation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, idea.TranslationsTable, idea.TranslationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBlogPosts queries the blog_posts edge of a Idea.
+func (c *IdeaClient) QueryBlogPosts(i *Idea) *BlogPostQuery {
+	query := (&BlogPostClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(idea.Table, idea.FieldID, id),
+			sqlgraph.To(blogpost.Table, blogpost.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, idea.BlogPostsTable, idea.BlogPostsColumn),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil

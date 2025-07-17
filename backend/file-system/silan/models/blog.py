@@ -10,11 +10,12 @@ from .base import Base, TimestampMixin, UUID, generate_uuid
 
 if TYPE_CHECKING:
     from .user import User, Language
+    from .ideas import Idea
 
 
 class BlogContentType(enum.Enum):
     """Enumeration for blog content types - matching Go schema"""
-    ARTICLE = "AR"
+    ARTICLE = "article"
     VLOG = "vlog"
     EPISODE = "episode"
 
@@ -61,12 +62,13 @@ class BlogPost(Base, TimestampMixin):
     user_id: Mapped[str] = mapped_column(UUID, ForeignKey("users.id"), nullable=False)
     category_id: Mapped[Optional[str]] = mapped_column(UUID, ForeignKey("blog_categories.id"))
     series_id: Mapped[Optional[str]] = mapped_column(UUID, ForeignKey("blog_series.id"))
+    ideas_id: Mapped[Optional[str]] = mapped_column(UUID, ForeignKey("ideas.id"))
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     slug: Mapped[str] = mapped_column(String(300), unique=True, nullable=False)
     excerpt: Mapped[Optional[str]] = mapped_column(Text)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    content_type: Mapped[BlogContentType] = mapped_column(Enum(BlogContentType, values_callable=lambda obj: [e.value for e in obj]), default=BlogContentType.ARTICLE)
-    status: Mapped[BlogStatus] = mapped_column(Enum(BlogStatus, values_callable=lambda obj: [e.value for e in obj]), default=BlogStatus.DRAFT)
+    content_type: Mapped[BlogContentType] = mapped_column(Enum(BlogContentType, values_callable=lambda enum_cls: [e.value for e in enum_cls]), default=BlogContentType.ARTICLE)
+    status: Mapped[BlogStatus] = mapped_column(Enum(BlogStatus, values_callable=lambda enum_cls: [e.value for e in enum_cls]), default=BlogStatus.PUBLISHED)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
     featured_image_url: Mapped[Optional[str]] = mapped_column(String(500))
     reading_time_minutes: Mapped[Optional[int]] = mapped_column(Integer)
@@ -80,6 +82,7 @@ class BlogPost(Base, TimestampMixin):
     user: Mapped["User"] = relationship(back_populates="blog_posts")
     category: Mapped[Optional["BlogCategory"]] = relationship(back_populates="blog_posts")
     series: Mapped[Optional["BlogSeries"]] = relationship(back_populates="blog_posts")
+    ideas: Mapped[Optional["Idea"]] = relationship(back_populates="blog_posts")
     tags: Mapped[List["BlogTag"]] = relationship(secondary="blog_post_tags", back_populates="blog_posts")
     translations: Mapped[List["BlogPostTranslation"]] = relationship(back_populates="blog_post", cascade="all, delete-orphan")
     comments: Mapped[List["BlogComment"]] = relationship(back_populates="blog_post", cascade="all, delete-orphan")

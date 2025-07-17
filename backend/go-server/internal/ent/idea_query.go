@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"silan-backend/internal/ent/blogpost"
 	"silan-backend/internal/ent/idea"
 	"silan-backend/internal/ent/ideatranslation"
 	"silan-backend/internal/ent/predicate"
@@ -28,6 +29,7 @@ type IdeaQuery struct {
 	predicates       []predicate.Idea
 	withUser         *UserQuery
 	withTranslations *IdeaTranslationQuery
+	withBlogPosts    *BlogPostQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +103,28 @@ func (iq *IdeaQuery) QueryTranslations() *IdeaTranslationQuery {
 			sqlgraph.From(idea.Table, idea.FieldID, selector),
 			sqlgraph.To(ideatranslation.Table, ideatranslation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, idea.TranslationsTable, idea.TranslationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBlogPosts chains the current query on the "blog_posts" edge.
+func (iq *IdeaQuery) QueryBlogPosts() *BlogPostQuery {
+	query := (&BlogPostClient{config: iq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := iq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(idea.Table, idea.FieldID, selector),
+			sqlgraph.To(blogpost.Table, blogpost.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, idea.BlogPostsTable, idea.BlogPostsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -302,6 +326,7 @@ func (iq *IdeaQuery) Clone() *IdeaQuery {
 		predicates:       append([]predicate.Idea{}, iq.predicates...),
 		withUser:         iq.withUser.Clone(),
 		withTranslations: iq.withTranslations.Clone(),
+		withBlogPosts:    iq.withBlogPosts.Clone(),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
@@ -327,6 +352,17 @@ func (iq *IdeaQuery) WithTranslations(opts ...func(*IdeaTranslationQuery)) *Idea
 		opt(query)
 	}
 	iq.withTranslations = query
+	return iq
+}
+
+// WithBlogPosts tells the query-builder to eager-load the nodes that are connected to
+// the "blog_posts" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *IdeaQuery) WithBlogPosts(opts ...func(*BlogPostQuery)) *IdeaQuery {
+	query := (&BlogPostClient{config: iq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	iq.withBlogPosts = query
 	return iq
 }
 
@@ -408,9 +444,10 @@ func (iq *IdeaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Idea, e
 	var (
 		nodes       = []*Idea{}
 		_spec       = iq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			iq.withUser != nil,
 			iq.withTranslations != nil,
+			iq.withBlogPosts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -441,6 +478,13 @@ func (iq *IdeaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Idea, e
 		if err := iq.loadTranslations(ctx, query, nodes,
 			func(n *Idea) { n.Edges.Translations = []*IdeaTranslation{} },
 			func(n *Idea, e *IdeaTranslation) { n.Edges.Translations = append(n.Edges.Translations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := iq.withBlogPosts; query != nil {
+		if err := iq.loadBlogPosts(ctx, query, nodes,
+			func(n *Idea) { n.Edges.BlogPosts = []*BlogPost{} },
+			func(n *Idea, e *BlogPost) { n.Edges.BlogPosts = append(n.Edges.BlogPosts, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -501,6 +545,36 @@ func (iq *IdeaQuery) loadTranslations(ctx context.Context, query *IdeaTranslatio
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "idea_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (iq *IdeaQuery) loadBlogPosts(ctx context.Context, query *BlogPostQuery, nodes []*Idea, init func(*Idea), assign func(*Idea, *BlogPost)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Idea)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(blogpost.FieldIdeasID)
+	}
+	query.Where(predicate.BlogPost(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(idea.BlogPostsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.IdeasID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "ideas_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
