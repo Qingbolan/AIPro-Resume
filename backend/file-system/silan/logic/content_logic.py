@@ -352,9 +352,8 @@ class ContentLogic(ContentLogger):
             
             # Preserve original frontmatter for all content types
             if hasattr(extracted_content, 'metadata') and extracted_content.metadata:
-                original_frontmatter = extracted_content.metadata.get('frontmatter')
-                if original_frontmatter:
-                    parsed_data['frontmatter'] = original_frontmatter
+                # The metadata itself IS the frontmatter
+                parsed_data['frontmatter'] = extracted_content.metadata
             
             # Validate frontmatter if validator exists
             if hasattr(ContentValidator, f'validate_{content_type}_frontmatter'):

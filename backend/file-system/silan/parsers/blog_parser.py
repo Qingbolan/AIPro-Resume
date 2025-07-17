@@ -167,17 +167,21 @@ class BlogParser(BaseParser):
             if len(parts) >= 2:
                 series_name = parts[1].replace('-', ' ').title()
                 
-                # Try to extract part number from filename
-                filename = metadata.get('filename', '')
-                part_number = 1
-                if filename.startswith('episode'):
-                    try:
-                        # Extract number from filename like "episode1.en.md"
-                        match = re.search(r'episode(\d+)', filename)
-                        if match:
-                            part_number = int(match.group(1))
-                    except:
-                        pass
+                # Try to extract part number from metadata first, then filename
+                part_number = metadata.get('episode', None)
+                if part_number is None or not isinstance(part_number, int):
+                    part_number = 1
+                    
+                    # If no episode in metadata, try filename
+                    filename = metadata.get('filename', '')
+                    if filename:
+                        try:
+                            # Extract number from filename like "part1-getting-started.md" or "episode1.en.md"
+                            match = re.search(r'(?:part|episode)(\d+)', filename)
+                            if match:
+                                part_number = int(match.group(1))
+                        except:
+                            pass
                 
                 series_info = {
                     'name': series_name,
@@ -218,14 +222,14 @@ class BlogParser(BaseParser):
                 series_info = {
                     'name': series_data,
                     'slug': self._generate_slug(series_data),
-                    'part_number': metadata.get('part', 1),
+                    'part_number': metadata.get('episode', metadata.get('part', 1)),
                     'description': ''
                 }
             elif isinstance(series_data, dict):
                 series_info = {
                     'name': series_data.get('name', ''),
                     'slug': self._generate_slug(series_data.get('name', '')),
-                    'part_number': series_data.get('part', 1),
+                    'part_number': series_data.get('episode', series_data.get('part', metadata.get('episode', 1))),
                     'description': series_data.get('description', '')
                 }
         

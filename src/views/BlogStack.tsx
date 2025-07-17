@@ -41,20 +41,18 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
   // Smart layout calculation for vlog and series
   const isVlog = post.type === 'vlog';
-  const isSeries = post.type === 'series';
+  const isSeries = post.type === 'episode';
 
   // Enhanced layout calculation for better visual hierarchy
   const shouldUseWideLayout = useMemo(() => {
     if (featured) return true;
 
-    // Series: More frequent wide layout for better showcase
+    // Series: Same layout frequency as articles for consistency
     if (isSeries) {
-      // Series get wide layout in strategic positions for better visual hierarchy
-      const isStrategicPosition = index % 6 === 0 || index % 6 === 3; // Positions 1, 4, 7, 10, etc.
-      const hasRichContent = Boolean(post.seriesImage) || Boolean(post.seriesDescription);
-      const hasMultipleEpisodes = post.totalEpisodes && post.totalEpisodes > 1;
+      const contentLength = (post.summary || '').length + (post.summaryZh || '').length;
+      const isFeaturedPosition = index % 8 === 4; // Same as articles
       
-      return isStrategicPosition || hasRichContent || hasMultipleEpisodes;
+      return contentLength > 250 && isFeaturedPosition;
     }
 
     // Vlogs: Smart adaptive width based on content and position
@@ -125,7 +123,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
     const paperNum = String(Math.abs(titleHash) % 10000).padStart(4, '0');
 
     const prefix = post.type === 'vlog' ? 'vlog' :
-      post.type === 'series' ? 'episode' : 'blog';
+      post.type === 'episode' ? 'episode' : 'blog';
 
     return `${prefix}.${year}${month}${day}.${paperNum}`;
   };
@@ -149,8 +147,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
       {/* Image */}
       <div className={`relative overflow-hidden transition-all duration-300 ${
         isWideLayout 
-          ? (isSeries ? 'h-72 md:h-80' : 'h-64 md:h-72') 
-          : (isSeries ? 'h-52' : 'h-48')
+          ? 'h-64 md:h-72'
+          : 'h-48'
         }`}>
         {/* Use vlog cover for vlogs, series image for series, or default cover */}
         {isVlog && post.vlogCover && !imageLoadError ? (
@@ -304,8 +302,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {/* Title with enhanced styling */}
         <h2 className={`font-bold mb-3 group-hover:text-theme-primary transition-colors duration-300 text-theme-primary leading-tight ${
           isWideLayout 
-            ? (isSeries ? 'text-2xl md:text-4xl' : 'text-2xl md:text-3xl')
-            : (isSeries ? 'text-xl md:text-2xl' : 'text-xl')
+            ? 'text-2xl md:text-3xl'
+            : 'text-xl'
         }`}>
           {language === 'zh' && post.titleZh ? post.titleZh : post.title}
         </h2>
@@ -313,8 +311,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {/* Excerpt with improved readability */}
         <p className={`leading-relaxed mb-4 text-theme-secondary ${
           isWideLayout 
-            ? (isSeries ? 'text-lg leading-7' : 'text-base')
-            : (isSeries ? 'text-base' : 'text-sm')
+            ? 'text-base'
+            : 'text-sm'
         }`}>
           {language === 'zh' && post.summaryZh ? post.summaryZh : post.summary}
         </p>
@@ -441,7 +439,7 @@ const BlogStack: React.FC = () => {
       const typeMap: Record<string, string> = {
         'article': language === 'en' ? 'Articles' : '文章',
         'vlog': language === 'en' ? 'Videos' : '视频',
-        'series': language === 'en' ? 'Series' : '系列'
+        'episode': language === 'en' ? 'Series' : '系列'
       };
       
       const displayType = typeMap[typeParam] || (language === 'en' ? 'All' : '全部');

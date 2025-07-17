@@ -23,7 +23,7 @@ export interface BlogData {
   views: number;
   summary: string;
   summaryZh?: string;
-  type?: 'article' | 'vlog' | 'tutorial' | 'podcast';
+  type?: 'article' | 'vlog' | 'tutorial' | 'podcast' | 'episode';
   // Vlog specific fields
   videoUrl?: string;
   videoDuration?: string;
